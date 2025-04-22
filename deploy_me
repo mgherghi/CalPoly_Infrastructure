@@ -1,37 +1,43 @@
 #!/bin/bash
 
 # SETUP LINSTOR KEY
+echo "Setting up Linstor"
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linbit.asc -O /etc/apt/keyrings/linbit.asc && wait
 
 # SETUP LINSTOR REPO
+echo "Setting up Linstor repo"
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linstor.sources -O /etc/apt/sources.list.d/linstor.sources && wait
 
 # CREATE BOOT FOLDERS
+echo "creating bootup folders"
 mkdir -p /home/.essentials
 mkdir -p /home/.essentials/startup 
 
 # ALLOW MULTIPATH FOR NVME
+echo "getting multipath config"
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait
 
-
 # CHANGE IO POLICY ON NVME DRIVES
+echo "getting iopolicy config"
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
 
 # SETUP OF PERFORMANCE GOVERNER
+echo "setting up performance governer"
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/cpupower -O /home/.essentials/startup/cpupower && wait
 
-
-
 # SETUP OF BOOT SCRIPT
+echo "setting up bootscript"
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/bootscript -O /home/.essentials/boot_script && wait
 
 chmod u+x /home/.essentials/boot_script && wait
 
 echo "post-up /home/.essentials/boot_script" >> /etc/network/interfaces  && wait
 
+echo "installing apps"
 apt update && apt install avahi-daemon linux-cpupower nvme-cli lvm2 firmware-linux -y  && wait
 
 
+echo "fixing network configs"
 hostname=$(hostname)
 
 if [[ "$hostname" == "r730xd-1" ]]; then
@@ -63,3 +69,4 @@ else
 fi
 
 chmod u+x /home/.essentials/startup/* && wait
+echo "ALL DONE !!"
