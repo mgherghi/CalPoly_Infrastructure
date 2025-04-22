@@ -70,3 +70,4 @@ fi
 
 chmod u+x /home/.essentials/startup/* && wait
 echo "ALL DONE !!"
+echo "Server restart is necessary.."
