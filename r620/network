@@ -9,3 +9,45 @@
 # # Setup eno4
 #ip link  set eno4 up
 # dhclient eno4
+
+# Enable Jumo Frames OVN
+# ip link  set ovs-system mtu 9000
+# ip link  set br-int mtu 9000
+
+# Setup OVS  MGMT
+ip link  add link enp66s0 name ovs-mgmt type vlan id 10
+ip addr add 4.0.0.11/24 brd + dev ovs-mgmt
+ip link  set ovs-mgmt mtu 9000
+ip link  set ovs-mgmt up
+
+# Setup LINSTOR MGMT
+ip link  add link enp66s0 name linstor-mgmt type vlan id 20
+ip addr add 4.0.1.11/24 brd + dev linstor-mgmt
+ip link  set linstor-mgmt mtu 9000
+ip link  set linstor-mgmt up
+
+# Setup INCUS MGMT
+ip link  add link enp66s0 name incus-mgmt type vlan id 30
+ip addr add 4.0.2.11/24 brd + dev incus-mgmt
+ip link  set incus-mgmt mtu 9000
+ip link  set incus-mgmt up
+
+# # Setup admin-labs UPLINK network
+ip link  add link enp66s0 name admin-labs type vlan id 40
+ip link  set admin-labs mtu 9000
+ip link  set admin-labs up
+
+# # Setup research-labs UPLINK network
+ip link  add link enp66s0 name research-labs type vlan id 50
+ip link  set research-labs mtu 9000
+ip link  set research-labs up
+
+# Setup bdebruhl UPLINK network
+ip link  add link enp66s0 name bdebruhl type vlan id 60
+ip link  set bdebruhl mtu 9000
+ip link  set bdebruhl up
+
+# Setup phoenix UPLINK network
+ip link  add link enp66s0 name dofang type vlan id 70
+ip link  set dofang mtu 9000
+ip link  set dofang up
