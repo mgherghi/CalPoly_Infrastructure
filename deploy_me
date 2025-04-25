@@ -24,13 +24,15 @@ echo "post-up /home/.essentials/boot_script" >> /etc/network/interfaces  && wait
 
 apt update && apt install avahi-daemon linux-cpupower nvme-cli lvm2 firmware-linux -y  && wait
 
+hostname=$(hostname)
+
 if [[ "$hostname" == "r730xd-1" ]]; then
 
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/r730xd-1/network -O /home/.essentials/startup/network && wait
-  echo "5.0.0.7 lan-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.0.7 ovs-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.1.7 linstor-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.2.7 incus-$hostname.local" >> /etc/avahi/hosts
+  echo "5.0.0.7 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.7 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.7 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.7 incus-$(hostname).local" >> /etc/avahi/hosts
 
   # ALLOW MULTIPATH FOR NVME
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait
@@ -41,10 +43,10 @@ if [[ "$hostname" == "r730xd-1" ]]; then
 elif [[ "$hostname" == "r730xd-2" ]]; then
 
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/r730xd-2/network -O /home/.essentials/startup/network && wait
-  echo "5.0.0.8 lan-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.0.8 ovs-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.1.8 linstor-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.2.8 incus-$hostname.local" >> /etc/avahi/hosts
+  echo "5.0.0.8 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.8 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.8 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.8 incus-$(hostname).local" >> /etc/avahi/hosts
 
   # ALLOW MULTIPATH FOR NVME
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait  
@@ -55,10 +57,10 @@ elif [[ "$hostname" == "r730xd-2" ]]; then
 elif [[ "$hostname" == "r730xd-3" ]]; then
 
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/r730xd-3/network -O /home/.essentials/startup/network && wait
-  echo "5.0.0.9 lan-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.0.9 ovs-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.1.9 linstor-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.2.9 incus-$hostname.local" >> /etc/avahi/hosts
+  echo "5.0.0.9 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.9 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.9 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.9 incus-$(hostname).local" >> /etc/avahi/hosts
 
   # ALLOW MULTIPATH FOR NVME
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait 
@@ -66,18 +68,34 @@ elif [[ "$hostname" == "r730xd-3" ]]; then
   # CHANGE IO POLICY ON NVME DRIVES
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
 
-elif [[ "$hostname" == "r620" ]]; then
+elif [[ "$hostname" == "supermicro" ]]; then
 
-  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/r620/network -O /home/.essentials/startup/network && wait
-  echo "5.0.0.10 lan-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.0.10 ovs-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.1.10 linstor-$hostname.local" >> /etc/avahi/hosts
-  echo "4.0.2.10 incus-$hostname.local" >> /etc/avahi/hosts
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/supermicro/network -O /home/.essentials/startup/network && wait
+  echo "5.0.0.10 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.10 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.10 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.10 incus-$(hostname).local" >> /etc/avahi/hosts
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
   apt install rdma-core -y 
-  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt "@' /etc/default/grub
+  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
   update-grub
+  update-initramfs -u
+
+elif [[ "$hostname" == "r620" ]]; then
+
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/r620/network -O /home/.essentials/startup/network && wait
+  echo "5.0.0.11 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.11 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.11 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.11 incus-$(hostname).local" >> /etc/avahi/hosts
+
+  sed -i '/iopolicy/d' /home/.essentials/boot_script
+  apt install rdma-core -y 
+  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+  update-grub
+  echo "options mlx4_core probe_vf=6 num_vfs=8" >> /etc/modprobe.d/mlx4.conf
+  update-initramfs -u
 else
   echo "Unknown host: $hostname"
 fi
