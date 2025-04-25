@@ -77,7 +77,6 @@ elif [[ "$hostname" == "supermicro" ]]; then
   echo "4.0.2.10 incus-$(hostname).local" >> /etc/avahi/hosts
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
-  apt install rdma-core -y 
   sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
   update-grub
   update-initramfs -u
@@ -91,7 +90,6 @@ elif [[ "$hostname" == "r620" ]]; then
   echo "4.0.2.11 incus-$(hostname).local" >> /etc/avahi/hosts
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
-  apt install rdma-core -y 
   sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
   update-grub
   echo "options mlx4_core probe_vf=6 num_vfs=8" >> /etc/modprobe.d/mlx4.conf
