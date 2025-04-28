@@ -74,6 +74,21 @@ elif [[ "$hostname" == "r730xd-3" ]]; then
 elif [[ "$hostname" == "supermicro" ]]; then
 
 # FIX MDNS FOR EASY LOOKUP
+  echo "5.0.0.6 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.6 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.6 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.6 incus-$(hostname).local" >> /etc/avahi/hosts
+
+  sed -i '/iopolicy/d' /home/.essentials/boot_script
+
+elif [[ "$hostname" == "r620" ]]; then
+
+#VF's for NiC
+  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"
+  update-initramfs -c -u -k all
+
+
+# FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.10 lan-$(hostname).local" >> /etc/avahi/hosts
   echo "4.0.0.10 ovs-$(hostname).local" >> /etc/avahi/hosts
   echo "4.0.1.10 linstor-$(hostname).local" >> /etc/avahi/hosts
@@ -81,7 +96,15 @@ elif [[ "$hostname" == "supermicro" ]]; then
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
-elif [[ "$hostname" == "r620" ]]; then
+  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+  update-grub
+  systemctl reboot
+
+elif [[ "$hostname" == "r720-1" ]]; then
+
+#VF's for NiC
+  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"
+  update-initramfs -c -u -k all
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.11 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -91,6 +114,43 @@ elif [[ "$hostname" == "r620" ]]; then
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
+  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+  update-grub
+  systemctl reboot
+elif [[ "$hostname" == "r720-2" ]]; then
+
+#VF's for NiC
+  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"
+  update-initramfs -c -u -k all
+
+# FIX MDNS FOR EASY LOOKUP
+  echo "5.0.0.12 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.12 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.12 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.12 incus-$(hostname).local" >> /etc/avahi/hosts
+
+  sed -i '/iopolicy/d' /home/.essentials/boot_script
+
+  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+  update-grub
+  systemctl reboot
+elif [[ "$hostname" == "r720-3" ]]; then
+
+#VF's for NiC
+  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"
+  update-initramfs -c -u -k all
+
+# FIX MDNS FOR EASY LOOKUP
+  echo "5.0.0.11 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.11 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.11 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.11 incus-$(hostname).local" >> /etc/avahi/hosts
+
+  sed -i '/iopolicy/d' /home/.essentials/boot_script
+
+  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+  update-grub
+  systemctl reboot
 else
   echo "Unknown host: $hostname"
 fi
