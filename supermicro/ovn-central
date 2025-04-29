@@ -1,0 +1,9 @@
+OVN_CTL_OPTS=" \
+     --db-nb-addr=4.0.0.6 \
+     --db-nb-create-insecure-remote=yes \
+     --db-sb-addr=4.0.0.6 \
+     --db-sb-create-insecure-remote=yes \
+     --db-nb-cluster-local-addr=4.0.0.6 \
+     --db-sb-cluster-local-addr=4.0.0.6 \
+     --ovn-northd-nb-db=tcp:4.0.0.6:6641,tcp:4.0.0.10:6641,tcp:4.0.0.11:6641 \
+     --ovn-northd-sb-db=tcp:4.0.0.6:6642,tcp:4.0.0.10:6642,tcp:4.0.0.11:6642"
