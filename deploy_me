@@ -84,9 +84,9 @@ elif [[ "$hostname" == "supermicro" ]]; then
 elif [[ "$hostname" == "r620" ]]; then
 
 #VF's for NiC
-  apt install rdma-core
-  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12" >> /etc/modprobe.d/mlx4.conf
-  update-initramfs -c -u -k all
+#  apt install rdma-core
+#  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12" >> /etc/modprobe.d/mlx4.conf
+#  update-initramfs -c -u -k all
 
 
 # FIX MDNS FOR EASY LOOKUP
@@ -97,16 +97,16 @@ elif [[ "$hostname" == "r620" ]]; then
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
-  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
-  update-grub
-  systemctl reboot
+#  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+#  update-grub
+#  systemctl reboot
 
 elif [[ "$hostname" == "r720-1" ]]; then
 
 #VF's for NiC
-  apt install rdma-core -y 
-  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"  >> /etc/modprobe.d/mlx4.conf
-  update-initramfs -c -u -k all
+#  apt install rdma-core -y 
+#  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"  >> /etc/modprobe.d/mlx4.conf
+#  update-initramfs -c -u -k all
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.11 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -116,15 +116,15 @@ elif [[ "$hostname" == "r720-1" ]]; then
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
-  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
-  update-grub
-  systemctl reboot
+#  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+#  update-grub
+#  systemctl reboot
 elif [[ "$hostname" == "r720-2" ]]; then
 
 #VF's for NiC
-  apt install rdma-core -y 
-  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"  >> /etc/modprobe.d/mlx4.conf
-  update-initramfs -c -u -k all
+ # apt install rdma-core -y 
+ # echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"  >> /etc/modprobe.d/mlx4.conf
+ # update-initramfs -c -u -k all
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.12 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -134,15 +134,15 @@ elif [[ "$hostname" == "r720-2" ]]; then
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
-  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
-  update-grub
-  systemctl reboot
+#  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+#  update-grub
+#  systemctl reboot
 elif [[ "$hostname" == "r720-3" ]]; then
 
 #VF's for NiC
-  apt install rdma-core -y 
-  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"  >> /etc/modprobe.d/mlx4.conf
-  update-initramfs -c -u -k all
+#  apt install rdma-core -y 
+#  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"  >> /etc/modprobe.d/mlx4.conf
+#  update-initramfs -c -u -k all
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.13 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -152,9 +152,9 @@ elif [[ "$hostname" == "r720-3" ]]; then
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
-  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
-  update-grub
-  systemctl reboot
+#  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
+#  update-grub
+#  systemctl reboot
 else
   echo "Unknown host: $hostname"
 fi
