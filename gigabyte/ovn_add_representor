@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in {0..11}; do
+    port="eth$i"
+    ovs-vsctl add-port ovs-sriov "$port" 
+done
