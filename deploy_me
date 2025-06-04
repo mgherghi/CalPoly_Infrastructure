@@ -74,10 +74,10 @@ elif [[ "$hostname" == "r730xd-3" ]]; then
 elif [[ "$hostname" == "supermicro" ]]; then
 
 # FIX MDNS FOR EASY LOOKUP
-  echo "5.0.0.6 lan-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.0.6 ovs-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.1.6 linstor-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.2.6 incus-$(hostname).local" >> /etc/avahi/hosts
+  echo "5.0.0.10 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.10 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.10 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.10 incus-$(hostname).local" >> /etc/avahi/hosts
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
@@ -90,16 +90,34 @@ elif [[ "$hostname" == "r620" ]]; then
 
 
 # FIX MDNS FOR EASY LOOKUP
-  echo "5.0.0.10 lan-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.0.10 ovs-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.1.10 linstor-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.2.10 incus-$(hostname).local" >> /etc/avahi/hosts
+  echo "5.0.0.6 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.6 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.6 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.6 incus-$(hostname).local" >> /etc/avahi/hosts
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
 #  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
 #  update-grub
 #  systemctl reboot
+elif [[ "$hostname" == "gigabyte" ]]; then
+
+#VF's for NiC
+ # apt install rdma-core -y 
+ # echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"  >> /etc/modprobe.d/mlx4.conf
+ # update-initramfs -c -u -k all
+
+# FIX MDNS FOR EASY LOOKUP
+  echo "5.0.0.5 lan-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.0.5 ovs-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.1.5 linstor-$(hostname).local" >> /etc/avahi/hosts
+  echo "4.0.2.5 incus-$(hostname).local" >> /etc/avahi/hosts
+
+# ALLOW MULTIPATH FOR NVME
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait  
+
+# CHANGE IO POLICY ON NVME DRIVES
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
 
 elif [[ "$hostname" == "r720-1" ]]; then
 
