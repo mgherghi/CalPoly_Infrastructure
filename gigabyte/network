@@ -6,13 +6,13 @@
 modprobe bonding mode=802.3ad
 
 # Create Bonding only in OS and not on actual Switch
-ip link add mlnx_vf-bond type bond
-ip link set mlnx_vf-bond mtu 9000
+ip link add mlnx-vf_bond type bond
+ip link set mlnx-vf_bond mtu 9000
 ip link set enp65s0f0np0 mtu 9000
 ip link set enp65s0f1np1 mtu 9000
-ip link set enp65s0f0np0 master mlnx_vf-bond
-ip link set enp65s0f1np1 master mlnx_vf-bond
-ip link set mlnx_vf-bond up
+ip link set enp65s0f0np0 master mlnx-vf_bond
+ip link set enp65s0f1np1 master mlnx-vf_bond
+ip link set mlnx-vf_bond up
 
 # Put ports in Switchdev
 devlink dev eswitch set pci/0000:41:00.0 mode switchdev
@@ -21,7 +21,6 @@ devlink dev eswitch set pci/0000:41:00.1 mode switchdev
 # Enable hardware offloading
 ethtool -K enp65s0f0np0 hw-tc-offload on
 ethtool -K enp65s0f1np1 hw-tc-offload on
-ethtool -K mlnx_vf-bond hw-tc-offload on
 
 # Setup VF's on enp65s0f0np0
 echo 11 > /sys/bus/pci/devices/0000\:41\:00.0/sriov_numvfs
@@ -39,7 +38,7 @@ for iface in $(ls /sys/class/net | grep "^eth"); do
     ip link set $iface mtu 9000
 done
 
-# Set JUMBO Frames on all VF's 
+# Set JUMBO Frames on all VF's
 for iface in $(ls /sys/class/net | grep "^enp65s0f"); do
     ip link set $iface mtu 9000
 done
@@ -48,14 +47,14 @@ done
 # ovs-appctl dpctl/dump-flows type=offloaded
 
 
-# Setup RDMA 
+# Setup OVS MGMT Layer
 ip link set eth0 name eth0-ovs
 ip link set eth0-ovs up
 ip link set enp65s0f0v0 name ovs-mgmt
 ip addr add 4.0.0.5/24 brd + dev ovs-mgmt
 ip link set ovs-mgmt up
 
-# Setup OVN MGMT Layer
+# Setup Linstor MGMT Layer
 ip link set eth1 name eth1-linstor
 ip link set eth1-linstor up
 ip link set enp65s0f0v1 name linstor-mgmt
@@ -69,32 +68,26 @@ ip link set enp65s0f0v2 name incus-mgmt
 ip addr add 4.0.2.5/24 brd + dev incus-mgmt
 ip link set incus-mgmt up
 
-# Setup bdebruhl interface
+# Setup admin_labs interface
 ip link set eth3 name eth3-admin_labs
 ip link set eth3-admin_labs up
 ip link set enp65s0f0v3 name admin_labs
 ip link set admin_labs up
 
-# Setup bhartma interface
-ip link set eth4 name eth4-bdebruhl
-ip link set eth4-bdebruhl up
-ip link set enp65s0f0v4 name bdebruhl
+# Setup research_labs interface
+ip link set eth4 name eth4-research_labs
+ip link set eth4-research_labs up
+ip link set enp65s0f0v4 name research_labs
+ip link set research_labs up
+
+# Setup bdebruhl interface
+ip link set eth5 name eth5-bdebruhl
+ip link set eth5-bdebruhl up
+ip link set enp65s0f0v5 name bdebruhl
 ip link set bdebruhl up
 
 # Setup phoenix interface
-ip link set eth5 name eth5-dofang
-ip link set eth5-dofang up
-ip link set enp65s0f0v5 name dofang
+ip link set eth6 name eth6-dofang
+ip link set eth6-dofang up
+ip link set enp65s0f0v6 name dofang
 ip link set dofang up
-
-# # Setup research-labs interface
-# ip link set eth6 name eth6-student_labs
-# ip link set eth6-student_labs up
-# ip link set enp65s0f0v6 name student-labs
-# ip link set student-labs up
-
-# # Setup admin-labs interface
-# ip link set eth7 name eth7-admin_labs
-# ip link set eth7-admin_labs up
-# ip link set enp65s0f0v7 name admin-labs
-# ip link set admin-labs up
