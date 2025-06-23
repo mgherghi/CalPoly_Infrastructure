@@ -1,0 +1,5 @@
+/home/.essentials/startup/iopolicy
+/home/.essentials/startup/cpupower
+/home/.essentials/startup/mlnx_prep
+/home/.essentials/startup/network
+source /home/.essentials/startup/cuda
