@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Put ports in Switchdev
+devlink dev eswitch set pci/0000:41:00.0 mode switchdev
+devlink dev eswitch set pci/0000:41:00.1 mode switchdev
+
+# Setup VF's on enp65s0f0np0
+echo 10 > /sys/class/net/enp65s0f0np0/device/sriov_numvfs
+
+# Enable hardware offloading
+ethtool -K enp65s0f0np0 hw-tc-offload on
+ethtool -K enp65s0f1np1 hw-tc-offload on
+
+# Enable Asap Direct and HW offload on OVS
+ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
+ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
+systemctl restart openvswitch-switch
+
+# Set all NetDev representors for JUMBO Frames
+for iface in $(ls /sys/class/net | grep "^eth"); do
+    ip link set $iface mtu 9000
+done
+
+
+# Set JUMBO Frames on all VF's
+for iface in $(ls /sys/class/net | grep "^enp65s0f"); do
+    ip link set $iface mtu 9000
+done
+
+# Load Bonding module
+modprobe bonding mode=802.3ad
+
+# Create Bonding only in OS and not on actual Switch
+ip link add mlnx-vf_bond type bond
+ip link set mlnx-vf_bond mtu 9000
+ip link set enp65s0f0np0 mtu 9000
+ip link set enp65s0f1np1 mtu 9000
+ip link set enp65s0f0np0 master mlnx-vf_bond
+ip link set enp65s0f1np1 master mlnx-vf_bond
+ip link set mlnx-vf_bond up
