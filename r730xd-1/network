@@ -16,7 +16,7 @@
 
 # Setup 802.3ad bond connection
 modprobe bonding mode=802.3ad miimon=100
-ip link  add mlnx-bond type bond 
+ip link  add mlnx-bond type bond
 ip link  set enp132s0 mtu 9000
 ip link  set enp132s0d1 mtu 9000
 ip link  set mlnx-bond mtu 9000
@@ -35,6 +35,7 @@ ip link  set ovs-mgmt up
 # Setup LINSTOR MGMT
 ip link  add link mlnx-bond name linstor-mgmt type vlan id 20
 ip addr add 4.0.1.7/24 brd + dev linstor-mgmt
+ip addr add 4.0.1.100/24 brd + dev linstor-mgmt
 ip link  set linstor-mgmt mtu 9000
 ip link  set linstor-mgmt up
 
