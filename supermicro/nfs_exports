@@ -1,0 +1,2 @@
+mount /dev/mapper/vg_ssd-lv_bomdas research_projects/bdebruhl/bomdas
+mount /dev/mapper/vg_ssd-lv_secureAI research_projects/dofang/secureAI
