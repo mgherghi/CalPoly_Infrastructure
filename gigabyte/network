@@ -1,93 +1,39 @@
-# Setup eno2 port as backup
-# ip link set eno2 up
-# dhclient eno2
-
-# Load Bonding module
-modprobe bonding mode=802.3ad
-
-# Create Bonding only in OS and not on actual Switch
-ip link add mlnx-vf_bond type bond
-ip link set mlnx-vf_bond mtu 9000
-ip link set enp65s0f0np0 mtu 9000
-ip link set enp65s0f1np1 mtu 9000
-ip link set enp65s0f0np0 master mlnx-vf_bond
-ip link set enp65s0f1np1 master mlnx-vf_bond
-ip link set mlnx-vf_bond up
-
-# Put ports in Switchdev
-devlink dev eswitch set pci/0000:41:00.0 mode switchdev
-devlink dev eswitch set pci/0000:41:00.1 mode switchdev
-
-# Enable hardware offloading
-ethtool -K enp65s0f0np0 hw-tc-offload on
-ethtool -K enp65s0f1np1 hw-tc-offload on
-
-# Setup VF's on enp65s0f0np0
-echo 11 > /sys/bus/pci/devices/0000\:41\:00.0/sriov_numvfs
-
-# Setup VF's on enp65s0f1np1
-#echo 10 > /sys/bus/pci/devices/0000\:41\:00.1/sriov_numvfs
-
-# Enable Asap Direct and HW offload on OVS
-ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
-ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
-systemctl restart openvswitch-switch
-
-# Set all NetDev representors for JUMBO Frames
-for iface in $(ls /sys/class/net | grep "^eth"); do
-    ip link set $iface mtu 9000
-done
-
-# Set JUMBO Frames on all VF's
-for iface in $(ls /sys/class/net | grep "^enp65s0f"); do
-    ip link set $iface mtu 9000
-done
-
-# Check if offloading
-# ovs-appctl dpctl/dump-flows type=offloaded
-
+#!/bin/bash
 
 # Setup OVS MGMT Layer
-ip link set eth0 name eth0-ovs
-ip link set eth0-ovs up
+ip link set eth0 up
 ip link set enp65s0f0v0 name ovs-mgmt
 ip addr add 4.0.0.5/24 brd + dev ovs-mgmt
 ip link set ovs-mgmt up
 
 # Setup Linstor MGMT Layer
-ip link set eth1 name eth1-linstor
-ip link set eth1-linstor up
+ip link set eth1 up
 ip link set enp65s0f0v1 name linstor-mgmt
 ip addr add 4.0.1.5/24 brd + dev linstor-mgmt
 ip link set linstor-mgmt up
 
 # Setup Incus MGMT Layer
-ip link set eth2 name eth2-incus
-ip link set eth2-incus up
+ip link set eth2 up
 ip link set enp65s0f0v2 name incus-mgmt
 ip addr add 4.0.2.5/24 brd + dev incus-mgmt
 ip link set incus-mgmt up
 
 # Setup admin_labs interface
-ip link set eth3 name eth3-admin_labs
-ip link set eth3-admin_labs up
-ip link set enp65s0f0v3 name admin_labs
-ip link set admin_labs up
+ip link set eth3 up
+ip link set enp65s0f0v3 name admin-labs
+ip link set admin-labs up
 
 # Setup research_labs interface
-ip link set eth4 name eth4-research_labs
-ip link set eth4-research_labs up
-ip link set enp65s0f0v4 name research_labs
-ip link set research_labs up
+ip link set eth4 up
+ip link set enp65s0f0v4 name research-labs
+ip link set research-labs up
 
 # Setup bdebruhl interface
-ip link set eth5 name eth5-bdebruhl
-ip link set eth5-bdebruhl up
+ip link set eth5 up
 ip link set enp65s0f0v5 name bdebruhl
 ip link set bdebruhl up
 
 # Setup phoenix interface
-ip link set eth6 name eth6-dofang
-ip link set eth6-dofang up
+ip link set eth6 up
 ip link set enp65s0f0v6 name dofang
 ip link set dofang up
