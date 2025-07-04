@@ -33,9 +33,24 @@ if [ -z "$domains" ]; then
   exit 1
 fi
 
-# Extract the first domain for nginx config filename & server_name
+# Split domains into positional parameters
 set -- $domains
-primary_domain="$1"
+num_domains=$#
+
+if [ "$num_domains" -eq 1 ]; then
+  first_domain="$1"
+  case "$first_domain" in
+    www.*)
+      domains="$first_domain"
+      ;;
+    *)
+      domains="$first_domain www.$first_domain"
+      ;;
+  esac
+fi
+
+# Primary domain for nginx filename (strip www. if present)
+primary_domain=$(echo $domains | awk '{print $1}' | sed 's/^www\.//')
 
 # --- Backend IP input ---
 echo -n "Enter the backend server IP and port (e.g., 127.0.0.1:5000): "
