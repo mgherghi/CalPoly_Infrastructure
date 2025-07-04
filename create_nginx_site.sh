@@ -1,10 +1,16 @@
-# Automated script ... just run either the wget command or curl 
-# wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/create_nginx_site.sh | sh -s yourdomain.com
-# curl -s https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/create_nginx_site.sh | sh -s yourdomain.com
-
 #!/bin/sh
+# Automated script ... just run either the wget command or curl 
+# wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/create_nginx_site.sh | sh
+# curl -s https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/create_nginx_site.sh | sh 
 
-# === Package Check & Install ===
+
+# Ensure Debian/Ubuntu
+if ! [ -x "$(command -v apt)" ]; then
+  echo "❌ This script requires Debian or Ubuntu (APT available)."
+  exit 1
+fi
+
+# Install required packages
 for pkg in nginx certbot python3-certbot-nginx; do
   if ! dpkg -s "$pkg" >/dev/null 2>&1; then
     echo "📦 Installing $pkg..."
@@ -14,31 +20,40 @@ for pkg in nginx certbot python3-certbot-nginx; do
   fi
 done
 
-# === Step 0: Input validation ===
-if [ -z "$1" ]; then
-  echo "Usage: sh create_nginx_site.sh <domain_name>"
+# --- Domains input ---
+if [ "$#" -gt 0 ]; then
+  domains="$*"
+else
+  echo -n "Enter domain(s) separated by space (e.g., example.com www.example.com): "
+  read domains
+fi
+
+if [ -z "$domains" ]; then
+  echo "❌ At least one domain is required. Aborting."
   exit 1
 fi
 
-domain="$1"
+# Extract the first domain for nginx config filename & server_name
+set -- $domains
+primary_domain="$1"
 
-# === Step 1: Ask for backend IP ===
-echo -n "Enter the backend server IP (e.g., 127.0.0.1:5000): "
+# --- Backend IP input ---
+echo -n "Enter the backend server IP and port (e.g., 127.0.0.1:5000): "
 read backend_ip
 
 if [ -z "$backend_ip" ]; then
-  echo "❌ No backend IP entered. Aborting."
+  echo "❌ Backend IP is required. Aborting."
   exit 1
 fi
 
-available_path="/etc/nginx/sites-available/$domain"
-enabled_path="/etc/nginx/sites-enabled/$domain"
+available_path="/etc/nginx/sites-available/$primary_domain"
+enabled_path="/etc/nginx/sites-enabled/$primary_domain"
 
-# === Step 2: Write Nginx config with backend IP ===
+# --- Write nginx config ---
 cat <<EOF > "$available_path"
 server {
     listen 80;
-    server_name $domain;
+    server_name $domains;
 
     location / {
         proxy_pass http://$backend_ip;
@@ -50,22 +65,37 @@ server {
 }
 EOF
 
-# === Step 3: Create symlink ===
-[ -e "$enabled_path" ] || ln -s "$available_path" "$enabled_path"
+echo "✅ Nginx config created at $available_path"
 
-# === Step 4: Test and reload Nginx ===
+# --- Create symlink ---
+if [ ! -e "$enabled_path" ]; then
+  ln -s "$available_path" "$enabled_path"
+  echo "✅ Symlink created: $enabled_path"
+else
+  echo "⚠️ Symlink already exists: $enabled_path"
+fi
+
+# --- Test & reload nginx ---
+echo "🔍 Testing Nginx config..."
 if nginx -t; then
-  echo "✅ Reloading Nginx..."
+  echo "✅ Nginx config valid. Reloading..."
   systemctl reload nginx
 else
   echo "❌ Nginx config invalid. Aborting."
   exit 1
 fi
 
-# === Step 5: Obtain SSL with Certbot ===
-certbot --nginx -d "$domain"
+# --- Prepare certbot domain arguments ---
+certbot_args=""
+for d in $domains; do
+  certbot_args="$certbot_args -d $d"
+done
 
-# === Step 6: Create systemd timer for renewal ===
+# --- Obtain SSL certificate ---
+echo "🔐 Running Certbot for domains:$domains"
+certbot --nginx $certbot_args
+
+# --- Setup systemd timer and service for renewal ---
 cat <<EOF > /etc/systemd/system/certbot-renew.timer
 [Unit]
 Description=Certbot renewal timer (every 80 days)
@@ -91,4 +121,5 @@ EOF
 systemctl daemon-reload
 systemctl enable --now certbot-renew.timer
 
-echo "🎉 Setup complete for $domain with SSL and auto-renew every 80 days"
+echo "✅ Certbot auto-renew timer set (every 80 days)."
+echo "🎉 Setup complete for domains: $domains"
