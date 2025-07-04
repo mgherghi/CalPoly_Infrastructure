@@ -20,7 +20,7 @@ BACKENDS=("$@")
 # --- Checks
 echo "[INFO] Validating environment..."
 
-required_bins=(nginx certbot tee ln systemctl crontab)
+required_bins=(nginx certbot tee ln systemctl python3-certbot-nginx crontab)
 for bin in "${required_bins[@]}"; do
   if ! command -v "$bin" &>/dev/null; then
     echo "[ERROR] Required command '$bin' not found. Install it and retry."
