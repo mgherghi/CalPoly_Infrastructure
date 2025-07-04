@@ -1,6 +1,6 @@
 # Automated script ... just run either the wget command or curl 
-# wget -qO- https://example.com/create_nginx_site.sh | sh -s yourdomain.com
-# curl -s https://example.com/create_nginx_site.sh | sh -s yourdomain.com
+# wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/create_nginx_site.sh | sh -s yourdomain.com
+# curl -s https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/create_nginx_site.sh | sh -s yourdomain.com
 
 #!/bin/sh
 
