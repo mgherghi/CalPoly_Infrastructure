@@ -25,7 +25,7 @@ if [ "$#" -gt 0 ]; then
   domains="$*"
 else
   echo -n "Enter domain(s) separated by space (e.g., example.com www.example.com): "
-  read domains
+  read domains < /dev/tty
 fi
 
 if [ -z "$domains" ]; then
@@ -39,7 +39,7 @@ primary_domain="$1"
 
 # --- Backend IP input ---
 echo -n "Enter the backend server IP and port (e.g., 127.0.0.1:5000): "
-read backend_ip
+read backend_ip < /dev/tty
 
 if [ -z "$backend_ip" ]; then
   echo "❌ Backend IP is required. Aborting."
@@ -92,7 +92,7 @@ for d in $domains; do
 done
 
 # --- Obtain SSL certificate ---
-echo "🔐 Running Certbot for domains:$domains"
+echo "🔐 Running Certbot for domains: $domains"
 certbot --nginx $certbot_args
 
 # --- Setup systemd timer and service for renewal ---
