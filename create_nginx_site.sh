@@ -2,14 +2,14 @@
 # Automated script ... just run either the wget command or curl 
 # wget -qO - https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/main/create_nginx_site.sh | bash -s -- <domain> <backend1> [backend2] ...
 # curl -s https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/create_nginx_site.sh | bash -s -- <domain> <backend1> [backend2] ...
-#!/bin/bash
 
 LOG_FILE="/var/log/nginx-setup.log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 set -euo pipefail
 
+# --- Input Validation
 if [[ $# -lt 2 ]]; then
-  echo "Usage: $0 <domain> <backend1> [backend2] ..."
+  echo "Usage: $0 <domain> <backend1> [backend2] [...]"
   exit 1
 fi
 
@@ -17,14 +17,32 @@ DOMAIN="$1"
 shift
 BACKENDS=("$@")
 
-echo "[INFO] Starting Nginx setup for $DOMAIN..."
+# --- Checks
+echo "[INFO] Validating environment..."
 
+required_bins=(nginx certbot tee ln systemctl crontab)
+for bin in "${required_bins[@]}"; do
+  if ! command -v "$bin" &>/dev/null; then
+    echo "[ERROR] Required command '$bin' not found. Install it and retry."
+    exit 1
+  fi
+done
+
+# --- Ensure webroot exists
+WEBROOT="/var/www/html"
+if [[ ! -d "$WEBROOT" ]]; then
+  echo "[INFO] Creating webroot directory at $WEBROOT"
+  sudo mkdir -p "$WEBROOT"
+  sudo chown www-data:www-data "$WEBROOT"
+fi
+
+# --- Paths
 NGINX_CONF="/etc/nginx/sites-available/$DOMAIN"
 SSL_PARAMS="/etc/nginx/ssl-params.conf"
 
-# Create SSL params file if missing
+# --- SSL Params
 if [[ ! -f "$SSL_PARAMS" ]]; then
-  echo "[INFO] Creating $SSL_PARAMS with secure defaults"
+  echo "[INFO] Creating SSL params file at $SSL_PARAMS"
   sudo tee "$SSL_PARAMS" > /dev/null <<'EOF'
 ssl_protocols TLSv1.2 TLSv1.3;
 ssl_prefer_server_ciphers on;
@@ -43,8 +61,9 @@ ssl_stapling_verify on;
 EOF
 fi
 
-# Write nginx config
-echo "[INFO] Writing Nginx config to $NGINX_CONF"
+# --- Generate NGINX Config
+echo "[INFO] Writing NGINX config to $NGINX_CONF"
+
 sudo tee "$NGINX_CONF" > /dev/null <<EOF
 upstream backend_pool {
 EOF
@@ -61,7 +80,7 @@ server {
     server_name $DOMAIN;
 
     location /.well-known/acme-challenge/ {
-        root /var/www/html;
+        root $WEBROOT;
     }
 
     location / {
@@ -90,33 +109,41 @@ server {
 }
 EOF
 
-# Enable site and reload
-sudo ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/
+# --- Enable Site
+echo "[INFO] Enabling NGINX site for $DOMAIN"
+sudo ln -sf "$NGINX_CONF" "/etc/nginx/sites-enabled/$DOMAIN"
 
+# --- Test & Reload NGINX
+echo "[INFO] Validating NGINX configuration"
 if ! sudo nginx -t; then
-  echo "[ERROR] Nginx config test failed!"
+  echo "[ERROR] NGINX configuration failed validation"
   exit 1
 fi
 
 sudo systemctl reload nginx
-echo "[INFO] Nginx reloaded successfully"
+echo "[INFO] NGINX reloaded"
 
-# Run certbot without email
-echo "[INFO] Running certbot for $DOMAIN"
-sudo certbot certonly --webroot -w /var/www/html -d "$DOMAIN" --agree-tos --non-interactive || {
+# --- Get SSL Certificate (no email)
+echo "[INFO] Requesting certificate from Let's Encrypt"
+sudo certbot certonly --webroot -w "$WEBROOT" -d "$DOMAIN" --agree-tos --non-interactive || {
   echo "[ERROR] Certbot failed"
   exit 1
 }
 
+# --- Final NGINX reload after cert
 sudo systemctl reload nginx
-echo "[INFO] SSL cert installed and nginx reloaded"
+echo "[INFO] SSL certificate installed and NGINX reloaded"
 
-# Setup renewal cron job
-if ! sudo crontab -l | grep -q "certbot renew"; then
-  echo "[INFO] Adding certbot renew cron job"
+# --- Setup Certbot Auto-Renew Cron
+echo "[INFO] Ensuring certbot auto-renew is in cron"
+if ! sudo crontab -l 2>/dev/null | grep -q "certbot renew"; then
   (sudo crontab -l 2>/dev/null; echo "0 3 * * * certbot renew --quiet --deploy-hook --cert-name $DOMAIN 'systemctl reload nginx'") | sudo crontab -
+  echo "[INFO] Cron job added for certbot renewal"
+else
+  echo "[INFO] Certbot renewal already scheduled"
 fi
 
+echo "[SUCCESS] Site $DOMAIN is configured with HTTPS and load balancing"
 echo "[DONE] Site $DOMAIN is ready"
 log "🎉 Setup complete for: $domains"
 log " - Reverse proxy to backend: $backend_ip"
