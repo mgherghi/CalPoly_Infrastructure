@@ -46,30 +46,56 @@ echo "[central] NODE_IP=${NODE_IP} IS_BOOTSTRAP=${IS_BOOTSTRAP} BOOTSTRAP_IP=${B
 echo "[central] NB=${OVN_NB_PORT} SB=${OVN_SB_PORT} NB_RAFT=${NB_RAFT_PORT} SB_RAFT=${SB_RAFT_PORT}"
 
 # -----------------------------
-# RAFT init (create / join)
+# RAFT init (create / join) with version-safe fallback
 # -----------------------------
-# --- derive schema names in a version-safe way ---
+
+# Derive schema names from files (always works)
 NB_NAME=$(ovsdb-tool schema-name "${NB_SCHEMA}")
 SB_NAME=$(ovsdb-tool schema-name "${SB_SCHEMA}")
 echo "[central] NB_NAME=${NB_NAME} SB_NAME=${SB_NAME}"
 
+run_or_retry() {
+  # run_or_retry "<desc>" "<cmd A...>" "||" "<cmd B...>"
+  local desc="$1"; shift
+  echo "[central] $desc (attempt A)"
+  if bash -lc "$*"; then
+    return 0
+  fi
+  echo "[central] $desc (attempt A failed, trying B)"
+  # shellcheck disable=SC2124
+  local _discard; _discard=$*
+  # Replace '||' sentinel with command B
+  local cmdA="${_discard%%||*}"
+  local cmdB="${_discard#*|| }"
+  bash -lc "$cmdB"
+}
+
 if [[ "${IS_BOOTSTRAP,,}" == "true" ]]; then
   if [[ ! -s "${NB_DB}" ]]; then
-    echo "[central] Initializing NB cluster on tcp:${NODE_IP}:${NB_RAFT_PORT}"
-    ovsdb-tool create-cluster "${NB_DB}" "${NB_NAME}" "tcp:${NODE_IP}:${NB_RAFT_PORT}"
+    # Some ovsdb-tool builds want schema NAME; others want schema FILE.
+    run_or_retry \
+      "Initializing NB cluster" \
+      "ovsdb-tool create-cluster '${NB_DB}' '${NB_NAME}' 'tcp:${NODE_IP}:${NB_RAFT_PORT}' || \
+       ovsdb-tool create-cluster '${NB_DB}' '${NB_SCHEMA}' 'tcp:${NODE_IP}:${NB_RAFT_PORT}'"
   fi
   if [[ ! -s "${SB_DB}" ]]; then
-    echo "[central] Initializing SB cluster on tcp:${NODE_IP}:${SB_RAFT_PORT}"
-    ovsdb-tool create-cluster "${SB_DB}" "${SB_NAME}" "tcp:${NODE_IP}:${SB_RAFT_PORT}"
+    run_or_retry \
+      "Initializing SB cluster" \
+      "ovsdb-tool create-cluster '${SB_DB}' '${SB_NAME}' 'tcp:${NODE_IP}:${SB_RAFT_PORT}' || \
+       ovsdb-tool create-cluster '${SB_DB}' '${SB_SCHEMA}' 'tcp:${NODE_IP}:${SB_RAFT_PORT}'"
   fi
 else
   if [[ ! -s "${NB_DB}" ]]; then
-    echo "[central] Joining NB cluster via tcp:${BOOTSTRAP_IP}:${NB_RAFT_PORT} (local tcp:${NODE_IP}:${NB_RAFT_PORT})"
-    ovsdb-tool join-cluster "${NB_DB}" "${NB_NAME}" "tcp:${NODE_IP}:${NB_RAFT_PORT}" "tcp:${BOOTSTRAP_IP}:${NB_RAFT_PORT}"
+    run_or_retry \
+      "Joining NB cluster" \
+      "ovsdb-tool join-cluster '${NB_DB}' '${NB_NAME}' 'tcp:${NODE_IP}:${NB_RAFT_PORT}' 'tcp:${BOOTSTRAP_IP}:${NB_RAFT_PORT}' || \
+       ovsdb-tool join-cluster '${NB_DB}' '${NB_SCHEMA}' 'tcp:${NODE_IP}:${NB_RAFT_PORT}' 'tcp:${BOOTSTRAP_IP}:${NB_RAFT_PORT}'"
   fi
   if [[ ! -s "${SB_DB}" ]]; then
-    echo "[central] Joining SB cluster via tcp:${BOOTSTRAP_IP}:${SB_RAFT_PORT} (local tcp:${NODE_IP}:${SB_RAFT_PORT})"
-    ovsdb-tool join-cluster "${SB_DB}" "${SB_NAME}" "tcp:${NODE_IP}:${SB_RAFT_PORT}" "tcp:${BOOTSTRAP_IP}:${SB_RAFT_PORT}"
+    run_or_retry \
+      "Joining SB cluster" \
+      "ovsdb-tool join-cluster '${SB_DB}' '${SB_NAME}' 'tcp:${NODE_IP}:${SB_RAFT_PORT}' 'tcp:${BOOTSTRAP_IP}:${SB_RAFT_PORT}' || \
+       ovsdb-tool join-cluster '${SB_DB}' '${SB_SCHEMA}' 'tcp:${NODE_IP}:${SB_RAFT_PORT}' 'tcp:${BOOTSTRAP_IP}:${SB_RAFT_PORT}'"
   fi
 fi
 
