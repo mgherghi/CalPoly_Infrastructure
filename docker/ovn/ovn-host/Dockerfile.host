@@ -3,7 +3,7 @@ ARG SCRIPT_URL
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ovn-host openvswitch-switch iproute2 ca-certificates tini procps \
+      ovn-host openvswitch-switch curl iproute2 ca-certificates tini procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Runtime & persistent state (we'll mount these)
