@@ -1,0 +1,20 @@
+FROM debian:13-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ovn-host openvswitch-common iproute2 ca-certificates tini procps \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /var/run/openvswitch /var/log/ovn
+
+COPY docker-entrypoint-host.sh /usr/local/bin/docker-entrypoint-host.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint-host.sh
+
+# Defaults (override via compose/.env)
+# Multiple SB remotes for HA
+ENV OVN_SB_REMOTES="tcp:4.0.0.7:6642,tcp:4.0.0.8:6642,tcp:4.0.0.9:6642" \
+    ENCAP_TYPE=geneve \
+    ENCAP_IP=auto
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/usr/local/bin/docker-entrypoint-host.sh"]

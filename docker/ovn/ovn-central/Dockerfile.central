@@ -1,0 +1,25 @@
+FROM debian:13-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ovn-central iproute2 iptables ca-certificates tini procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# runtime & data dirs
+RUN mkdir -p /var/run/ovn /var/lib/ovn /etc/ovn
+
+# Entry script
+COPY docker-entrypoint-central.sh /usr/local/bin/docker-entrypoint-central.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint-central.sh
+
+# Defaults (override via compose/.env)
+ENV NODE_IP=0.0.0.0 \
+    IS_BOOTSTRAP=false \
+    BOOTSTRAP_IP=4.0.0.7 \
+    OVN_NB_PORT=6641 \
+    OVN_SB_PORT=6642 \
+    NB_RAFT_PORT=6643 \
+    SB_RAFT_PORT=6644
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/usr/local/bin/docker-entrypoint-central.sh"]
