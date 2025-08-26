@@ -7,6 +7,10 @@ NB_SCHEMA=/usr/share/ovn/ovn-nb.ovsschema
 SB_SCHEMA=/usr/share/ovn/ovn-sb.ovsschema
 RUN_DIR=/var/run/ovn
 
+rm -f "${RUN_DIR}"/*.pid "${RUN_DIR}"/*.sock 2>/dev/null || true
+mkdir -p "${RUN_DIR}" /var/lib/ovn /etc/ovn /var/log/ovn
+umask 027
+
 mkdir -p "$RUN_DIR" /var/lib/ovn /etc/ovn /var/log/ovn
 
 # If compose mounted ./ovn-script → overwrite default config
