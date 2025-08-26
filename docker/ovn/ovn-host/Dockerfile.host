@@ -2,13 +2,16 @@ FROM debian:13-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ovn-host openvswitch-common iproute2 ca-certificates tini procps \
+      ovn-host curl openvswitch-common iproute2 ca-certificates tini procps \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/run/openvswitch /var/log/ovn
 
-COPY docker-entrypoint-host.sh /usr/local/bin/docker-entrypoint-host.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint-host.sh
+
+# Fetch entrypoint with checksum verification
+RUN set -eux; \
+    curl -fsSL "$SCRIPT_URL" -o /usr/local/bin/docker-entrypoint-host.sh; \
+    chmod +x /usr/local/bin/docker-entrypoint-host.sh
 
 # Defaults (override via compose/.env)
 # Multiple SB remotes for HA
