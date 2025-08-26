@@ -6,8 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       ovn-central curl iproute2 iptables ca-certificates tini procps \
     && rm -rf /var/lib/apt/lists/*
 
-# runtime & data dirs
-RUN mkdir -p /var/run/ovn /var/lib/ovn /etc/ovn
+RUN mkdir -p /var/run/ovn /var/lib/ovn /etc/ovn /var/log/ovn
 
 # Fetch entrypoint with checksum verification
 RUN set -eux; \
