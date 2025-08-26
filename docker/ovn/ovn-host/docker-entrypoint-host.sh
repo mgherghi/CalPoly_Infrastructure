@@ -17,11 +17,21 @@ fi
 echo "[host] Using OVN SB remotes: ${OVN_SB_REMOTES}"
 echo "[host] ENCAP_TYPE=${ENCAP_TYPE} ENCAP_IP=${ENCAP_IP}"
 
-# Configure OVS external IDs for OVN
+# set remotes/encap
 ovs-vsctl --db="unix:${OVS_SOCK}" set open_vswitch . \
   external_ids:ovn-remote="${OVN_SB_REMOTES}" \
   external_ids:ovn-encap-type="${ENCAP_TYPE}" \
   external_ids:ovn-encap-ip="${ENCAP_IP}"
+
+# wait for SB TCP to be reachable (any one)
+IFS=, read -ra REMS <<< "${OVN_SB_REMOTES}"
+ok=0
+for r in "${REMS[@]}"; do
+  hostport="${r#tcp:}"
+  host="${hostport%%:*}"; port="${hostport##*:}"
+  if timeout 2 bash -c ">/dev/tcp/${host}/${port}"; then ok=1; break; fi
+done
+[[ $ok -eq 1 ]] || echo "[host] WARN: no SB remote reachable yet"
 
 # Keep a stable system-id
 if ! ovs-vsctl --db="unix:${OVS_SOCK}" get open_vswitch . external_ids:system-id >/dev/null 2>&1; then
