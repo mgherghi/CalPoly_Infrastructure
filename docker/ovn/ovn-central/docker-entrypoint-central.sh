@@ -19,11 +19,11 @@ echo "[central] NB_PORT=$OVN_NB_PORT SB_PORT=$OVN_SB_PORT NB_RAFT=$NB_RAFT_PORT 
 
 # Initialize RAFT clusters if DBs are missing
 if [[ "${IS_BOOTSTRAP,,}" == "true" ]]; then
-  [[ -s "$NB_DB" ]] || ovsdb-tool create-cluster "$NB_DB" "$NB_SCHEMA" "${NODE_IP}:${NB_RAFT_PORT}"
-  [[ -s "$SB_DB" ]] || ovsdb-tool create-cluster "$SB_DB" "$SB_SCHEMA" "${NODE_IP}:${SB_RAFT_PORT}"
+  [[ -s "$NB_DB" ]] || ovsdb-tool create-cluster "$NB_DB" "$NB_SCHEMA" "tcp:${NODE_IP}:${NB_RAFT_PORT}"
+  [[ -s "$SB_DB" ]] || ovsdb-tool create-cluster "$SB_DB" "$SB_SCHEMA" "tcp:${NODE_IP}:${SB_RAFT_PORT}"
 else
-  [[ -s "$NB_DB" ]] || ovsdb-tool join-cluster "$NB_DB" "$NB_SCHEMA" "${NODE_IP}:${NB_RAFT_PORT}" "${BOOTSTRAP_IP}:${NB_RAFT_PORT}"
-  [[ -s "$SB_DB" ]] || ovsdb-tool join-cluster "$SB_DB" "$SB_SCHEMA" "${NODE_IP}:${SB_RAFT_PORT}" "${BOOTSTRAP_IP}:${SB_RAFT_PORT}"
+  [[ -s "$NB_DB" ]] || ovsdb-tool join-cluster "$NB_DB" "$NB_SCHEMA" "tcp:${NODE_IP}:${NB_RAFT_PORT}" "tcp:${BOOTSTRAP_IP}:${NB_RAFT_PORT}"
+  [[ -s "$SB_DB" ]] || ovsdb-tool join-cluster "$SB_DB" "$SB_SCHEMA" "tcp:${NODE_IP}:${SB_RAFT_PORT}" "tcp:${BOOTSTRAP_IP}:${SB_RAFT_PORT}"
 fi
 
 # Start single ovsdb-server handling both NB & SB, listening only on NODE_IP
