@@ -2,15 +2,16 @@ FROM debian:13-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ovn-central iproute2 iptables ca-certificates tini procps \
+      ovn-central curl iproute2 iptables ca-certificates tini procps \
     && rm -rf /var/lib/apt/lists/*
 
 # runtime & data dirs
 RUN mkdir -p /var/run/ovn /var/lib/ovn /etc/ovn
 
-# Entry script
-COPY docker-entrypoint-central.sh /usr/local/bin/docker-entrypoint-central.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint-central.sh
+# Fetch entrypoint with checksum verification
+RUN set -eux; \
+    curl -fsSL "$SCRIPT_URL" -o /usr/local/bin/docker-entrypoint-central.sh; \
+    chmod +x /usr/local/bin/docker-entrypoint-central.sh
 
 # Defaults (override via compose/.env)
 ENV NODE_IP=0.0.0.0 \
