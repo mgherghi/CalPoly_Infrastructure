@@ -48,23 +48,28 @@ echo "[central] NB=${OVN_NB_PORT} SB=${OVN_SB_PORT} NB_RAFT=${NB_RAFT_PORT} SB_R
 # -----------------------------
 # RAFT init (create / join)
 # -----------------------------
+# --- derive schema names in a version-safe way ---
+NB_NAME=$(ovsdb-tool schema-name "${NB_SCHEMA}")
+SB_NAME=$(ovsdb-tool schema-name "${SB_SCHEMA}")
+echo "[central] NB_NAME=${NB_NAME} SB_NAME=${SB_NAME}"
+
 if [[ "${IS_BOOTSTRAP,,}" == "true" ]]; then
   if [[ ! -s "${NB_DB}" ]]; then
     echo "[central] Initializing NB cluster on tcp:${NODE_IP}:${NB_RAFT_PORT}"
-    ovsdb-tool create-cluster "${NB_DB}" "${NB_SCHEMA}" "tcp:${NODE_IP}:${NB_RAFT_PORT}"
+    ovsdb-tool create-cluster "${NB_DB}" "${NB_NAME}" "tcp:${NODE_IP}:${NB_RAFT_PORT}"
   fi
   if [[ ! -s "${SB_DB}" ]]; then
     echo "[central] Initializing SB cluster on tcp:${NODE_IP}:${SB_RAFT_PORT}"
-    ovsdb-tool create-cluster "${SB_DB}" "${SB_SCHEMA}" "tcp:${NODE_IP}:${SB_RAFT_PORT}"
+    ovsdb-tool create-cluster "${SB_DB}" "${SB_NAME}" "tcp:${NODE_IP}:${SB_RAFT_PORT}"
   fi
 else
   if [[ ! -s "${NB_DB}" ]]; then
     echo "[central] Joining NB cluster via tcp:${BOOTSTRAP_IP}:${NB_RAFT_PORT} (local tcp:${NODE_IP}:${NB_RAFT_PORT})"
-    ovsdb-tool join-cluster "${NB_DB}" "${NB_SCHEMA}" "tcp:${NODE_IP}:${NB_RAFT_PORT}" "tcp:${BOOTSTRAP_IP}:${NB_RAFT_PORT}"
+    ovsdb-tool join-cluster "${NB_DB}" "${NB_NAME}" "tcp:${NODE_IP}:${NB_RAFT_PORT}" "tcp:${BOOTSTRAP_IP}:${NB_RAFT_PORT}"
   fi
   if [[ ! -s "${SB_DB}" ]]; then
     echo "[central] Joining SB cluster via tcp:${BOOTSTRAP_IP}:${SB_RAFT_PORT} (local tcp:${NODE_IP}:${SB_RAFT_PORT})"
-    ovsdb-tool join-cluster "${SB_DB}" "${SB_SCHEMA}" "tcp:${NODE_IP}:${SB_RAFT_PORT}" "tcp:${BOOTSTRAP_IP}:${SB_RAFT_PORT}"
+    ovsdb-tool join-cluster "${SB_DB}" "${SB_NAME}" "tcp:${NODE_IP}:${SB_RAFT_PORT}" "tcp:${BOOTSTRAP_IP}:${SB_RAFT_PORT}"
   fi
 fi
 
