@@ -13,7 +13,6 @@ x-satellite-mounts: &satellite_mounts
   - /lib/modules:/lib/modules:ro
   - /run/udev:/run/udev:ro
 
-
 services:
   linstor-controller:
     build:
@@ -47,7 +46,10 @@ services:
     environment:
       <<: *common_env
     volumes: *satellite_mounts
-    # Satellite reads /etc/linstor/satellite.conf (mounted below)
+    cap_add:
+      - SYS_MODULE     # the container cannot load new modules if the host doesn't have them
+      - SYS_ADMIN
+      - NET_ADMIN
     depends_on:
       linstor-controller:
         condition: service_started
