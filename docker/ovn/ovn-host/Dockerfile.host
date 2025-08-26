@@ -3,10 +3,11 @@ ARG SCRIPT_URL
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ovn-host curl openvswitch-common iproute2 ca-certificates tini procps \
+      ovn-host openvswitch-switch iproute2 ca-certificates tini procps \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /var/run/openvswitch /var/log/ovn
+# Runtime & persistent state (we'll mount these)
+RUN mkdir -p /var/run/openvswitch /var/lib/openvswitch /etc/openvswitch /var/log/openvswitch /var/log/ovn
 
 
 # Fetch entrypoint with checksum verification
@@ -15,7 +16,6 @@ RUN set -eux; \
     chmod +x /usr/local/bin/docker-entrypoint-host.sh
 
 # Defaults (override via compose/.env)
-# Multiple SB remotes for HA
 ENV OVN_SB_REMOTES="tcp:4.0.0.7:6642,tcp:4.0.0.8:6642,tcp:4.0.0.9:6642" \
     ENCAP_TYPE=geneve \
     ENCAP_IP=auto
