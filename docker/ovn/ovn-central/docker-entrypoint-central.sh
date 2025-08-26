@@ -27,6 +27,7 @@ else
 fi
 
 # Start ovsdb-server (listens on host IP due to network_mode: host)
+# AFTER (correct — OVN NB/SB DB files passed)
 ovsdb-server \
   --unixctl="$RUN_DIR/ovsdb-server.ctl" \
   --remote=punix:$RUN_DIR/ovnnb_db.sock \
@@ -35,7 +36,8 @@ ovsdb-server \
   --remote=ptcp:${OVN_SB_PORT}:${NODE_IP} \
   --pidfile=/var/run/ovn/ovsdb-server.pid \
   --log-file=/var/log/ovn/ovsdb-server.log \
-  --detach
+  --detach \
+  "$NB_DB" "$SB_DB"
 
 sleep 1
 
