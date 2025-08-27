@@ -5,7 +5,7 @@ ARG LINBIT_REPO
 
 USER root
 RUN apt update -y && apt install wget -y && wget "$LINBIT_KEY" -O /etc/apt/keyrings/linbit.asc && wait && wget "$LINBIT_REPO" -O /etc/apt/sources.list.d/linstor.sources && wait && apt update -y
-RUN apt install curl linstor-controller tini linstor-client python3-setuptools -y
+RUN apt install curl linstor-controller tini linstor-client lvm2 thin-send-recv python3-setuptools -y
 
 # Fetch entrypoint with checksum verification
 RUN set -eux; \
