@@ -1,0 +1,13 @@
+FROM debian:13-slim
+
+USER root
+RUN apt update -y && apt install wget -y && wget "$LINBIT_KEY" -O /etc/apt/keyrings/linbit.asc && wait && wget "$LINBIT_REPO" -O /etc/apt/sources.list.d/linstor.sources && wait && apt update -y
+RUN apt install drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools linstor-satellite  -y
+
+# Fetch entrypoint with checksum verification
+RUN set -eux; \
+    curl -fsSL "$SCRIPT_URL" -o /usr/local/bin/docker-entrypoint-linstor-satellite.sh; \
+    chmod +x /usr/local/bin/docker-entrypoint-linstor-satellite.sh
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/usr/local/bin/docker-entrypoint-linstor-satellite.sh"]
