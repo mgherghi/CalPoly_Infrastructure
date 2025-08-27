@@ -1,0 +1,81 @@
+#
+#					VERY IMPORTANT
+#
+#               YOU MUST RUN THIS LIKE
+#!/usr/bin/env bash
+#set -euo pipefail
+#HOSTNAME="$(hostname -s)" exec docker compose up -d "$@"
+#
+#
+###############################################################################
+
+version: "3.9"
+x-common-env: &common_env
+  # Set this VIP/DNS so satellites and clients always hit the active controller
+  - LINSTOR_CONTROLLERS: "${LINSTOR_CONTROLLERS:-4.0.0.7:3370}"
+
+x-satellite-mounts: &satellite_mounts
+  - /etc/linstor:/etc/linstor
+  - /var/lib/linstor:/var/lib/linstor
+  - /etc/drbd:/etc/drbd
+  - /var/lib/drbd:/var/lib/drbd
+  - /dev:/dev
+  - /sys:/sys
+  - /lib/modules:/lib/modules:ro
+  - /run/udev:/run/udev:ro
+
+services:
+  linstor-controller:
+    build:
+      context: https://github.com/mgherghi/CalPoly_Infrastructure.git
+      dockerfile: docker/linstor-server/controller/Dockerfile.controller
+      args:
+        SCRIPT_URL: "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/docker/linstor-server/controller/docker-entrypoint-linstor-controller.sh"
+        LINBIT_REPO: "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linstor.sources"
+        LINBIT_KEY: "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linbit.asc"
+    image: linstor-controller
+    container_name: linstor-controller
+    hostname: "${HOSTNAME}-linstor-controller"
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx2048m
+    healthcheck:
+      test: ["CMD-SHELL", "linstor controller list >/dev/null 2>&1 || exit 0"]
+      interval: 20s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+
+
+  linstor-satellite:
+    # Build the satellite image straight from source
+    build:
+      context: https://github.com/mgherghi/CalPoly_Infrastructure.git
+      dockerfile: docker/linstor-server/satellite/Dockerfile.satellite
+      args:
+        SCRIPT_URL: "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/docker/linstor-server/satellite/docker-entrypoint-linstor-satellite.sh"
+        LINBIT_REPO: "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linstor.sources"
+        LINBIT_KEY: "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linbit.asc"
+    image: linstor-satellite
+    container_name: linstor-satellite
+    hostname: "${HOSTNAME}-linstor-satellite"
+    network_mode: host
+    privileged: true  # simplest path to host DRBD + devices
+    restart: unless-stopped
+    environment:
+      <<: *common_env
+    volumes: *satellite_mounts
+    cap_add:
+      - SYS_MODULE     # the container cannot load new modules if the host doesn't have them
+      - SYS_ADMIN
+      - NET_ADMIN
+    depends_on:
+      linstor-controller:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "linstor node list >/dev/null 2>&1 || exit 0"]
+      interval: 20s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
