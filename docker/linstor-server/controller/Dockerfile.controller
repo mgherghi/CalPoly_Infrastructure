@@ -1,7 +1,7 @@
 FROM debian:13-slim
 
 USER root
-RUN apt update -y && apt install wget -y && wget "$LINBIT_KEY" -O /etc/apt/keyrings/linbit.asc && wait && wget "$LINBIT_REPO" -O /etc/apt/sources.list.d/linstor.sources && wait && apt update -y
+RUN apt update -y && apt install wget -y && wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linbit.asc -O /etc/apt/keyrings/linbit.asc && wait && wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linstor.sources -O /etc/apt/sources.list.d/linstor.sources && wait && apt update -y
 RUN apt install curl linstor-controller tini linstor-client python3-setuptools -y
 
 # Fetch entrypoint with checksum verification
