@@ -6,7 +6,7 @@
 #set -euo pipefail
 #HOSTNAME="$(hostname -s)" exec docker compose up -d "$@"
 #
-#
+#  USE AS NEEDED AND COMMENT OUT WHAT YOU DONT NEED 
 ###############################################################################
 
 version: "3.9"
@@ -64,8 +64,16 @@ services:
     privileged: true  # simplest path to host DRBD + devices
     restart: unless-stopped
     environment:
-      <<: *common_env
-    volumes: *satellite_mounts
+	  - LINSTOR_CONTROLLERS: "${LINSTOR_CONTROLLERS:-4.0.0.7:3370}"
+    volumes:
+      - /etc/linstor:/etc/linstor
+      - /var/lib/linstor:/var/lib/linstor
+      - /etc/drbd:/etc/drbd
+      - /var/lib/drbd:/var/lib/drbd
+      - /dev:/dev
+      - /sys:/sys
+      - /lib/modules:/lib/modules:ro
+      - /run/udev:/run/udev:ro
     cap_add:
       - SYS_MODULE     # the container cannot load new modules if the host doesn't have them
       - SYS_ADMIN
@@ -79,3 +87,54 @@ services:
       timeout: 5s
       retries: 15
       start_period: 60s
+
+  ovn-central:
+    build:
+      context: https://github.com/mgherghi/CalPoly_Infrastructure.git
+      dockerfile: ./docker/ovn/ovn-central/Dockerfile.central
+      args:
+        SCRIPT_URL: "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/docker/ovn/ovn-central/docker-entrypoint-central.sh"
+    container_name: ovn-central
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      NODE_IP: "${NODE_IP}"
+      IS_BOOTSTRAP: "${IS_BOOTSTRAP}"
+      BOOTSTRAP_IP: "${BOOTSTRAP_IP}"
+      OVN_NB_PORT: "6641"
+      OVN_SB_PORT: "6642"
+      NB_RAFT_PORT: "6643"
+      SB_RAFT_PORT: "6644"
+    volumes:
+      - ./data/ovn-central:/var/lib/ovn
+      - ./hostscript:/tmp/ovn-script:ro
+    healthcheck:
+      test: ["CMD-SHELL", "ss -lnt | grep -q ':6641\\|:6642'"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+  ovn-host:
+    build:
+      context: https://github.com/mgherghi/CalPoly_Infrastructure.git
+      dockerfile: ./docker/ovn/ovn-host/Dockerfile.host
+      args:
+        SCRIPT_URL: "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/docker/ovn/ovn-host/docker-entrypoint-host.sh"
+    container_name: ovn-host
+    restart: unless-stopped
+    network_mode: host
+    privileged: true               # needed to access kernel datapath
+    volumes:
+      - /lib/modules:/lib/modules:ro
+      - ./data/openvswitch/etc:/etc/openvswitch
+      - ./data/openvswitch/lib:/var/lib/openvswitch
+      - /var/run/ovn:/var/run/ovn           # optional: share for tooling
+    environment:
+      OVN_SB_REMOTES: "tcp:4.0.0.7:6642,tcp:4.0.0.8:6642,tcp:4.0.0.9:6642"
+      ENCAP_TYPE: "geneve"
+      ENCAP_IP: "auto"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -x ovn-controller >/dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
