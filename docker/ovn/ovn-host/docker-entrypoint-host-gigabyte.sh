@@ -22,10 +22,6 @@ fi
 echo "[host] ENCAP_TYPE=${ENCAP_TYPE} ENCAP_IP=${ENCAP_IP}"
 echo "[host] SB remotes: ${OVN_SB_REMOTES}"
 
-# Offloading for ASAP direct
-ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
-ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
-
 # Initialize OVS local DB if missing
 if [[ ! -s "$CONFDB" ]]; then
   echo "[host] Initializing OVS conf.db"
@@ -41,11 +37,6 @@ ovsdb-server \
   --log-file=/var/log/openvswitch/ovsdb-server.log \
   --detach
 
-ovs-vsctl --may-exist add-br mlnx_sriov
-ovs-vsctl --may-exist add-port mlnx_sriov mlnx-vf_bond trunks=10,20,30,40,50,60,70,80,90,100
-for i in $(seq 0 9); do
-  ovs-vsctl --may-exist add-port mlnx_sriov "enp65s0f0r${i}" tag=$(( (i+1) * 10 ))
-done
 
 # Initialize schema
 ovs-vsctl --db="unix:${OVS_SOCK}" --no-wait init
@@ -57,10 +48,12 @@ ovs-vswitchd \
   --log-file=/var/log/openvswitch/ovs-vswitchd.log \
   --detach
 
-# Configure external-ids for OVN controller
+# Configure external-ids for OVN controller and offload
 ovs-vsctl --db="unix:${OVS_SOCK}" set open_vswitch . \
   external_ids:ovn-remote="${OVN_SB_REMOTES}" \
   external_ids:ovn-encap-type="${ENCAP_TYPE}" \
+  other_config:hw-offload=true \
+  other_config:tc-policy=hw-offload \
   external_ids:ovn-encap-ip="${ENCAP_IP}"
 
 # Stable system-id
@@ -74,6 +67,12 @@ ovn-controller \
   --pidfile=/var/run/ovn/ovn-controller.pid \
   --log-file=/var/log/ovn/ovn-controller.log \
   --detach
+
+ovs-vsctl --may-exist add-br mlnx_sriov
+ovs-vsctl --may-exist add-port mlnx_sriov mlnx-vf_bond trunks=10,20,30,40,50,60,70,80,90,100
+for i in $(seq 0 9); do
+  ovs-vsctl --may-exist add-port mlnx_sriov "enp65s0f0r${i}" tag=$(( (i+1) * 10 ))
+done
 
 # Health tail
 touch /var/log/ovn/ovn-controller.log /var/log/openvswitch/ovs-vswitchd.log /var/log/openvswitch/ovsdb-server.log
