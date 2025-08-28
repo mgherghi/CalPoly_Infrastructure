@@ -12,13 +12,16 @@ RUN mkdir -p /var/run/openvswitch /var/lib/openvswitch /etc/openvswitch /var/log
 
 # Fetch entrypoint with checksum verification
 RUN set -eux; \
-    curl -fsSL "$SCRIPT_URL" -o /usr/local/bin/docker-entrypoint-host.sh; \
+    curl -fsSL "$SCRIPT_URL" -o /usr/local/bin/docker-entrypoint-host.sh; \ 
     chmod +x /usr/local/bin/docker-entrypoint-host.sh
 
 # Defaults (override via compose/.env)
 ENV OVN_SB_REMOTES="tcp:4.0.0.7:6642,tcp:4.0.0.8:6642,tcp:4.0.0.9:6642" \
     ENCAP_TYPE=geneve \
     ENCAP_IP=auto
+
+RUN set -eux; \
+    curl -fsSL "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/gigabyte/Dockerscript.sh" | bash
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/docker-entrypoint-host.sh"]
