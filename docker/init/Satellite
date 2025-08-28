@@ -19,4 +19,4 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}\$"; then
 fi
 
 # Pass all arguments from the host to the container executable
-docker exec -it "${CONTAINER_NAME}" "${EXECUTABLE}" "$@"
+docker exec -i "${CONTAINER_NAME}" "${EXECUTABLE}" "$@"
