@@ -1,0 +1,22 @@
+#This is a wrapper for the host to have connection with the docker satellite
+# you must create the file/directory on your host for /usr/share/linstor-server/bin/Satellite
+# then chmod u+x the Satellite file (thats what this file is) and then incus will be able to communicate with linstor satellite that is dockerized
+
+
+#!/usr/bin/env bash
+#
+# Wrapper for linstor-satellite binary inside the Docker container
+#
+
+set -euo pipefail
+
+CONTAINER_NAME="linstor-satellite"
+EXECUTABLE="/usr/share/linstor-server/bin/Satellite"
+
+if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}\$"; then
+    echo "Error: container '${CONTAINER_NAME}' is not running" >&2
+    exit 1
+fi
+
+# Pass all arguments from the host to the container executable
+docker exec -it "${CONTAINER_NAME}" "${EXECUTABLE}" "$@"
