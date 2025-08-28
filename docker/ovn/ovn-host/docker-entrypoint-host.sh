@@ -22,6 +22,10 @@ fi
 echo "[host] ENCAP_TYPE=${ENCAP_TYPE} ENCAP_IP=${ENCAP_IP}"
 echo "[host] SB remotes: ${OVN_SB_REMOTES}"
 
+# Offloading for ASAP direct
+ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
+ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
+
 # Initialize OVS local DB if missing
 if [[ ! -s "$CONFDB" ]]; then
   echo "[host] Initializing OVS conf.db"
