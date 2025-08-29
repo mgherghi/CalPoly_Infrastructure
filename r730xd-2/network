@@ -64,3 +64,13 @@ ip link  set bdebruhl up
 ip link  add link mlnx-bond name dofang type vlan id 70
 ip link  set dofang mtu 9000
 ip link  set dofang up
+
+# Setup bahartma UPLINK network
+ip link  add link mlnx-bond name bahartma type vlan id 80
+ip link  set bahartma mtu 9000
+ip link  set bahartma up
+
+# Setup infra UPLINK network
+ip link  add link mlnx-bond name infra type vlan id 90
+ip link  set infra mtu 9000
+ip link  set infra up
