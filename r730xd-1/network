@@ -35,7 +35,6 @@ ip link  set ovs-mgmt up
 # Setup LINSTOR MGMT
 ip link  add link mlnx-bond name linstor-mgmt type vlan id 20
 ip addr add 4.0.1.7/24 brd + dev linstor-mgmt
-ip addr add 4.0.1.100/24 brd + dev linstor-mgmt
 ip link  set linstor-mgmt mtu 9000
 ip link  set linstor-mgmt up
 
