@@ -20,19 +20,19 @@ ip link set enp66s0 up
 
 # Setup OVS  MGMT
 ip link add link enp66s0 name ovs-mgmt type vlan id 10
-ip addr add 4.0.0.11/24 brd + dev ovs-mgmt
+ip addr add 4.0.0.6/24 brd + dev ovs-mgmt
 ip link  set ovs-mgmt mtu 9000
 ip link  set ovs-mgmt up
 
 # Setup LINSTOR MGMT
 ip link add link enp66s0 name linstor-mgmt type vlan id 20
-ip addr add 4.0.1.11/24 brd + dev linstor-mgmt
+ip addr add 4.0.1.6/24 brd + dev linstor-mgmt
 ip link  set linstor-mgmt mtu 9000
 ip link  set linstor-mgmt up
 
 # Setup INCUS MGMT
 ip link add link enp66s0 name incus-mgmt type vlan id 30
-ip addr add 4.0.2.11/24 brd + dev incus-mgmt
+ip addr add 4.0.2.6/24 brd + dev incus-mgmt
 ip link  set incus-mgmt mtu 9000
 ip link  set incus-mgmt up
 
@@ -55,3 +55,13 @@ ip link  set bdebruhl up
 ip link add link enp66s0 name dofang type vlan id 70
 ip link  set dofang mtu 9000
 ip link  set dofang up
+
+# Setup bahartma UPLINK network
+ip link add link enp66s0 name bahartma type vlan id 80
+ip link  set bahartma mtu 9000
+ip link  set bahartma up
+
+# Setup infra UPLINK network
+ip link add link enp66s0 name infra type vlan id 90
+ip link  set infra mtu 9000
+ip link  set infra up
