@@ -1,0 +1,176 @@
+#!/bin/bash
+set -euo pipefail
+
+GUAC_VERSION=1.6.0
+BUILD_DIR=/usr/src/guacamole-build
+CORES=$(nproc)
+
+echo "[+] Installing build dependencies..."
+sudo apt update
+sudo apt install -y build-essential autotools-dev debhelper \
+    dpkg-dev fakeroot devscripts \
+    libcairo2-dev libjpeg62-turbo-dev libpng-dev libossp-uuid-dev \
+    libavcodec-dev libavutil-dev libswscale-dev freerdp3-dev \
+    libpango1.0-dev libssh2-1-dev libtelnet-dev libvncserver-dev \
+    libpulse-dev libssl-dev libvorbis-dev libwebp-dev libwebsockets-dev \
+    wget curl
+
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+###############################################################################
+# Build guacamole-server (guacd)
+###############################################################################
+echo "[+] Downloading guacamole-server ${GUAC_VERSION}..."
+wget -q https://downloads.apache.org/guacamole/${GUAC_VERSION}/source/guacamole-server-${GUAC_VERSION}.tar.gz
+tar -xzf guacamole-server-${GUAC_VERSION}.tar.gz
+cd guacamole-server-${GUAC_VERSION}
+
+echo "[+] Creating Debian packaging for guacamole-server..."
+mkdir -p debian
+cat > debian/control <<EOF
+Source: guacamole-server
+Section: net
+Priority: optional
+Maintainer: Guacamole Builder <builder@example.com>
+Build-Depends: debhelper-compat (= 13), autotools-dev, \
+ libcairo2-dev, libjpeg62-turbo-dev, libpng-dev, libossp-uuid-dev, \
+ libavcodec-dev, libavutil-dev, libswscale-dev, freerdp3-dev, \
+ libpango1.0-dev, libssh2-1-dev, libtelnet-dev, libvncserver-dev, \
+ libpulse-dev, libssl-dev, libvorbis-dev, libwebp-dev, libwebsockets-dev
+Standards-Version: 4.6.0
+Homepage: https://guacamole.apache.org/
+
+Package: guacamole-server
+Architecture: any
+Depends: libcairo2, libjpeg62-turbo, libpng16-16, libossp-uuid16, \
+ libavcodec61, libavutil59, libswscale8, freerdp3-x11, \
+ libpango-1.0-0, libssh2-1, libtelnet2, libvncserver1, \
+ libpulse0, libssl3, libvorbis0a, libvorbisenc2, libwebp7, \
+ libwebsockets19, ffmpeg, \${misc:Depends}
+Description: Guacamole remote desktop gateway (server daemon)
+ Guacd proxy daemon supporting RDP, VNC, SSH, Telnet, Kubernetes,
+ Wake-on-LAN and more.
+EOF
+
+cat > debian/rules <<EOF
+#!/usr/bin/make -f
+%:
+	dh \$@
+
+override_dh_auto_configure:
+	./configure --prefix=/usr --enable-allow-freerdp-snapshots
+
+override_dh_auto_build:
+	\$(MAKE) -j${CORES}
+
+override_dh_auto_test:
+	# Disabled: skip unit tests
+EOF
+chmod +x debian/rules
+
+cat > debian/changelog <<EOF
+guacamole-server (${GUAC_VERSION}-1) unstable; urgency=medium
+
+  * Automated build of guacamole-server ${GUAC_VERSION} for Debian 13
+
+ -- Guacamole Builder <builder@example.com>  $(date -R)
+EOF
+
+###############################################################################
+# Systemd integration
+###############################################################################
+mkdir -p debian/guacamole-server/lib/systemd/system
+cat > debian/guacamole-server/lib/systemd/system/guacd.service <<'EOF'
+[Unit]
+Description=Guacamole proxy daemon (guacd)
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/guacd -f
+Restart=always
+User=guacd
+Group=guacd
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+###############################################################################
+# Default configs
+###############################################################################
+mkdir -p debian/guacamole-server/etc/guacamole
+
+# guacd config
+cat > debian/guacamole-server/etc/guacamole/guacd.conf <<'EOF'
+[server]
+bind_host = 0.0.0.0
+bind_port = 4822
+EOF
+
+# guacamole.properties sample
+cat > debian/guacamole-server/etc/guacamole/guacamole.properties <<'EOF'
+# Apache Guacamole - Sample configuration
+
+# Hostname and port of guacd
+guacd-hostname: localhost
+guacd-port: 4822
+
+# Default auth provider (simple user-mapping)
+auth-provider: net.sourceforge.guacamole.net.basic.BasicFileAuthenticationProvider
+user-mapping: /etc/guacamole/user-mapping.xml
+
+# Example database config (uncomment to use MySQL/Postgres)
+#auth-provider: net.sourceforge.guacamole.net.auth.mysql.MySQLAuthenticationProvider
+#mysql-hostname: localhost
+#mysql-port: 3306
+#mysql-database: guacamole_db
+#mysql-username: guac_user
+#mysql-password: guac_pass
+EOF
+
+###############################################################################
+# Post-install / Post-remove
+###############################################################################
+cat > debian/postinst <<'EOF'
+#!/bin/bash
+set -e
+case "$1" in
+    configure)
+        # Ensure user and group exist
+        if ! id -u guacd >/dev/null 2>&1; then
+            adduser --system --group --no-create-home guacd
+        fi
+
+        systemctl daemon-reload
+        systemctl enable --now guacd
+        ;;
+esac
+exit 0
+EOF
+chmod 755 debian/postinst
+
+cat > debian/postrm <<'EOF'
+#!/bin/bash
+set -e
+case "$1" in
+    remove|purge)
+        systemctl disable --now guacd || true
+        ;;
+esac
+exit 0
+EOF
+chmod 755 debian/postrm
+
+###############################################################################
+# Build package
+###############################################################################
+echo "[+] Building guacamole-server package..."
+dpkg-buildpackage -us -uc -b
+cd ..
+
+###############################################################################
+# Result
+###############################################################################
+echo "[+] Build complete. Generated package:"
+ls -1 ../guacamole-server_*_amd64.deb
