@@ -1,52 +1,40 @@
 #!/bin/bash
 
 # Setup OVS MGMT Layer
-#ip link set enp65s0f0r0 up
 ip link set enp65s0f0v0 name ovs-mgmt
 ip addr add 4.0.0.5/24 brd + dev ovs-mgmt
-ip link set ovs-mgmt mtu 9000
-#ip link set ovs-mgmt up
+ip link set ovs-mgmt up
 
 # Setup Linstor MGMT Layer
-#ip link set enp65s0f0r1 up
 ip link set enp65s0f0v1 name linstor-mgmt
 ip addr add 4.0.1.5/24 brd + dev linstor-mgmt
-ip link set linstor-mgmt mtu 9000
-#ip link set linstor-mgmt up
+ip link set linstor-mgmt up
 
 # Setup Incus MGMT Layer
-#ip link set enp65s0f0r2 up
 ip link set enp65s0f0v2 name incus-mgmt
 ip addr add 4.0.2.5/24 brd + dev incus-mgmt
-ip link set incus-mgmt mtu 9000
-#ip link set incus-mgmt up
+ip link set incus-mgmt up
 
 # Setup admin_labs interface
-#ip link set enp65s0f0r3 up
 ip link set enp65s0f0v3 name admin-labs
-#ip link set admin-labs up
+ip link set admin-labs up
 
 # Setup research_labs interface
-#ip link set enp65s0f0r4 up
 ip link set enp65s0f0v4 name research-labs
-#ip link set research-labs up
+ip link set research-labs up
 
 # Setup bdebruhl interface
-#ip link set enp65s0f0r5 up
 ip link set enp65s0f0v5 name bdebruhl
-#ip link set bdebruhl up
+ip link set bdebruhl up
 
 # Setup phoenix interface
-#ip link set enp65s0f0r6 up
 ip link set enp65s0f0v6 name dofang
-#ip link set dofang up
+ip link set dofang up
 
 # Setup bahartma interface
-#ip link set enp65s0f0r7 up
 ip link set enp65s0f0v7 name bahartma
-#ip link set bahartma up
+ip link set bahartma up
 
 # Setup infra interface
-#ip link set enp65s0f0r8 up
 ip link set enp65s0f0v8 name infra
-#ip link set infra up
+ip link set infra up
