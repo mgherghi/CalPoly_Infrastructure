@@ -31,10 +31,10 @@ done
 modprobe bonding mode=802.3ad
 
 # Create Bonding only in OS and not on actual Switch
-ip link add mlnx-vf_bond type bond
-ip link set mlnx-vf_bond mtu 9000
+ip link add mlnx type bond
+ip link set mlnx mtu 9000
 ip link set enp65s0f0np0 mtu 9000
 ip link set enp65s0f1np1 mtu 9000
-ip link set enp65s0f0np0 master mlnx-vf_bond
-ip link set enp65s0f1np1 master mlnx-vf_bond
-ip link set mlnx-vf_bond up
+ip link set enp65s0f0np0 master mlnx
+ip link set enp65s0f1np1 master mlnx
+ip link set mlnx up
