@@ -11,65 +11,37 @@
 # dhclient eno4
 
 # Enable Jumo Frames OVN
-# ip link  set ovs-system mtu 9000
-# ip link  set br-int mtu 9000
+ip link  set br-int mtu 9000
+ip link set br-int up
 
 # Setup 802.3ad bond connection
 modprobe bonding mode=802.3ad miimon=100
-ip link  add mlnx-bond type bond
+ip link  add mlnx type bond
 ip link  set enp132s0 mtu 9000
 ip link  set enp132s0d1 mtu 9000
-ip link  set mlnx-bond mtu 9000
-ip link  set enp132s0 down
-ip link  set enp132s0d1 down
-ip link  set enp132s0 master mlnx-bond
-ip link  set enp132s0d1 master mlnx-bond
-ip link  set mlnx-bond up
+ip link  set mlnx mtu 9000
+ip link  set enp132s0 master mlnx
+ip link  set enp132s0d1 master mlnx
+ip link  set mlnx up
+
+
+ethtool -K enp132s0 gro on gso on tso on tx on rx on lro off
+ethtool -K enp132s0d1 gro on gso on tso on tx on rx on lro off
+ovs-vsctl --may-exist add-br mlnx-ovs
+ip link set mlnx-ovs mtu 9000
+ip link set mlnx-ovs up
+ovs-vsctl --may-exist add-port mlnx-ovs mlnx trunks=10,20,30,40,50,60,70,80,90,100
+ovs-vsctl --may-exist add-port mlnx-ovs ovs-mgmt tag=10  -- set interface ovs-mgmt type=internal
+ovs-vsctl --may-exist add-port mlnx-ovs linstor-mgmt tag=20 -- set interface linstor-mgmt type=internal
 
 # Setup OVS  MGMT
-ip link  add link mlnx-bond name ovs-mgmt type vlan id 10
+#ip link  add link mlnx-bond name ovs-mgmt type vlan id 10
 ip addr add 4.0.0.7/24 brd + dev ovs-mgmt
 ip link  set ovs-mgmt mtu 9000
 ip link  set ovs-mgmt up
 
 # Setup LINSTOR MGMT
-ip link  add link mlnx-bond name linstor-mgmt type vlan id 20
+#ip link  add link mlnx-bond name linstor-mgmt type vlan id 20
 ip addr add 4.0.1.7/24 brd + dev linstor-mgmt
 ip link  set linstor-mgmt mtu 9000
 ip link  set linstor-mgmt up
-
-# Setup INCUS MGMT
-ip link  add link mlnx-bond name incus-mgmt type vlan id 30
-ip addr add 4.0.2.7/24 brd + dev incus-mgmt
-ip link  set incus-mgmt mtu 9000
-ip link  set incus-mgmt up
-
-# # Setup admin-labs UPLINK network
-ip link  add link mlnx-bond name admin-labs type vlan id 40
-ip link  set admin-labs mtu 9000
-ip link  set admin-labs up
-
-# # Setup research-labs UPLINK network
-ip link  add link mlnx-bond name research-labs type vlan id 50
-ip link  set research-labs mtu 9000
-ip link  set research-labs up
-
-# Setup bdebruhl UPLINK network
-ip link  add link mlnx-bond name bdebruhl type vlan id 60
-ip link  set bdebruhl mtu 9000
-ip link  set bdebruhl up
-
-# Setup phoenix UPLINK network
-ip link  add link mlnx-bond name dofang type vlan id 70
-ip link  set dofang mtu 9000
-ip link  set dofang up
-
-# Setup bahartma UPLINK network
-ip link  add link mlnx-bond name bahartma type vlan id 80
-ip link  set bahartma mtu 9000
-ip link  set bahartma up
-
-# Setup infra UPLINK network
-ip link  add link mlnx-bond name infra type vlan id 90
-ip link  set infra mtu 9000
-ip link  set infra up
