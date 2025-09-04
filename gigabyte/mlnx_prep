@@ -16,15 +16,11 @@ ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
 ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
 systemctl restart openvswitch-switch
 
-# Set all NetDev representors for JUMBO Frames
-for iface in $(ls /sys/class/net | grep "^eth"); do
-    ip link set $iface mtu 9000
-done
 
-
-# Set JUMBO Frames on all VF's
+# Set JUMBO Frames on all 
 for iface in $(ls /sys/class/net | grep "^enp65s0f"); do
     ip link set $iface mtu 9000
+    ip link set $iface up
 done
 
 # Load Bonding module
@@ -38,3 +34,8 @@ ip link set enp65s0f1np1 mtu 9000
 ip link set enp65s0f0np0 master mlnx
 ip link set enp65s0f1np1 master mlnx
 ip link set mlnx up
+
+ovs-vsctl --may-exist add-br mlnx-sriov 
+ovs-vsctl --may-exist add-port mlnx-sriov mlnx trunks=10,20,30,40,50,60,70,80,90,100
+ip link set mlnx-sriov mtu 9000
+ip link set mlnx-sriov up 
