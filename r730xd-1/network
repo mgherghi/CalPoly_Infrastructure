@@ -11,37 +11,45 @@
 # dhclient eno4
 
 # Enable Jumo Frames OVN
-ip link  set br-int mtu 9000
-ip link set br-int up
+#ip link  set br-int mtu 9000
+#ip link set br-int up
 
 # Setup 802.3ad bond connection
-modprobe bonding mode=802.3ad miimon=100
-ip link  add mlnx type bond
-ip link  set enp132s0 mtu 9000
-ip link  set enp132s0d1 mtu 9000
-ip link  set mlnx mtu 9000
-ip link  set enp132s0 master mlnx
-ip link  set enp132s0d1 master mlnx
-ip link  set mlnx up
+#modprobe bonding mode=802.3ad miimon=100
+#ip link  add mlnx type bond
+#ip link  set enp132s0 mtu 9000
+#ip link  set enp132s0d1 mtu 9000
+#ip link  set mlnx mtu 9000
+#ip link  set enp132s0 master mlnx
+#ip link  set enp132s0d1 master mlnx
+#ip link  set mlnx up
 
 
 ethtool -K enp132s0 gro on gso on tso on tx on rx on lro off
 ethtool -K enp132s0d1 gro on gso on tso on tx on rx on lro off
-ovs-vsctl --may-exist add-br mlnx-ovs
-ip link set mlnx-ovs mtu 9000
-ip link set mlnx-ovs up
-ovs-vsctl --may-exist add-port mlnx-ovs mlnx trunks=10,20,30,40,50,60,70,80,90,100
-ovs-vsctl --may-exist add-port mlnx-ovs ovs-mgmt tag=10  -- set interface ovs-mgmt type=internal
-ovs-vsctl --may-exist add-port mlnx-ovs linstor-mgmt tag=20 -- set interface linstor-mgmt type=internal
+#ovs-vsctl --may-exist add-br mlnx-ovs
+#ip link set mlnx-ovs mtu 9000
+#ip link set mlnx-ovs up
+#ovs-vsctl --may-exist add-port mlnx-ovs mlnx trunks=10,20,30,40,50,60,70,80,90,100
+#ovs-vsctl --may-exist add-port mlnx-ovs ovs-mgmt tag=10  -- set interface ovs-mgmt type=internal
+#ovs-vsctl --may-exist add-port mlnx-ovs linstor-mgmt tag=20 -- set interface linstor-mgmt type=internal
 
 # Setup OVS  MGMT
 #ip link  add link mlnx-bond name ovs-mgmt type vlan id 10
+ip link set enp132s0 vf 0 vlan 10
+ip link set enp132s0 vf 0  spoofchk off
+ip link set enp132s0 vf 0 trust on
+ip link set enp132s0v0 name ovs-mgmt
 ip addr add 4.0.0.7/24 brd + dev ovs-mgmt
 ip link  set ovs-mgmt mtu 9000
 ip link  set ovs-mgmt up
 
 # Setup LINSTOR MGMT
 #ip link  add link mlnx-bond name linstor-mgmt type vlan id 20
+ip link set enp132s0 vf 1 vlan 20
+ip link set enp132s0 vf 1  spoofchk off
+ip link set enp132s0 vf 1 trust on
+ip link set enp132s0v1 name linstor-mgmt
 ip addr add 4.0.1.7/24 brd + dev linstor-mgmt
 ip link  set linstor-mgmt mtu 9000
 ip link  set linstor-mgmt up
