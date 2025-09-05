@@ -15,61 +15,88 @@
 # ip link  set br-int mtu 9000
 
 # Setup 802.3ad bond connection
-modprobe bonding mode=802.3ad miimon=100
-ip link  add mlnx-bond type bond
-ip link  set enp175s0 mtu 9000
-ip link  set enp175s0d1 mtu 9000
-ip link  set mlnx-bond mtu 9000
-ip link  set enp175s0 down
-ip link  set enp175s0d1 down
-ip link  set enp175s0 master mlnx-bond
-ip link  set enp175s0d1 master mlnx-bond
-ip link  set mlnx-bond up
+# modprobe bonding mode=802.3ad miimon=100
+# ip link  add mlnx-bond type bond
+# ip link  set enp175s0 mtu 9000
+# ip link  set enp175s0d1 mtu 9000
+# ip link  set mlnx-bond mtu 9000
+# ip link  set enp175s0 down
+# ip link  set enp175s0d1 down
+# ip link  set enp175s0 master mlnx-bond
+# ip link  set enp175s0d1 master mlnx-bond
+# ip link  set mlnx-bond up
 
 # Setup OVS  MGMT
-ip link  add link mlnx-bond name ovs-mgmt type vlan id 10
+ip link set enp175s0 vf 0 vlan 10
+ip link set enp175s0 vf 0 spoofchk off
+ip link set enp175s0 vf 0 trust on
+ip link set enp175s0v0 name ovs-mgmt
 ip addr add 4.0.0.10/24 brd + dev ovs-mgmt
 ip link  set ovs-mgmt mtu 9000
 ip link  set ovs-mgmt up
 
 # Setup LINSTOR MGMT
-ip link  add link mlnx-bond name linstor-mgmt type vlan id 20
+ip link set enp175s0 vf 1 vlan 20
+ip link set enp175s0 vf 1 spoofchk off
+ip link set enp175s0 vf 1 trust on
+ip link set enp175s0v1 name linstor-mgmt
 ip addr add 4.0.1.10/24 brd + dev linstor-mgmt
 ip link  set linstor-mgmt mtu 9000
 ip link  set linstor-mgmt up
 
 # Setup INCUS MGMT
-ip link  add link mlnx-bond name incus-mgmt type vlan id 30
+ip link set enp175s0 vf 2 vlan 30
+ip link set enp175s0 vf 2 spoofchk off
+ip link set enp175s0 vf 2 trust on
+ip link set enp175s0v2 name incus-mgmt
 ip addr add 4.0.2.10/24 brd + dev incus-mgmt
 ip link  set incus-mgmt mtu 9000
 ip link  set incus-mgmt up
 
 # # Setup admin-labs UPLINK network
-ip link  add link mlnx-bond name admin-labs type vlan id 40
+ip link set enp175s0d1 vf 0 vlan 40
+ip link set enp175s0d1 vf 0 spoofchk off
+ip link set enp175s0d1 vf 0 trust on
+ip link set enp175s0d1v0 name admin-labs
 ip link  set admin-labs mtu 9000
 ip link  set admin-labs up
 
 # # Setup research-labs UPLINK network
-ip link  add link mlnx-bond name research-labs type vlan id 50
+ip link set enp175s0d1 vf 1 vlan 50
+ip link set enp175s0d1 vf 1 spoofchk off
+ip link set enp175s0d1 vf 1 trust on
+ip link set enp175s0d1v1 name research-labs
 ip link  set research-labs mtu 9000
 ip link  set research-labs up
 
 # Setup bdebruhl UPLINK network
-ip link  add link mlnx-bond name bdebruhl type vlan id 60
+ip link set enp175s0d1 vf 2 vlan 60
+ip link set enp175s0d1 vf 2 spoofchk off
+ip link set enp175s0d1 vf 2 trust on
+ip link set enp175s0d1v2 name bdebruhl
 ip link  set bdebruhl mtu 9000
 ip link  set bdebruhl up
 
 # Setup phoenix UPLINK network
-ip link  add link mlnx-bond name dofang type vlan id 70
+ip link set enp175s0d1 vf 3 vlan 70
+ip link set enp175s0d1 vf 3 spoofchk off
+ip link set enp175s0d1 vf 3 trust on
+ip link set enp175s0d1v3 name dofang
 ip link  set dofang mtu 9000
 ip link  set dofang up
 
 # Setup bahartma UPLINK network
-ip link  add link mlnx-bond name bahartma type vlan id 80
+ip link set enp175s0d1 vf 4 vlan 80
+ip link set enp175s0d1 vf 4 spoofchk off
+ip link set enp175s0d1 vf 4 trust on
+ip link set enp175s0d1v4 name bahartma
 ip link  set bahartma mtu 9000
 ip link  set bahartma up
 
 # Setup infra UPLINK network
-ip link  add link mlnx-bond name infra type vlan id 90
+ip link set enp175s0d1 vf 5 vlan 90
+ip link set enp175s0d1 vf 5 spoofchk off
+ip link set enp175s0d1 vf 5 trust on
+ip link set enp175s0d1v5 name infra
 ip link  set infra mtu 9000
 ip link  set infra up
