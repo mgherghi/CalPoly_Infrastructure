@@ -21,15 +21,16 @@ wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/head
 # SETUP OF BOOT SCRIPT
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/bootscript -O /home/.essentials/boot_script && wait
 
-chmod u+x /home/.essentials/boot_script && wait
-
 echo "post-up /home/.essentials/boot_script" >> /etc/network/interfaces  && wait
 
-apt update && apt install avahi-daemon linux-cpupower nvme-cli lvm2 firmware-linux -y  && wait
+apt update && apt install avahi-daemon linux-cpupower drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv rdma-core dkms drbd-dkms nvme-cli lvm2 firmware-linux -y  && wait
 
 hostname=$(hostname)
 
 if [[ "$hostname" == "r730xd-1" ]]; then
+
+# Apt install for remaining stuff
+  apt update -y && apt install linstor-satellite linstor-controller linstor-client python3-setuptools
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.7 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -45,6 +46,9 @@ if [[ "$hostname" == "r730xd-1" ]]; then
 
 elif [[ "$hostname" == "r730xd-2" ]]; then
 
+# Apt install for remaining stuff
+  apt update -y && apt install linstor-satellite 
+
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.8 lan-$(hostname).local" >> /etc/avahi/hosts
   echo "4.0.0.8 ovs-$(hostname).local" >> /etc/avahi/hosts
@@ -59,6 +63,9 @@ elif [[ "$hostname" == "r730xd-2" ]]; then
 
 elif [[ "$hostname" == "r730xd-3" ]]; then
 
+# Remaning apt packages
+  apt update -y && apt install linstor-satellite 
+
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.9 lan-$(hostname).local" >> /etc/avahi/hosts
   echo "4.0.0.9 ovs-$(hostname).local" >> /etc/avahi/hosts
@@ -72,6 +79,13 @@ elif [[ "$hostname" == "r730xd-3" ]]; then
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
 
 elif [[ "$hostname" == "supermicro" ]]; then
+  apt update -y && apt install linstor-satellite ovn-host 
+
+# ALLOW MULTIPATH FOR NVME
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait
+
+# CHANGE IO POLICY ON NVME DRIVES
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.10 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -79,15 +93,9 @@ elif [[ "$hostname" == "supermicro" ]]; then
   echo "4.0.1.10 linstor-$(hostname).local" >> /etc/avahi/hosts
   echo "4.0.2.10 incus-$(hostname).local" >> /etc/avahi/hosts
 
-  sed -i '/iopolicy/d' /home/.essentials/boot_script
+#  echo "/home/.essential/startup/iopolicy" >> /home/.essentials/boot_script
 
 elif [[ "$hostname" == "r620" ]]; then
-
-#VF's for NiC
-#  apt install rdma-core
-#  echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12" >> /etc/modprobe.d/mlx4.conf
-#  update-initramfs -c -u -k all
-
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.6 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -95,17 +103,16 @@ elif [[ "$hostname" == "r620" ]]; then
   echo "4.0.1.6 linstor-$(hostname).local" >> /etc/avahi/hosts
   echo "4.0.2.6 incus-$(hostname).local" >> /etc/avahi/hosts
 
-  sed -i '/iopolicy/d' /home/.essentials/boot_script
+#  sed -i '/iopolicy/d' /home/.essentials/boot_script
 
-#  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
-#  update-grub
-#  systemctl reboot
 elif [[ "$hostname" == "gigabyte" ]]; then
 
-#VF's for NiC
- # apt install rdma-core -y 
- # echo "options mlx4_core log_num_mgm_entry_size=-1 num_vfs=12 port_type_array=2 probe_vf=12"  >> /etc/modprobe.d/mlx4.conf
- # update-initramfs -c -u -k all
+# Setup Gigabyte
+  apt update && apt upgrade -y && apt install linstor-satellite ovn-host 
+
+# Setup SR-IOV  
+  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on intel_iommu=on iommu=pt"@' /etc/default/grub
+  update-grub
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.5 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -118,6 +125,10 @@ elif [[ "$hostname" == "gigabyte" ]]; then
 
 # CHANGE IO POLICY ON NVME DRIVES
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
+
+# GET MLNX PREP 
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/gigabyte/mlnx_prep -O  /home/.essentials/startup/mlnx-prep
+  echo "/home/.essentials/startup/mlnx-prep" >> /home/.essentials/boot_script
 
 elif [[ "$hostname" == "r720-1" ]]; then
 
@@ -177,4 +188,4 @@ else
   echo "Unknown host: $hostname"
 fi
 
-chmod u+x /home/.essentials/startup/* && wait
+chmod u+x /home/.essentials/startup/* && chmod -R u+x /home/.essentials/* && wait
