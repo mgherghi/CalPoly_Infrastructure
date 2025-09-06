@@ -10,94 +10,58 @@
 #ip link  set eno4 up
 # dhclient eno4
 
-# Enable Jumo Frames OVN
-# ip link  set ovs-system mtu 9000
-# ip link  set br-int mtu 9000
-
-# Enable enp66s0
+# # Setup mellanox nics
 ip link set enp66s0 mtu 9000
 ip link set enp66s0 up
 
+# Setup nic connection
+ovs-vsctl --may-exist add-br ovs-mlnx
+ovs-vsctl --may-exist add-port ovs-mlnx enp66s0  trunks=10,20,30,40,50,60,70,80,90,100
+
 # Setup OVS  MGMT
-#ip link add link enp66s0 name ovs-mgmt type vlan id 10
-ip link set enp66s0 vf 0 vlan 10
-ip link set enp66s0 vf 0 spoofchk off
-ip link set enp66s0 vf 0 trust on
-ip link set enp66s0v0 name ovs-mgmt
+ovs-vsctl add-port ovs-mlnx ovs-mgmt tag=10 -- set interface ovs-mgmt type=internal
 ip addr add 4.0.0.6/24 brd + dev ovs-mgmt
 ip link  set ovs-mgmt mtu 9000
 ip link  set ovs-mgmt up
 
 # Setup LINSTOR MGMT
-#ip link add link enp66s0 name linstor-mgmt type vlan id 20
-ip link set enp66s0 vf 1 vlan 20
-ip link set enp66s0 vf 1 spoofchk off
-ip link set enp66s0 vf 1 trust on
-ip link set enp66s0v1 name linstor-mgmt
+ovs-vsctl add-port ovs-mlnx linstor-mgmt tag=20 -- set interface linstor-mgmt type=internal
 ip addr add 4.0.1.6/24 brd + dev linstor-mgmt
 ip link  set linstor-mgmt mtu 9000
 ip link  set linstor-mgmt up
 
-# Setup INCUS MGMT
-#ip link add link enp66s0 name incus-mgmt type vlan id 30
-ip link set enp66s0 vf 2 vlan 30
-ip link set enp66s0 vf 2 spoofchk off
-ip link set enp66s0 vf 2 trust on
-ip link set enp66s0v2 name incus-mgmt
+# Setup LINSTOR MGMT
+ovs-vsctl add-port ovs-mlnx incus-mgmt tag=30 -- set interface incus-mgmt type=internal
 ip addr add 4.0.2.6/24 brd + dev incus-mgmt
-ip link  set incus-mgmt mtu 9000
-ip link  set incus-mgmt up
+ip link  set linstor-mgmt mtu 9000
+ip link  set linstor-mgmt up
 
 # # Setup admin-labs UPLINK network
-#ip link add link enp66s0 name admin-labs type vlan id 40
-ip link set enp66s0 vf 3 vlan 40
-ip link set enp66s0 vf 3 spoofchk off
-ip link set enp66s0 vf 3 trust on
-ip link set enp66s0v3 name admin-labs
+ovs-vsctl add-port ovs-mlnx admin-labs tag=40 -- set interface admin-labs type=internal
 ip link  set admin-labs mtu 9000
 ip link  set admin-labs up
 
 # # Setup research-labs UPLINK network
-#ip link add link enp66s0 name research-labs type vlan id 50
-ip link set enp66s0 vf 4 vlan 50
-ip link set enp66s0 vf 4 spoofchk off
-ip link set enp66s0 vf 4 trust on
-ip link set enp66s0v4 name research-labs
+ovs-vsctl add-port ovs-mlnx research-labs tag=50 -- set interface research-labs type=internal
 ip link  set research-labs mtu 9000
 ip link  set research-labs up
 
 # Setup bdebruhl UPLINK network
-#ip link add link enp66s0 name bdebruhl type vlan id 60
-ip link set enp66s0 vf 4 vlan 60
-ip link set enp66s0 vf 4 spoofchk off
-ip link set enp66s0 vf 4 trust on
-ip link set enp66s0v4 name bdebruhl
+ovs-vsctl add-port ovs-mlnx bdebruhl tag=60 -- set interface bdebruhl type=internal
 ip link  set bdebruhl mtu 9000
 ip link  set bdebruhl up
 
 # Setup phoenix UPLINK network
-#ip link add link enp66s0 name dofang type vlan id 70
-ip link set enp66s0 vf 5 vlan 70
-ip link set enp66s0 vf 5 spoofchk off
-ip link set enp66s0 vf 5 trust on
-ip link set enp66s0v5 name dofang
+ovs-vsctl add-port ovs-mlnx dofang tag=70 -- set interface dofang type=internal
 ip link  set dofang mtu 9000
 ip link  set dofang up
 
 # Setup bahartma UPLINK network
-#ip link add link enp66s0 name bahartma type vlan id 80
-ip link set enp66s0 vf 6 vlan 80
-ip link set enp66s0 vf 6 spoofchk off
-ip link set enp66s0 vf 6 trust on
-ip link set enp66s0v6 name bahartma
+ovs-vsctl add-port ovs-mlnx bahartma tag=80 -- set interface bahartma type=internal
 ip link  set bahartma mtu 9000
 ip link  set bahartma up
 
 # Setup infra UPLINK network
-#ip link add link enp66s0 name infra type vlan id 90
-ip link set enp66s0 vf 7 vlan 90
-ip link set enp66s0 vf 7 spoofchk off
-ip link set enp66s0 vf 7 trust on
-ip link set enp66s0v7 name infra
+ovs-vsctl add-port ovs-mlnx infra tag=90 -- set interface infra type=internal
 ip link  set infra mtu 9000
 ip link  set infra up
