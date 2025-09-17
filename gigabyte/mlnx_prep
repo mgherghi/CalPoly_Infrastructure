@@ -4,8 +4,20 @@
 devlink dev eswitch set pci/0000:41:00.0 mode switchdev
 devlink dev eswitch set pci/0000:41:00.1 mode switchdev
 
+# Add to ovs
+ovs-vsctl --may-exist add-br mlnx-ovs
+ip link set mlnx-ovs mtu 9000
+ip link set mlnx-ovs up
+ovs-vsctl --may-exist add-bond mlnx-ovs mlnx-bond enp65s0f0np0 enp65s0f1np1 lacp=active other_config:lacp-time=fast bond_mode=balance-tcp
+ovs-vsctl set port mlnx-bond trunks=10,20,30,40,50,60,70,80,90,100
+
 # Setup VF's on enp65s0f0np0
 echo 10 > /sys/class/net/enp65s0f0np0/device/sriov_numvfs
+#echo 10 > /sys/class/net/enp65s0f1np1/device/sriov_numvfs
+
+for i in $(seq 0 9); do
+  ovs-vsctl --may-exist add-port mlnx-ovs enp65s0f0r"$i" tag=$((i+1))0
+done
 
 # Enable hardware offloading
 ethtool -K enp65s0f0np0 hw-tc-offload on
@@ -17,31 +29,25 @@ ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
 systemctl restart openvswitch-switch
 
 
-# Set JUMBO Frames on all 
+# Set JUMBO Frames on all
 for iface in $(ls /sys/class/net | grep "^enp65s0f"); do
-    ip link set $iface mtu 9000
+#    ip link set $iface mtu 9000
     ip link set $iface up
 done
 
 # Load Bonding module
-modprobe bonding mode=802.3ad
+#modprobe bonding mode=802.3ad miimon=100
 
 # Create Bonding only in OS and not on actual Switch
-ip link add mlnx type bond
-ip link set mlnx mtu 9000
-ip link set enp65s0f0np0 mtu 9000
-ip link set enp65s0f1np1 mtu 9000
-ip link set enp65s0f0np0 master mlnx
-ip link set enp65s0f1np1 master mlnx
-ip link set mlnx up
+#ip link add mlnx-bond type bond
+#ip link set mlnx-bond mtu 9000
+#ip link set enp65s0f0np0 mtu 9000
+#ip link set enp65s0f1np1 mtu 9000
+#ip link set enp65s0f0np0 master mlnx-bond
+#ip link set enp65s0f1np1 master mlnx-bond
+#ip link set mlnx-bond up
 
-ovs-vsctl --may-exist add-br mlnx-sriov 
-ovs-vsctl --may-exist add-port mlnx-sriov mlnx trunks=10,20,30,40,50,60,70,80,90,100
-ip link set mlnx-sriov mtu 9000
-ip link set mlnx-sriov up 
-
-for i in $(seq 0 9); do
-  ovs-vsctl --may-exist add-port mlnx_sriov enp65s0f0r"$i" tag=$((i+1))0
-  ip link set enp65s0f0r"$i" mtu 9000
-  ip link set enp65s0f0r"$i" up
-done
+#ovs-vsctl --may-exist add-br mlnx-ovs
+#ovs-vsctl --may-exist add-bond br-ovs bond0 enp65s0f0np0 enp65s0f1np1 lacp=active other_config:lacp-time=fast bond_mode=balance-tcp
+#ip link set mlnx-sriov mtu 9000
+#ip link set mlnx-sriov up
