@@ -2,6 +2,10 @@
 
 hostname=$(hostname)
 
+# SETUP PATH
+echo "export PATH=$PATH:/sbin" >> /home/mihai/.bashrc
+source /home/mihai/.bashrc
+
 #SETUP INCUS REPO AND KEY FUNCTION
 incus_setup() {
     # Create keyrings directory if missing
@@ -46,8 +50,6 @@ wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/head
 
 # SETUP BOOT SCRIPT 
 echo "post-up /home/.essentials/boot_script" >> /etc/network/interfaces  && wait
-echo "export PATH=$PATH:/sbin" >> /home/mihai/.bashrc
-source /home/mihai/.bashrc
 
 apt update && apt install avahi-daemon ovn-host linux-cpupower linux-headers-amd64 linux-image-amd64 drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv dkms drbd-dkms nvme-cli lvm2 firmware-linux -y  && wait
 
