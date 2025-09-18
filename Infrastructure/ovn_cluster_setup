@@ -1,3 +1,5 @@
+# Use like wget -qO- <url> | bash
+
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -16,21 +18,26 @@ declare -A ENCAP_IP_OVERRIDE=(
   [r730xd-3]=""
 )
 
+# Client ports for NB/SB (northd, clients)
 NB_PORT=6641
 SB_PORT=6642
+# RAFT replication ports
 NB_RAFT_PORT=6643
 SB_RAFT_PORT=6644
 
+# DB paths / sockets
 NB_DB="/var/lib/ovn/ovnnb_db.db"
 SB_DB="/var/lib/ovn/ovnsb_db.db"
 NB_CTL="/var/run/ovn/ovnnb_db.ctl"
 SB_CTL="/var/run/ovn/ovnsb_db.ctl"
 
+# Debian 13 service names
 NB_SVC="ovn-ovsdb-server-nb"
 SB_SVC="ovn-ovsdb-server-sb"
 NORTHD_SVC="ovn-northd"
 HOST_SVC="ovn-host"
 
+# Binary path on Debian 13
 OVSDB_BIN="/usr/sbin/ovsdb-server"
 # ====== END CONFIG ======
 
@@ -126,8 +133,23 @@ bootstrap_raft() {
 join_raft() {
   rm -f "$NB_DB" "$SB_DB"
   local boot_ip="${NODE_IP[$BOOTSTRAP_NODE]}"
+  # join-cluster: <db> <schema-name> <local-addr> <remote-addr>
   ovsdb-tool join-cluster "$NB_DB" OVN_Northbound "tcp:${IP}:${NB_RAFT_PORT}" "tcp:${boot_ip}:${NB_RAFT_PORT}"
   ovsdb-tool join-cluster "$SB_DB" OVN_Southbound "tcp:${IP}:${SB_RAFT_PORT}" "tcp:${boot_ip}:${SB_RAFT_PORT}"
+}
+
+wait_for_sbdb() {
+  echo "[WAIT] Checking if Southbound DB is up..."
+  for i in {1..20}; do
+    if ovn-appctl -t "$SB_CTL" cluster/status OVN_Southbound >/dev/null 2>&1; then
+      echo "[WAIT] Southbound DB is responding (attempt $i)"
+      return 0
+    fi
+    echo "[WAIT] Southbound DB not ready yet... (attempt $i)"
+    sleep 2
+  done
+  echo "[WARN] Southbound DB did not respond after ~40s"
+  return 1
 }
 
 start_dbs_with_autofix() {
@@ -137,7 +159,7 @@ start_dbs_with_autofix() {
   sleep 1
 
   if ! is_active "$NB_SVC" || ! is_active "$SB_SVC"; then
-    echo "[WARN] NB/SB failed → re-init clustered DBs."
+    echo "[WARN] NB/SB failed → re-init clustered DBs (handles ephemeral→persistent)."
     if [[ "$host" == "$BOOTSTRAP_NODE" ]]; then
       bootstrap_raft
     else
@@ -152,7 +174,12 @@ start_dbs_with_autofix() {
     exit 1
   fi
 
-  systemctl enable --now "$NORTHD_SVC"
+  if wait_for_sbdb; then
+    systemctl enable --now "$NORTHD_SVC"
+  else
+    echo "[WARN] Starting ovn-northd anyway; DB may not be ready."
+    systemctl enable --now "$NORTHD_SVC"
+  fi
 }
 
 install_boot_fix() {
@@ -202,11 +229,17 @@ health() {
   echo "[HEALTH] Cluster status (SB):"
   ovn-appctl -t "$SB_CTL" cluster/status OVN_Southbound || true
 
-  echo "[HEALTH] ovn-controller connection-status:"
-  ovn-appctl -t ovn-controller connection-status || true
+  echo "[HEALTH] ovn-sbctl Chassis list:"
+  if ovn-sbctl list Chassis >/dev/null 2>&1; then
+    CHASSIS_COUNT=$(ovn-sbctl list Chassis | grep -c '^_uuid' || true)
+    echo "[INFO] Chassis count: ${CHASSIS_COUNT}"
+    ovn-sbctl show || true
+  else
+    echo "[WARN] Could not query Southbound DB with ovn-sbctl"
+  fi
 
-  echo "[HEALTH] ovn-sbctl chassis list:"
-  ovn-sbctl show || true
+  echo "[HEALTH] ovn-controller (local) connection-status:"
+  ovn-appctl -t ovn-controller connection-status || true
 
   echo "[HEALTH] OVS external_ids:"
   ovs-vsctl get open_vswitch . external_ids || true
