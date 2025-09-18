@@ -22,49 +22,47 @@ ovs-vsctl --may-exist add-bond ovs-mlnx mlnx_bond enp175s0 enp175s0d1 lacp=activ
 ovs-vsctl set port mlnx_bond trunks=10,20,30,40,50,60,70,80,90,100
 
 # Setup OVS  MGMT
-ovs-vsctl add-port ovs-mlnx ovs-mgmt tag=10 -- set interface ovs-mgmt type=internal
+ovs-vsctl --may-exist add-port ovs-mlnx ovs-mgmt tag=10 -- set interface ovs-mgmt type=internal
 ip addr add 4.0.0.10/24 brd + dev ovs-mgmt
-ip link  set ovs-mgmt mtu 9000
-ip link  set ovs-mgmt up
+ip link set ovs-mgmt mtu 9000
+ip link set ovs-mgmt up
 
 # Setup LINSTOR MGMT
-ovs-vsctl add-port ovs-mlnx linstor-mgmt tag=20 -- set interface linstor-mgmt type=internal
+ovs-vsctl --may-exist add-port ovs-mlnx linstor-mgmt tag=20 -- set interface linstor-mgmt type=internal
 ip addr add 4.0.1.10/24 brd + dev linstor-mgmt
-ip link  set linstor-mgmt mtu 9000
-ip link  set linstor-mgmt up
+ip link set linstor-mgmt mtu 9000
+ip link set linstor-mgmt up
 
 # Setup LINSTOR MGMT
-ovs-vsctl add-port ovs-mlnx incus-mgmt tag=30 -- set interface incus-mgmt type=internal
+ovs-vsctl --may-exist add-port ovs-mlnx incus-mgmt tag=30 -- set interface incus-mgmt type=internal
 ip addr add 4.0.2.10/24 brd + dev incus-mgmt
-ip link  set linstor-mgmt mtu 9000
-ip link  set linstor-mgmt up
+ip link set incus-mgmt mtu 9000
+ip link set incus-mgmt up
 
 # # Setup admin-labs UPLINK network
-ovs-vsctl add-port ovs-mlnx admin-labs tag=40 -- set interface admin-labs type=internal
-ip link  set admin-labs mtu 9000
-ip link  set admin-labs up
+ovs-vsctl --may-exist add-port ovs-mlnx admin-labs tag=40 -- set interface admin-labs type=internal
+ip link set admin-labs up
 
 # # Setup research-labs UPLINK network
-ovs-vsctl add-port ovs-mlnx research-labs tag=50 -- set interface research-labs type=internal
-ip link  set research-labs mtu 9000
-ip link  set research-labs up
+ovs-vsctl --may-exist add-port ovs-mlnx research-labs tag=50 -- set interface research-labs type=internal
+ip link set research-labs up
 
 # Setup bdebruhl UPLINK network
-ovs-vsctl add-port ovs-mlnx bdebruhl tag=60 -- set interface bdebruhl type=internal
-ip link  set bdebruhl mtu 9000
-ip link  set bdebruhl up
+ovs-vsctl --may-exist add-port ovs-mlnx bdebruhl tag=60 -- set interface bdebruhl type=internal
+ip link set bdebruhl up
 
 # Setup phoenix UPLINK network
-ovs-vsctl add-port ovs-mlnx dofang tag=70 -- set interface dofang type=internal
-ip link  set dofang mtu 9000
-ip link  set dofang up
+ovs-vsctl --may-exist add-port ovs-mlnx dofang tag=70 -- set interface dofang type=internal
+ip link set dofang up
 
 # Setup bahartma UPLINK network
-ovs-vsctl add-port ovs-mlnx bahartma tag=80 -- set interface bahartma type=internal
-ip link  set bahartma mtu 9000
-ip link  set bahartma up
+ovs-vsctl --may-exist add-port ovs-mlnx bahartma tag=80 -- set interface bahartma type=internal
+ip link set bahartma up
 
 # Setup infra UPLINK network
-ovs-vsctl add-port ovs-mlnx infra tag=90 -- set interface infra type=internal
-ip link  set infra mtu 9000
-ip link  set infra up
+ovs-vsctl --may-exist add-port ovs-mlnx infra tag=90 -- set interface infra type=internal
+ip link set infra up
+
+# Setup srbeard UPLINK network
+ovs-vsctl --may-exist add-port ovs-mlnx srbeard tag=100 -- set interface infra type=internal
+ip link set srbeard up
