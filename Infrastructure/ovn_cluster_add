@@ -1,24 +1,37 @@
+# use as ./ovn_cluster_add --ip <ip> 
+
 #!/usr/bin/env bash
 set -euo pipefail
 
 # ====== CONFIG ======
-# Adjust these if you add more central nodes later
 CENTRALS=("4.0.0.7" "4.0.0.8" "4.0.0.9")
 SB_PORT=6642
 ENCAP_TYPE="geneve"
-
-# Optional per-host IP override (otherwise uses host IP mapping)
-declare -A ENCAP_IP_OVERRIDE=(
-  [gigabyte]="4.0.0.5"
-  [supermicro]="4.0.0.10"
-)
 # ====== END CONFIG ======
 
 host="$(hostname -s)"
-ENCAP_IP="${ENCAP_IP_OVERRIDE[$host]:-}"
+ENCAP_IP=""
+
+# --- parse args ---
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --ip)
+      ENCAP_IP="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "Usage: $0 --ip <encap-ip>"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 if [[ -z "$ENCAP_IP" ]]; then
-  echo "FATAL: No ENCAP_IP configured for host $host. Add it in ENCAP_IP_OVERRIDE." >&2
+  echo "FATAL: You must pass --ip <encap-ip>" >&2
   exit 1
 fi
 
