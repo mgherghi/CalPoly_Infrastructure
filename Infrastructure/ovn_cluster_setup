@@ -1,4 +1,4 @@
-# Use like wget -qO- <url> | bash
+# Use like wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/ovn_cluster_setup | bash
 
 #!/usr/bin/env bash
 set -euo pipefail
