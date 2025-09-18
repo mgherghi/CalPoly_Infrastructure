@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ====== CONFIG ======
+# Adjust these if you add more central nodes later
+CENTRALS=("4.0.0.7" "4.0.0.8" "4.0.0.9")
+SB_PORT=6642
+ENCAP_TYPE="geneve"
+
+# Optional per-host IP override (otherwise uses host IP mapping)
+declare -A ENCAP_IP_OVERRIDE=(
+  [gigabyte]="4.0.0.5"
+  [supermicro]="4.0.0.10"
+)
+# ====== END CONFIG ======
+
+host="$(hostname -s)"
+ENCAP_IP="${ENCAP_IP_OVERRIDE[$host]:-}"
+
+if [[ -z "$ENCAP_IP" ]]; then
+  echo "FATAL: No ENCAP_IP configured for host $host. Add it in ENCAP_IP_OVERRIDE." >&2
+  exit 1
+fi
+
+# Build SB remotes string
+SB_REMOTES=""
+for ip in "${CENTRALS[@]}"; do
+  SB_REMOTES+="tcp:${ip}:${SB_PORT},"
+done
+SB_REMOTES="${SB_REMOTES%,}"
+
+echo "[INFO] Adding host: $host  (EncapIP=$ENCAP_IP)"
+echo "[INFO] SB remotes: $SB_REMOTES"
+
+# --- 0) Packages ---
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -y
+apt-get install -y --no-install-recommends \
+  openvswitch-switch ovn-host iproute2 iputils-ping netcat-openbsd
+systemctl enable --now openvswitch-switch
+
+# --- 1) Ensure br-int exists ---
+if ! ovs-vsctl br-exists br-int 2>/dev/null; then
+  ovs-vsctl --may-exist add-br br-int
+  ovs-vsctl set bridge br-int protocols=OpenFlow13
+fi
+ip link set dev ovs-system up || true
+ip link set dev br-int up || true
+
+# --- 2) Configure ovn-controller ---
+ovs-vsctl set open_vswitch . \
+  external_ids:system-id="$host" \
+  external_ids:hostname="$host" \
+  external_ids:ovn-remote="$SB_REMOTES" \
+  external_ids:ovn-encap-type="$ENCAP_TYPE" \
+  external_ids:ovn-encap-ip="$ENCAP_IP"
+
+systemctl enable --now ovn-host
+
+# --- 3) Persist config across reboot ---
+mkdir -p /usr/local/sbin
+cat >/usr/local/sbin/ovn-host-boot-fix.sh <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+ovs-vsctl set open_vswitch . \
+  external_ids:system-id="$host" \
+  external_ids:hostname="$host" \
+  external_ids:ovn-remote="$SB_REMOTES" \
+  external_ids:ovn-encap-type="$ENCAP_TYPE" \
+  external_ids:ovn-encap-ip="$ENCAP_IP"
+ip link set dev ovs-system up || true
+ip link set dev br-int up || true
+EOF
+chmod +x /usr/local/sbin/ovn-host-boot-fix.sh
+
+cat >/etc/systemd/system/ovn-host-boot-fix.service <<'EOF'
+[Unit]
+Description=Ensure OVS external_ids and link state for OVN host
+After=network-online.target openvswitch-switch.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ovn-host-boot-fix.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now ovn-host-boot-fix.service
+
+# --- 4) Health checks ---
+echo "[HEALTH] ovn-controller connection-status:"
+ovn-appctl -t ovn-controller connection-status || true
+
+echo "[HEALTH] ovn-sbctl show (chassis list):"
+ovn-sbctl show || true
+
+echo "[HEALTH] OVS external_ids:"
+ovs-vsctl get open_vswitch . external_ids || true
