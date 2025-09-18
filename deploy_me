@@ -9,7 +9,6 @@ source /home/mihai/.bashrc
 #SETUP INCUS REPO AND KEY FUNCTION
 incus_setup() {
     # Create keyrings directory if missing
-    mkdir -p /etc/apt/keyrings
 
     echo "[*] Downloading Incus apt key..."
     wget -qO /etc/apt/keyrings/zabbly.asc https://pkgs.zabbly.com/key.asc
