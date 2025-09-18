@@ -205,6 +205,9 @@ health() {
   echo "[HEALTH] ovn-controller connection-status:"
   ovn-appctl -t ovn-controller connection-status || true
 
+  echo "[HEALTH] ovn-sbctl chassis list:"
+  ovn-sbctl show || true
+
   echo "[HEALTH] OVS external_ids:"
   ovs-vsctl get open_vswitch . external_ids || true
 
