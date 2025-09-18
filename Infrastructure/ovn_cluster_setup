@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ====== CONFIG ======
+declare -A NODE_IP=(
+  [r730xd-1]="4.0.0.7"
+  [r730xd-2]="4.0.0.8"
+  [r730xd-3]="4.0.0.9"
+)
+BOOTSTRAP_NODE="r730xd-1"
+
+ENCAP_TYPE="geneve"
+declare -A ENCAP_IP_OVERRIDE=(
+  [r730xd-1]=""
+  [r730xd-2]=""
+  [r730xd-3]=""
+)
+
+NB_PORT=6641
+SB_PORT=6642
+NB_RAFT_PORT=6643
+SB_RAFT_PORT=6644
+
+NB_DB="/var/lib/ovn/ovnnb_db.db"
+SB_DB="/var/lib/ovn/ovnsb_db.db"
+NB_CTL="/var/run/ovn/ovnnb_db.ctl"
+SB_CTL="/var/run/ovn/ovnsb_db.ctl"
+
+NB_SVC="ovn-ovsdb-server-nb"
+SB_SVC="ovn-ovsdb-server-sb"
+NORTHD_SVC="ovn-northd"
+HOST_SVC="ovn-host"
+
+OVSDB_BIN="/usr/sbin/ovsdb-server"
+# ====== END CONFIG ======
+
+host="$(hostname -s)"
+if [[ -z "${NODE_IP[$host]:-}" ]]; then
+  echo "FATAL: Hostname '$host' not in NODE_IP map." >&2
+  exit 1
+fi
+
+IP="${NODE_IP[$host]}"
+ENCAP_IP="${ENCAP_IP_OVERRIDE[$host]}"
+ENCAP_IP="${ENCAP_IP:-$IP}"
+
+SB_REMOTES=$(printf 'tcp:%s:%d,tcp:%s:%d,tcp:%s:%d' \
+  "${NODE_IP[r730xd-1]}" "$SB_PORT" \
+  "${NODE_IP[r730xd-2]}" "$SB_PORT" \
+  "${NODE_IP[r730xd-3]}" "$SB_PORT")
+
+echo "[INFO] Node: $host  IP: $IP  ENCAP_IP: $ENCAP_IP"
+echo "[INFO] SB remotes: $SB_REMOTES"
+
+# ---------- helpers ----------
+is_active() { systemctl is-active --quiet "$1"; }
+svc_start() { systemctl start "$@" || true; }
+svc_stop() { systemctl stop "$@" || true; }
+svc_restart() { systemctl restart "$@" || true; }
+
+ensure_packages() {
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -y
+  apt-get install -y --no-install-recommends \
+    openvswitch-switch ovn-central ovn-host iproute2 iputils-ping netcat-openbsd
+  systemctl enable --now openvswitch-switch
+}
+
+ensure_brint() {
+  if ! ovs-vsctl br-exists br-int 2>/dev/null; then
+    ovs-vsctl --may-exist add-br br-int
+    ovs-vsctl set bridge br-int protocols=OpenFlow13
+  fi
+  ip link set dev ovs-system up || true
+  ip link set dev br-int up || true
+}
+
+configure_ovn_host() {
+  ovs-vsctl set open_vswitch . \
+    external_ids:system-id="$host" \
+    external_ids:hostname="$host" \
+    external_ids:ovn-remote="$SB_REMOTES" \
+    external_ids:ovn-encap-type="$ENCAP_TYPE" \
+    external_ids:ovn-encap-ip="$ENCAP_IP"
+  systemctl enable --now "$HOST_SVC"
+}
+
+write_overrides() {
+  mkdir -p /etc/systemd/system/${NB_SVC}.service.d \
+           /etc/systemd/system/${SB_SVC}.service.d \
+           /var/log/ovn /var/run/ovn
+
+  cat >/etc/systemd/system/${NB_SVC}.service.d/override.conf <<EOF
+[Service]
+ExecStart=
+ExecStart=$OVSDB_BIN \
+  $NB_DB \
+  --remote=ptcp:${NB_PORT}:${IP} \
+  --remote=punix:/var/run/ovn/ovnnb_db.sock \
+  --log-file=/var/log/ovn/ovnnb_db.log \
+  --pidfile=/var/run/ovn/ovnnb_db.pid \
+  --unixctl=$NB_CTL
+EOF
+
+  cat >/etc/systemd/system/${SB_SVC}.service.d/override.conf <<EOF
+[Service]
+ExecStart=
+ExecStart=$OVSDB_BIN \
+  $SB_DB \
+  --remote=ptcp:${SB_PORT}:${IP} \
+  --remote=punix:/var/run/ovn/ovnsb_db.sock \
+  --log-file=/var/log/ovn/ovnsb_db.log \
+  --pidfile=/var/run/ovn/ovnsb_db.pid \
+  --unixctl=$SB_CTL
+EOF
+
+  systemctl daemon-reexec
+}
+
+bootstrap_raft() {
+  rm -f "$NB_DB" "$SB_DB"
+  ovsdb-tool create-cluster "$NB_DB" /usr/share/ovn/ovn-nb.ovsschema "tcp:${IP}:${NB_RAFT_PORT}"
+  ovsdb-tool create-cluster "$SB_DB" /usr/share/ovn/ovn-sb.ovsschema "tcp:${IP}:${SB_RAFT_PORT}"
+}
+
+join_raft() {
+  rm -f "$NB_DB" "$SB_DB"
+  local boot_ip="${NODE_IP[$BOOTSTRAP_NODE]}"
+  ovsdb-tool join-cluster "$NB_DB" OVN_Northbound "tcp:${IP}:${NB_RAFT_PORT}" "tcp:${boot_ip}:${NB_RAFT_PORT}"
+  ovsdb-tool join-cluster "$SB_DB" OVN_Southbound "tcp:${IP}:${SB_RAFT_PORT}" "tcp:${boot_ip}:${SB_RAFT_PORT}"
+}
+
+start_dbs_with_autofix() {
+  svc_stop "$NB_SVC" "$SB_SVC" "$NORTHD_SVC"
+  svc_start "$NB_SVC"
+  svc_start "$SB_SVC"
+  sleep 1
+
+  if ! is_active "$NB_SVC" || ! is_active "$SB_SVC"; then
+    echo "[WARN] NB/SB failed → re-init clustered DBs."
+    if [[ "$host" == "$BOOTSTRAP_NODE" ]]; then
+      bootstrap_raft
+    else
+      join_raft
+    fi
+    svc_restart "$NB_SVC" "$SB_SVC"
+  fi
+
+  if ! is_active "$NB_SVC" || ! is_active "$SB_SVC"; then
+    echo "[FATAL] OVN DB services not running after auto-repair." >&2
+    systemctl status "$NB_SVC" "$SB_SVC" --no-pager -l || true
+    exit 1
+  fi
+
+  systemctl enable --now "$NORTHD_SVC"
+}
+
+install_boot_fix() {
+  mkdir -p /usr/local/sbin
+  cat >/usr/local/sbin/ovn-host-boot-fix.sh <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+ovs-vsctl set open_vswitch . \
+  external_ids:system-id="$host" \
+  external_ids:hostname="$host" \
+  external_ids:ovn-remote="$SB_REMOTES" \
+  external_ids:ovn-encap-type="$ENCAP_TYPE" \
+  external_ids:ovn-encap-ip="$ENCAP_IP"
+ip link set dev ovs-system up || true
+ip link set dev br-int up || true
+EOF
+  chmod +x /usr/local/sbin/ovn-host-boot-fix.sh
+
+  cat >/etc/systemd/system/ovn-host-boot-fix.service <<'EOF'
+[Unit]
+Description=Ensure OVS external_ids and link state for OVN host
+After=network-online.target openvswitch-switch.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ovn-host-boot-fix.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl daemon-reload
+  systemctl enable --now ovn-host-boot-fix.service
+}
+
+health() {
+  echo "[HEALTH] Services:"
+  is_active "$NB_SVC" && echo "$NB_SVC: running" || echo "$NB_SVC: NOT running"
+  is_active "$SB_SVC" && echo "$SB_SVC: running" || echo "$SB_SVC: NOT running"
+  is_active "$NORTHD_SVC" && echo "$NORTHD_SVC: running" || echo "$NORTHD_SVC: NOT running"
+
+  echo "[HEALTH] Cluster status (NB):"
+  ovn-appctl -t "$NB_CTL" cluster/status OVN_Northbound || true
+
+  echo "[HEALTH] Cluster status (SB):"
+  ovn-appctl -t "$SB_CTL" cluster/status OVN_Southbound || true
+
+  echo "[HEALTH] ovn-controller connection-status:"
+  ovn-appctl -t ovn-controller connection-status || true
+
+  echo "[HEALTH] OVS external_ids:"
+  ovs-vsctl get open_vswitch . external_ids || true
+
+  echo "[HEALTH] Listening ports:"
+  ss -lntp | grep -E ':(6641|6642|6643|6644)\b' || true
+}
+
+# ---------- execution ----------
+ensure_packages
+ensure_brint
+configure_ovn_host
+
+if [[ "$host" == "$BOOTSTRAP_NODE" ]]; then
+  if [[ ! -s "$NB_DB" || ! -s "$SB_DB" ]]; then
+    echo "[INIT] Bootstrap clustered DBs"
+    bootstrap_raft
+  fi
+else
+  if [[ ! -s "$NB_DB" || ! -s "$SB_DB" ]]; then
+    echo "[INIT] Join clustered DBs"
+    join_raft
+  fi
+fi
+
+write_overrides
+start_dbs_with_autofix
+install_boot_fix
+health
+
+echo "[DONE] OVN HA cluster setup finished on $host."
