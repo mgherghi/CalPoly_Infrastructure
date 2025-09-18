@@ -1,9 +1,9 @@
-# use as ./ovn_cluster_add --ip <ip> 
+# use as  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/ovn_cluster_add | bash  -s -- --ip <ip>
 
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ====== CONFIG ======
+# ====== CONFIG (edit if centrals change) ======
 CENTRALS=("4.0.0.7" "4.0.0.8" "4.0.0.9")
 SB_PORT=6642
 ENCAP_TYPE="geneve"
@@ -12,37 +12,28 @@ ENCAP_TYPE="geneve"
 host="$(hostname -s)"
 ENCAP_IP=""
 
-# --- parse args ---
+# --- args ---
+usage() { echo "Usage: $0 --ip <encap-ip>  [--centrals 4.0.0.7,4.0.0.8,4.0.0.9]"; }
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --ip)
-      ENCAP_IP="$2"
-      shift 2
-      ;;
-    -h|--help)
-      echo "Usage: $0 --ip <encap-ip>"
-      exit 0
-      ;;
-    *)
-      echo "Unknown option: $1" >&2
-      exit 1
-      ;;
+    --ip) ENCAP_IP="${2:-}"; shift 2 ;;
+    --centrals)
+      IFS=',' read -r -a CENTRALS <<< "${2:-}"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown option: $1"; usage; exit 1 ;;
   esac
 done
 
-if [[ -z "$ENCAP_IP" ]]; then
-  echo "FATAL: You must pass --ip <encap-ip>" >&2
-  exit 1
-fi
+[[ -z "$ENCAP_IP" ]] && { echo "FATAL: --ip <encap-ip> is required"; exit 1; }
 
-# Build SB remotes string
+# Build SB remotes
 SB_REMOTES=""
 for ip in "${CENTRALS[@]}"; do
   SB_REMOTES+="tcp:${ip}:${SB_PORT},"
 done
 SB_REMOTES="${SB_REMOTES%,}"
 
-echo "[INFO] Adding host: $host  (EncapIP=$ENCAP_IP)"
+echo "[INFO] Adding compute host: $host  (EncapIP=$ENCAP_IP)"
 echo "[INFO] SB remotes: $SB_REMOTES"
 
 # --- 0) Packages ---
@@ -104,12 +95,11 @@ EOF
 systemctl daemon-reload
 systemctl enable --now ovn-host-boot-fix.service
 
-# --- 4) Health checks ---
+# --- 4) Health checks (compute-safe) ---
 echo "[HEALTH] ovn-controller connection-status:"
 ovn-appctl -t ovn-controller connection-status || true
 
-echo "[HEALTH] ovn-sbctl show (chassis list):"
-ovn-sbctl show || true
-
 echo "[HEALTH] OVS external_ids:"
 ovs-vsctl get open_vswitch . external_ids || true
+
+echo "[NOTE] 'ovn-sbctl show' is expected to fail on compute nodes (no local SB DB)."
