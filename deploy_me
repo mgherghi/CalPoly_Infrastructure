@@ -22,15 +22,17 @@ wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/head
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/bootscript -O /home/.essentials/boot_script && wait
 
 echo "post-up /home/.essentials/boot_script" >> /etc/network/interfaces  && wait
+echo "export PATH=$PATH:/sbin" >> /home/mihai/.bashrc
+source /home/mihai/.bashrc
 
-apt update && apt install avahi-daemon linux-cpupower linux-headers-amd64 linux-image-amd64 drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv rdma-core dkms drbd-dkms nvme-cli lvm2 firmware-linux -y  && wait
+apt update && apt install avahi-daemon ovn-host linux-cpupower linux-headers-amd64 linux-image-amd64 drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv dkms drbd-dkms nvme-cli lvm2 firmware-linux -y  && wait
 
 hostname=$(hostname)
 
 if [[ "$hostname" == "r730xd-1" ]]; then
 
 # Apt install for remaining stuff
-  apt update -y && apt install linstor-satellite linstor-controller linstor-client python3-setuptools
+  apt update -y && apt install ovn-central linstor-satellite linstor-controller linstor-client python3-setuptools
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.7 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -44,10 +46,16 @@ if [[ "$hostname" == "r730xd-1" ]]; then
 # CHANGE IO POLICY ON NVME DRIVES
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
 
+# SAVE OVN-CENTRAL FILE TO HOST
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovn-central -O /etc/default/ovn-central
+
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
+
 elif [[ "$hostname" == "r730xd-2" ]]; then
 
 # Apt install for remaining stuff
-  apt update -y && apt install linstor-satellite 
+  apt update -y && apt install linstor-satellite ovn-central
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.8 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -61,10 +69,16 @@ elif [[ "$hostname" == "r730xd-2" ]]; then
 # CHANGE IO POLICY ON NVME DRIVES
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
 
+# SAVE OVN-CENTRAL FILE TO HOST
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovn-central -O /etc/default/ovn-central
+
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
+
 elif [[ "$hostname" == "r730xd-3" ]]; then
 
 # Remaning apt packages
-  apt update -y && apt install linstor-satellite 
+  apt update -y && apt install linstor-satellite ovn-central
 
 # FIX MDNS FOR EASY LOOKUP
   echo "5.0.0.9 lan-$(hostname).local" >> /etc/avahi/hosts
@@ -77,6 +91,12 @@ elif [[ "$hostname" == "r730xd-3" ]]; then
 
 # CHANGE IO POLICY ON NVME DRIVES
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
+
+# SAVE OVN-CENTRAL FILE TO HOST
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovn-central -O /etc/default/ovn-central
+
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
 
 elif [[ "$hostname" == "supermicro" ]]; then
   apt update -y && apt install linstor-satellite ovn-host 
@@ -95,6 +115,9 @@ elif [[ "$hostname" == "supermicro" ]]; then
 
 #  echo "/home/.essential/startup/iopolicy" >> /home/.essentials/boot_script
 
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
+
 elif [[ "$hostname" == "r620" ]]; then
 
 # FIX MDNS FOR EASY LOOKUP
@@ -104,6 +127,9 @@ elif [[ "$hostname" == "r620" ]]; then
   echo "4.0.2.6 incus-$(hostname).local" >> /etc/avahi/hosts
 
 #  sed -i '/iopolicy/d' /home/.essentials/boot_script
+
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
 
 elif [[ "$hostname" == "gigabyte" ]]; then
 
@@ -130,6 +156,9 @@ elif [[ "$hostname" == "gigabyte" ]]; then
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/gigabyte/mlnx_prep -O  /home/.essentials/startup/mlnx-prep
   echo "/home/.essentials/startup/mlnx-prep" >> /home/.essentials/boot_script
 
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
+
 elif [[ "$hostname" == "r720-1" ]]; then
 
 #VF's for NiC
@@ -144,6 +173,9 @@ elif [[ "$hostname" == "r720-1" ]]; then
   echo "4.0.2.11 incus-$(hostname).local" >> /etc/avahi/hosts
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
+
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
 
 #  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
 #  update-grub
@@ -163,6 +195,9 @@ elif [[ "$hostname" == "r720-2" ]]; then
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
 
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
+
 #  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
 #  update-grub
 #  systemctl reboot
@@ -180,6 +215,9 @@ elif [[ "$hostname" == "r720-3" ]]; then
   echo "4.0.2.13 incus-$(hostname).local" >> /etc/avahi/hosts
 
   sed -i '/iopolicy/d' /home/.essentials/boot_script
+
+# RUN OVN-CENTRAL COMMAND
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
 
 #  sed -i 's@^GRUB_CMDLINE_LINUX_DEFAULT="quiet"@GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"@' /etc/default/grub
 #  update-grub
