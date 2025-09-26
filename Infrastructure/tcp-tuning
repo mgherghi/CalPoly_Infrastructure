@@ -1,0 +1,35 @@
+if lsmod | grep -q '^mlx4'; then
+  tee /etc/sysctl.d/10-tcp.conf > /dev/null <<'EOF'
+# increase TCP max buffer size setable using setsockopt() to 512MB
+net.core.rmem_max = 536870912
+net.core.wmem_max = 536870912
+# increase Linux autotuning TCP buffer limit to 256MB
+net.ipv4.tcp_rmem = 4096 87380 268435456
+net.ipv4.tcp_wmem = 4096 65536 268435456
+# recommended for hosts with jumbo frames enabled
+net.ipv4.tcp_mtu_probing=1
+# recommended to enable 'fair queueing'
+net.core.default_qdisc = fq
+EOF
+
+elif lsmod | grep -q '^mlx5'; then
+  tee /etc/sysctl.d/10-tcp.conf > /dev/null <<'EOF'
+# allow TCP with buffers up to 2GB (Max allowed in Linux is 2GB-1)
+net.core.rmem_max=2147483647
+net.core.wmem_max=2147483647
+# increase TCP autotuning buffer limits. 
+net.ipv4.tcp_rmem=4096 131072 1073741824 
+net.ipv4.tcp_wmem=4096 16384 1073741824
+# recommended for hosts with jumbo frames enabled
+net.ipv4.tcp_mtu_probing=1
+# recommended to enable 'fair queueing'
+net.core.default_qdisc = fq
+# need to increase this to use MSG_ZEROCOPY
+net.core.optmem_max = 1048576 
+EOF
+else
+  echo "no Mellanox driver found"
+fi
+
+
+
