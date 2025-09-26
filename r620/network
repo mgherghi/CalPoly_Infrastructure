@@ -1,67 +1,83 @@
-# # Setup eno2
-#ip link  set eno2 up
-# dhclient eno2
+#!/usr/bin/env bash
+# mellanox-offloads.sh — Enable Mellanox offloads (mlx4 / mlx5)
+# Prints BEFORE vs AFTER in side-by-side table.
+# Usage: sudo ./mellanox-offloads.sh <nic1> [nic2...]
 
-# # Setup eno3
-#ip link  set eno3 up
-# dhclient eno3
+set -euo pipefail
 
-# # Setup eno4
-#ip link  set eno4 up
-# dhclient eno4
+NICS=("$@")
+if [[ ${#NICS[@]} -eq 0 ]]; then
+  echo "Usage: $0 <nic1> [nic2...]"
+  echo "Example: $0 eno1 eno2"
+  exit 1
+fi
 
-# # Setup mellanox nics
-ip link set enp66s0 mtu 9000
-ip link set enp66s0 up
+# Detect driver type
+get_driver() {
+  local nic="$1"
+  local drv_path
+  drv_path=$(readlink -f /sys/class/net/$nic/device/driver/module/drivers/pci:* 2>/dev/null || true)
+  basename "$drv_path"
+}
 
-# Setup nic connection
-ovs-vsctl --may-exist add-br ovs-mlnx
-ovs-vsctl --may-exist add-port ovs-mlnx enp66s0  trunks=10,20,30,40,50,60,70,80,90,100
+# Collect relevant features
+dump_features() {
+  local nic="$1"
+  ethtool -k "$nic" 2>/dev/null | \
+    egrep -i "rx-checksumming|tx-checksumming|scatter-gather|tcp-segmentation-offload|generic-(segmentation|receive)-offload|rx-vlan-offload|tx-vlan-offload|rx-vlan-stag-hw-parse|tx-vlan-stag-hw-insert|rx-gro-hw|hw-tc-offload|tls-hw-(tx|rx)-offload|esp-hw-offload" | \
+    awk -F': ' '{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $1":"$2}'
+}
 
-# Setup OVS  MGMT
-ovs-vsctl add-port ovs-mlnx ovs-mgmt tag=10 -- set interface ovs-mgmt type=internal
-ip addr add 4.0.0.6/24 brd + dev ovs-mgmt
-ip link  set ovs-mgmt mtu 9000
-ip link  set ovs-mgmt up
+# Apply offloads
+apply_offloads() {
+  local nic="$1" driver="$2"
 
-# Setup LINSTOR MGMT
-ovs-vsctl add-port ovs-mlnx linstor-mgmt tag=20 -- set interface linstor-mgmt type=internal
-ip addr add 4.0.1.6/24 brd + dev linstor-mgmt
-ip link  set linstor-mgmt mtu 9000
-ip link  set linstor-mgmt up
+  # Core
+  ethtool -K "$nic" rx on tx on sg on tso on gso on gro on rxvlan on txvlan on || true
 
-# Setup LINSTOR MGMT
-ovs-vsctl add-port ovs-mlnx incus-mgmt tag=30 -- set interface incus-mgmt type=internal
-ip addr add 4.0.2.6/24 brd + dev incus-mgmt
-ip link  set linstor-mgmt mtu 9000
-ip link  set linstor-mgmt up
+  # QinQ VLAN (stag)
+  ethtool -K "$nic" rx-vlan-stag-hw-parse on 2>/dev/null || true
+  ethtool -K "$nic" tx-vlan-stag-hw-insert on 2>/dev/null || true
 
-# # Setup admin-labs UPLINK network
-ovs-vsctl add-port ovs-mlnx admin-labs tag=40 -- set interface admin-labs type=internal
-ip link  set admin-labs mtu 9000
-ip link  set admin-labs up
+  if [[ "$driver" == "mlx5_core" ]]; then
+    # mlx5 extras
+    ethtool -K "$nic" rx-gro-hw on 2>/dev/null || true
+    ethtool -K "$nic" hw-tc-offload on 2>/dev/null || true
+    ethtool -K "$nic" tls-hw-tx-offload on 2>/dev/null || true
+    ethtool -K "$nic" tls-hw-rx-offload on 2>/dev/null || true
+    ethtool -K "$nic" esp-hw-offload on 2>/dev/null || true
+  fi
+}
 
-# # Setup research-labs UPLINK network
-ovs-vsctl add-port ovs-mlnx research-labs tag=50 -- set interface research-labs type=internal
-ip link  set research-labs mtu 9000
-ip link  set research-labs up
+# Print side-by-side table
+print_table() {
+  local before="$1" after="$2"
 
-# Setup bdebruhl UPLINK network
-ovs-vsctl add-port ovs-mlnx bdebruhl tag=60 -- set interface bdebruhl type=internal
-ip link  set bdebruhl mtu 9000
-ip link  set bdebruhl up
+  echo "------------------------------------------------------------"
+  printf "%-35s %-12s %-12s\n" "Feature" "Before" "After"
+  echo "------------------------------------------------------------"
 
-# Setup phoenix UPLINK network
-ovs-vsctl add-port ovs-mlnx dofang tag=70 -- set interface dofang type=internal
-ip link  set dofang mtu 9000
-ip link  set dofang up
+  # Merge both outputs into one stream
+  echo "$before" | while IFS=: read -r feature bstate; do
+    astate=$(echo "$after" | awk -F':' -v f="$feature" '$1==f {print $2}')
+    printf "%-35s %-12s %-12s\n" "$feature" "$bstate" "$astate"
+  done
+  echo
+}
 
-# Setup bahartma UPLINK network
-ovs-vsctl add-port ovs-mlnx bahartma tag=80 -- set interface bahartma type=internal
-ip link  set bahartma mtu 9000
-ip link  set bahartma up
+# Main loop
+for nic in "${NICS[@]}"; do
+  if [[ ! -e /sys/class/net/$nic ]]; then
+    echo "Skipping $nic (not found)"
+    continue
+  fi
 
-# Setup infra UPLINK network
-ovs-vsctl add-port ovs-mlnx infra tag=90 -- set interface infra type=internal
-ip link  set infra mtu 9000
-ip link  set infra up
+  DRIVER=$(get_driver "$nic")
+  echo "=== Configuring $nic (driver: $DRIVER) ==="
+
+  BEFORE=$(dump_features "$nic")
+  apply_offloads "$nic" "$DRIVER"
+  AFTER=$(dump_features "$nic")
+
+  print_table "$BEFORE" "$AFTER"
+done
