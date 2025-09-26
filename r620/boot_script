@@ -1,0 +1,4 @@
+boot/home/.essentials/startup/iopolicy
+/home/.essentials/startup/cpupower
+/home/.essentials/startup/mlnx-prep enp66s0
+/home/.essentials/startup/network
