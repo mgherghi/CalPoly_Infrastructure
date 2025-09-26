@@ -3,8 +3,11 @@
 hostname=$(hostname)
 
 # SETUP PATH
-echo "export PATH=$PATH:/sbin" >> /home/mihai/.bashrc
-source /home/mihai/.bashrc
+path_setup() {
+    echo "export PATH=$PATH:/sbin" >> /home/mihai/.bashrc
+    source /home/mihai/.bashrc
+}
+
 
 #SETUP INCUS REPO AND KEY FUNCTION
 incus_setup() {
@@ -15,24 +18,27 @@ incus_setup() {
 
     echo "[*] Configuring Incus apt repository..."
     cat <<EOF | tee /etc/apt/sources.list.d/zabbly-incus-stable.sources >/dev/null
-Enabled: yes
-Types: deb
-URIs: https://pkgs.zabbly.com/incus/stable
-Suites: $(. /etc/os-release && echo ${VERSION_CODENAME})
-Components: main
-Architectures: $(dpkg --print-architecture)
-Signed-By: /etc/apt/keyrings/zabbly.asc
-EOF
+    Enabled: yes    
+    Types: deb
+    URIs: https://pkgs.zabbly.com/incus/stable
+    Suites: $(. /etc/os-release && echo ${VERSION_CODENAME})
+    Components: main
+    Architectures: $(dpkg --print-architecture)
+    Signed-By: /etc/apt/keyrings/zabbly.asc
+    EOF
+
 
     echo "[*] Incus repo setup complete."
+    apt update
 }
 
-
-# SETUP LINSTOR KEY
-wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linbit.asc -O /etc/apt/keyrings/linbit.asc && wait
-
-# SETUP LINSTOR REPO
-wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linstor.sources -O /etc/apt/sources.list.d/linstor.sources && wait
+# SETUP LINSTOR KEY AND REPO
+linstor_setup() {
+    wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linbit.asc -O /etc/apt/keyrings/linbit.asc && wait
+    wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linstor.sources -O /etc/apt/sources.list.d/linstor.sources && wait
+    apt update 
+    echo "[*] linstor repo setup complete."
+}
 
 # CREATE BOOT FOLDERS
 mkdir -p /home/.essentials
@@ -44,26 +50,43 @@ wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/head
 # SETUP OF PERFORMANCE GOVERNER
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/cpupower -O /home/.essentials/startup/cpupower && wait
 
-# SETUP OF BOOT SCRIPT
-wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/bootscript -O /home/.essentials/boot_script && wait
+# # SETUP OF BOOT SCRIPT
+# wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/bootscript -O /home/.essentials/boot_script && wait
 
 # SETUP BOOT SCRIPT 
 echo "post-up /home/.essentials/boot_script" >> /etc/network/interfaces  && wait
 
-apt update && apt install avahi-daemon ovn-host linux-cpupower linux-headers-amd64 linux-image-amd64 drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv dkms drbd-dkms nvme-cli lvm2 firmware-linux -y  && wait
+# DOWNLOAD TCP SYSCTL OPTIMIZATIONS
+wget https://github.com/mgherghi/CalPoly_Infrastructure/blob/main/"$(hostname)"/10-tcp.conf -O /etc/sysctl.d/10-tcp.conf
+
+# DOWNLOAD MLNX-PREP
+wget https://github.com/mgherghi/CalPoly_Infrastructure/blob/main/"$(hostname)"/mlnx-prep -O /home/.essentials/startup/mlnx-prep && wait
+
+
+# SETUP APP INSTALLS
+apt_setup() {
+    apt update && apt install ethtool vlan linstor-satellite ovn-host linux-cpupower linux-headers-amd64 linux-image-amd64 drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv dkms drbd-dkms drbd-utils nvme-cli lvm2 firmware-linux -y  && wait
+    echo "8021q" >> /etc/modules
+    update-initramfs -u -k all 
+}
+
+path_setup
+linstor_setup
+apt_setup
 
 hostname=$(hostname)
 
 if [[ "$hostname" == "r730xd-1" ]]; then
 
+  
 # Apt install for remaining stuff
-  apt update -y && apt install ovn-central linstor-satellite linstor-controller linstor-client python3-setuptools
+  apt update -y && apt install ovn-central linstor-controller linstor-client python3-setuptools
 
-# FIX MDNS FOR EASY LOOKUP
-  echo "5.0.0.7 lan-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.0.7 ovs-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.1.7 linstor-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.2.7 incus-$(hostname).local" >> /etc/avahi/hosts
+# # FIX MDNS FOR EASY LOOKUP
+#   echo "5.0.0.7 lan-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.0.7 ovs-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.1.7 linstor-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.2.7 incus-$(hostname).local" >> /etc/avahi/hosts
 
 # ALLOW MULTIPATH FOR NVME
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait
@@ -77,16 +100,23 @@ if [[ "$hostname" == "r730xd-1" ]]; then
 # RUN OVN-CENTRAL COMMAND
   wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
 
+# CONFIGURE BOOT SCRIPT
+  echo "/home/.essentials/startup/iopolicy" > /home/.essentials/boot_script
+  echo "/home/.essentials/startup/cpupower" >> /home/.essentials/boot_script
+  echo "/home/.essentials/startup/mlnx-prep" >> /home/.essentials/boot_script
+  echo "/home/.essentials/startup/network" >> /home/.essentials/boot_script
+
+
 elif [[ "$hostname" == "r730xd-2" ]]; then
 
 # Apt install for remaining stuff
-  apt update -y && apt install linstor-satellite ovn-central
+  apt update -y && apt install ovn-central
 
 # FIX MDNS FOR EASY LOOKUP
-  echo "5.0.0.8 lan-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.0.8 ovs-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.1.8 linstor-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.2.8 incus-$(hostname).local" >> /etc/avahi/hosts
+#   echo "5.0.0.8 lan-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.0.8 ovs-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.1.8 linstor-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.2.8 incus-$(hostname).local" >> /etc/avahi/hosts
 
 # ALLOW MULTIPATH FOR NVME
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait  
@@ -100,16 +130,22 @@ elif [[ "$hostname" == "r730xd-2" ]]; then
 # RUN OVN-CENTRAL COMMAND
   wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
 
+# CONFIGURE BOOT SCRIPT
+  echo "/home/.essentials/startup/iopolicy" > /home/.essentials/boot_script
+  echo "/home/.essentials/startup/cpupower" >> /home/.essentials/boot_script
+  echo "/home/.essentials/startup/mlnx-prep" >> /home/.essentials/boot_script
+  echo "/home/.essentials/startup/network" >> /home/.essentials/boot_script
+
 elif [[ "$hostname" == "r730xd-3" ]]; then
 
 # Remaning apt packages
-  apt update -y && apt install linstor-satellite ovn-central
+  apt update -y && apt install ovn-central
 
 # FIX MDNS FOR EASY LOOKUP
-  echo "5.0.0.9 lan-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.0.9 ovs-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.1.9 linstor-$(hostname).local" >> /etc/avahi/hosts
-  echo "4.0.2.9 incus-$(hostname).local" >> /etc/avahi/hosts
+#   echo "5.0.0.9 lan-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.0.9 ovs-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.1.9 linstor-$(hostname).local" >> /etc/avahi/hosts
+#   echo "4.0.2.9 incus-$(hostname).local" >> /etc/avahi/hosts
 
 # ALLOW MULTIPATH FOR NVME
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait 
@@ -122,6 +158,13 @@ elif [[ "$hostname" == "r730xd-3" ]]; then
 
 # RUN OVN-CENTRAL COMMAND
   wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/ovs-command | bash
+
+# CONFIGURE BOOT SCRIPT
+  echo "/home/.essentials/startup/iopolicy" > /home/.essentials/boot_script
+  echo "/home/.essentials/startup/cpupower" >> /home/.essentials/boot_script
+  echo "/home/.essentials/startup/mlnx-prep" >> /home/.essentials/boot_script
+  echo "/home/.essentials/startup/network" >> /home/.essentials/boot_script
+
 
 elif [[ "$hostname" == "supermicro" ]]; then
   apt update -y && apt install linstor-satellite ovn-host 
