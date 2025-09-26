@@ -19,6 +19,9 @@ case "$(hostname)" in
 esac
 }
 
+tcp_tuning() {
+  wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/tcp-tuning | bash
+}
 
 #SETUP INCUS REPO AND KEY FUNCTION
 incus_setup() {
