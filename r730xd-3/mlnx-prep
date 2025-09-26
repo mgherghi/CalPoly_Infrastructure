@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# mellanox-offloads.sh — Enable Mellanox offloads (mlx4 / mlx5)
+# Prints BEFORE vs AFTER in side-by-side table.
+# Usage: sudo ./mellanox-offloads.sh <nic1> [nic2...]
+
+set -euo pipefail
+
+NICS=("$@")
+if [[ ${#NICS[@]} -eq 0 ]]; then
+  echo "Usage: $0 <nic1> [nic2...]"
+  echo "Example: $0 eno1 eno2"
+  exit 1
+fi
+
+# Detect driver type
+get_driver() {
+  local nic="$1"
+  local drv_path
+  drv_path=$(readlink -f /sys/class/net/$nic/device/driver/module/drivers/pci:* 2>/dev/null || true)
+  basename "$drv_path"
+}
+
+# Collect relevant features
+dump_features() {
+  local nic="$1"
+  ethtool -k "$nic" 2>/dev/null | \
+    egrep -i "rx-checksumming|tx-checksumming|scatter-gather|tcp-segmentation-offload|generic-(segmentation|receive)-offload|rx-vlan-offload|tx-vlan-offload|rx-vlan-stag-hw-parse|tx-vlan-stag-hw-insert|rx-gro-hw|hw-tc-offload|tls-hw-(tx|rx)-offload|esp-hw-offload" | \
+    awk -F': ' '{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $1":"$2}'
+}
+
+# Apply offloads
+apply_offloads() {
+  local nic="$1" driver="$2"
+
+  # Core
+  ethtool -K "$nic" rx on tx on sg on tso on gso on gro on rxvlan on txvlan on || true
+
+  # QinQ VLAN (stag)
+  ethtool -K "$nic" rx-vlan-stag-hw-parse on 2>/dev/null || true
+  ethtool -K "$nic" tx-vlan-stag-hw-insert on 2>/dev/null || true
+
+  if [[ "$driver" == "mlx5_core" ]]; then
+    # mlx5 extras
+    ethtool -K "$nic" rx-gro-hw on 2>/dev/null || true
+    ethtool -K "$nic" hw-tc-offload on 2>/dev/null || true
+    ethtool -K "$nic" tls-hw-tx-offload on 2>/dev/null || true
+    ethtool -K "$nic" tls-hw-rx-offload on 2>/dev/null || true
+    ethtool -K "$nic" esp-hw-offload on 2>/dev/null || true
+  fi
+}
+
+# Print side-by-side table
+print_table() {
+  local before="$1" after="$2"
+
+  echo "------------------------------------------------------------"
+  printf "%-35s %-12s %-12s\n" "Feature" "Before" "After"
+  echo "------------------------------------------------------------"
+
+  # Merge both outputs into one stream
+  echo "$before" | while IFS=: read -r feature bstate; do
+    astate=$(echo "$after" | awk -F':' -v f="$feature" '$1==f {print $2}')
+    printf "%-35s %-12s %-12s\n" "$feature" "$bstate" "$astate"
+  done
+  echo
+}
+
+# Main loop
+for nic in "${NICS[@]}"; do
+  if [[ ! -e /sys/class/net/$nic ]]; then
+    echo "Skipping $nic (not found)"
+    continue
+  fi
+
+  DRIVER=$(get_driver "$nic")
+  echo "=== Configuring $nic (driver: $DRIVER) ==="
+
+  BEFORE=$(dump_features "$nic")
+  apply_offloads "$nic" "$DRIVER"
+  AFTER=$(dump_features "$nic")
+
+  print_table "$BEFORE" "$AFTER"
+done
