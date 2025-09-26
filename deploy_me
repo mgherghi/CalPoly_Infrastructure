@@ -55,6 +55,7 @@ EOF'
 else
   echo "no Mellanox driver found"
 fi
+sysctl --system
 }
 
 #SETUP INCUS REPO AND KEY FUNCTION
@@ -316,3 +317,4 @@ fi
 
 chmod u+x /home/.essentials/startup/* && chmod -R u+x /home/.essentials/* && wait
 path_setup
+tcp_tuning 
