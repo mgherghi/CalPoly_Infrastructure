@@ -1,83 +1,83 @@
-#!/usr/bin/env bash
-# mellanox-offloads.sh — Enable Mellanox offloads (mlx4 / mlx5)
-# Prints BEFORE vs AFTER in side-by-side table.
-# Usage: sudo ./mellanox-offloads.sh <nic1> [nic2...]
+# Setup mellanox
+ip link set enp66s0 mtu 9000
+ip link set enp66s0 up
 
-set -euo pipefail
+# Setup OVS  MGMT
+ip link add link enp66s0 name ovs-mgmt type vlan id 10
+ip addr add 4.0.0.6/24 brd + dev ovs-mgmt
+ip link  set ovs-mgmt mtu 9000
+ip link  set ovs-mgmt up
 
-NICS=("$@")
-if [[ ${#NICS[@]} -eq 0 ]]; then
-  echo "Usage: $0 <nic1> [nic2...]"
-  echo "Example: $0 eno1 eno2"
-  exit 1
-fi
+# Setup LINSTOR MGMT
+ip link add link enp66s0 name linstor-mgmt type vlan id 20
+ip addr add 4.0.1.6/24 brd + dev linstor-mgmt
+ip link  set linstor-mgmt mtu 9000
+ip link  set linstor-mgmt up
 
-# Detect driver type
-get_driver() {
-  local nic="$1"
-  local drv_path
-  drv_path=$(readlink -f /sys/class/net/$nic/device/driver/module/drivers/pci:* 2>/dev/null || true)
-  basename "$drv_path"
-}
+# Setup INCUS MGMT
+ip link add link enp66s0 name incus-mgmt type vlan id 30
+ip addr add 4.0.2.6/24 brd + dev incus-mgmt
+ip link  set incus-mgmt mtu 9000
+ip link  set incus-mgmt up
 
-# Collect relevant features
-dump_features() {
-  local nic="$1"
-  ethtool -k "$nic" 2>/dev/null | \
-    egrep -i "rx-checksumming|tx-checksumming|scatter-gather|tcp-segmentation-offload|generic-(segmentation|receive)-offload|rx-vlan-offload|tx-vlan-offload|rx-vlan-stag-hw-parse|tx-vlan-stag-hw-insert|rx-gro-hw|hw-tc-offload|tls-hw-(tx|rx)-offload|esp-hw-offload" | \
-    awk -F': ' '{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $1":"$2}'
-}
+# # Setup admin-labs UPLINK network
+ip link add link enp66s0 name admin-labs type vlan id 40
+ip link set admin-labs mtu 9000
+ip link set admin-labs up
 
-# Apply offloads
-apply_offloads() {
-  local nic="$1" driver="$2"
+# # Setup research-labs UPLINK network
+ip link add link enp66s0 name research-labs type vlan id 50
+ip link set research-labs mtu 9000
+ip link set research-labs up
 
-  # Core
-  ethtool -K "$nic" rx on tx on sg on tso on gso on gro on rxvlan on txvlan on || true
+# Setup bdebruhl UPLINK network
+ip link add link enp66s0 name bdebruhl type vlan id 60
+ip link set bdebruhl mtu 9000
+ip link set bdebruhl up
 
-  # QinQ VLAN (stag)
-  ethtool -K "$nic" rx-vlan-stag-hw-parse on 2>/dev/null || true
-  ethtool -K "$nic" tx-vlan-stag-hw-insert on 2>/dev/null || true
+# Setup phoenix UPLINK network
+ip link add link enp66s0 name dofang type vlan id 70
+ip link set dofang mtu 9000
+ip link set dofang up
 
-  if [[ "$driver" == "mlx5_core" ]]; then
-    # mlx5 extras
-    ethtool -K "$nic" rx-gro-hw on 2>/dev/null || true
-    ethtool -K "$nic" hw-tc-offload on 2>/dev/null || true
-    ethtool -K "$nic" tls-hw-tx-offload on 2>/dev/null || true
-    ethtool -K "$nic" tls-hw-rx-offload on 2>/dev/null || true
-    ethtool -K "$nic" esp-hw-offload on 2>/dev/null || true
-  fi
-}
+# Setup bahartma UPLINK network
+ip link add link enp66s0 name bahartma type vlan id 80
+ip link set bahartma mtu 9000
+ip link set bahartma up
 
-# Print side-by-side table
-print_table() {
-  local before="$1" after="$2"
+# Setup infra UPLINK network
+ip link add link enp66s0 name infra type vlan id 90
+ip link set infra mtu 9000
+ip link set infra up
 
-  echo "------------------------------------------------------------"
-  printf "%-35s %-12s %-12s\n" "Feature" "Before" "After"
-  echo "------------------------------------------------------------"
+# Setup srbeard UPLINK network
+ip link add link enp66s0 name srbeard type vlan id 100
+ip link set srbeard mtu 9000
+ip link set srbeard up
 
-  # Merge both outputs into one stream
-  echo "$before" | while IFS=: read -r feature bstate; do
-    astate=$(echo "$after" | awk -F':' -v f="$feature" '$1==f {print $2}')
-    printf "%-35s %-12s %-12s\n" "$feature" "$bstate" "$astate"
-  done
-  echo
-}
 
-# Main loop
-for nic in "${NICS[@]}"; do
-  if [[ ! -e /sys/class/net/$nic ]]; then
-    echo "Skipping $nic (not found)"
-    continue
-  fi
+MTU=9000
 
-  DRIVER=$(get_driver "$nic")
-  echo "=== Configuring $nic (driver: $DRIVER) ==="
-
-  BEFORE=$(dump_features "$nic")
-  apply_offloads "$nic" "$DRIVER"
-  AFTER=$(dump_features "$nic")
-
-  print_table "$BEFORE" "$AFTER"
+echo "=== Linux interfaces (except lo and eno*) ==="
+for iface in $(ls /sys/class/net | grep -v '^lo$' | grep -v '^eno'); do
+  echo "Setting $iface to MTU=$MTU"
+  ip link set dev "$iface" mtu $MTU || echo "⚠️ Failed $iface"
 done
+
+echo
+echo "=== OVS existing ports ==="
+if command -v ovs-vsctl >/dev/null 2>&1; then
+  for port in $(ovs-vsctl list Interface | awk -F\" '/^name/{print $2}'); do
+    echo "Setting OVS port $port MTU=$MTU"
+    ovs-vsctl set Interface "$port" mtu_request=$MTU || echo "⚠️ Failed $port"
+  done
+
+  echo
+  echo "=== OVS global default MTU ==="
+  ovs-vsctl set Open_vSwitch . other_config:mtu_default=$MTU
+else
+  echo "⚠️ ovs-vsctl not found"
+fi
+ethtool -A enp66s0 rx on tx on
+#echo off > /sys/devices/system/cpu/smt/control
+ethtool -G enp66s0 rx 8192 tx 8192
