@@ -10,25 +10,55 @@
 #ip link  set eno4 up
 # dhclient eno4
 
-# # Setup mellanox nics
-ip link set enp131s0 mtu 9000
-ip link set enp131s0 up
-ip link set enp131s0d1 mtu 9000
-ip link set enp131s0d1 up
-
 # Setup 802.3ad bond connection
-ovs-vsctl --may-exist add-br ovs-mlnx
-ovs-vsctl --may-exist add-bond ovs-mlnx mlnx_bond enp131s0 enp131s0d1 lacp=active other_config:lacp-time=fast bond_mode=balance-tcp
-ovs-vsctl set port mlnx_bond trunks=10,20,30,40,50,60,70,80,90,100
+modprobe bonding mode=802.3ad miimon=100
+ip link  add mlnx-bond type bond
+ip link  set enp131s0 mtu 9000
+ip link  set enp131s0d1 mtu 9000
+ip link  set mlnx-bond mtu 9000
+ip link  set enp131s0 down
+ip link  set enp131s0d1 down
+ip link  set enp131s0 master mlnx-bond
+ip link  set enp131s0d1 master mlnx-bond
+ip link  set mlnx-bond up
 
 # Setup OVS  MGMT
-ovs-vsctl add-port ovs-mlnx ovs-mgmt tag=10 -- set interface ovs-mgmt type=internal
-ip addr add 4.0.0.8/24 brd + dev ovs-mgmt
-ip link  set ovs-mgmt mtu 9000
-ip link  set ovs-mgmt up
+ip link add link mlnx-bond name ovs-mgmt type vlan id 10
+ip addr add 4.0.0.9/24 brd + dev ovs-mgmt
+ip link set ovs-mgmt mtu 9000
+ip link set ovs-mgmt up
 
 # Setup LINSTOR MGMT
-ovs-vsctl add-port ovs-mlnx linstor-mgmt tag=20 -- set interface linstor-mgmt type=internal
-ip addr add 4.0.1.8/24 brd + dev linstor-mgmt
-ip link  set linstor-mgmt mtu 9000
-ip link  set linstor-mgmt up
+ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+ip addr add 4.0.1.9/24 brd + dev linstor-mgmt
+ip link set linstor-mgmt mtu 9000
+ip link set linstor-mgmt up
+
+
+MTU=9000
+
+echo "=== Linux interfaces (except lo and eno*) ==="
+for iface in $(ls /sys/class/net | grep -v '^lo$' | grep -v '^eno'); do
+  echo "Setting $iface to MTU=$MTU"
+  ip link set dev "$iface" mtu $MTU || echo "⚠️ Failed $iface"
+done
+
+echo
+echo "=== OVS existing ports ==="
+if command -v ovs-vsctl >/dev/null 2>&1; then
+  for port in $(ovs-vsctl list Interface | awk -F\" '/^name/{print $2}'); do
+    echo "Setting OVS port $port MTU=$MTU"
+    ovs-vsctl set Interface "$port" mtu_request=$MTU || echo "⚠️ Failed $port"
+  done
+
+  echo
+  echo "=== OVS global default MTU ==="
+  ovs-vsctl set Open_vSwitch . other_config:mtu_default=$MTU
+else
+  echo "⚠️ ovs-vsctl not found"
+fi
+ethtool -A enp131s0d1 rx on tx on
+ethtool -A enp131s0 rx on tx on
+#echo off > /sys/devices/system/cpu/smt/control
+ethtool -G enp131s0d1 rx 8192 tx 8192
+ethtool -G enp131s0 rx 8192 tx 8192
