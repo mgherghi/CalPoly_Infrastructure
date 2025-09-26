@@ -18,7 +18,7 @@ incus_setup() {
 
     echo "[*] Configuring Incus apt repository..."
     cat <<EOF | tee /etc/apt/sources.list.d/zabbly-incus-stable.sources >/dev/null
-    Enabled: yes    
+    Enabled: yes
     Types: deb
     URIs: https://pkgs.zabbly.com/incus/stable
     Suites: $(. /etc/os-release && echo ${VERSION_CODENAME})
@@ -36,13 +36,13 @@ EOF
 linstor_setup() {
     wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linbit.asc -O /etc/apt/keyrings/linbit.asc && wait
     wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linstor.sources -O /etc/apt/sources.list.d/linstor.sources && wait
-    apt update 
+    apt update
     echo "[*] linstor repo setup complete."
 }
 
 # CREATE BOOT FOLDERS
 mkdir -p /home/.essentials
-mkdir -p /home/.essentials/startup 
+mkdir -p /home/.essentials/startup
 
 # GET NETWORK BOOTUP SCRIPT
 wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/"$(hostname)"/network -O /home/.essentials/startup/network && wait
@@ -53,7 +53,7 @@ wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/head
 # # SETUP OF BOOT SCRIPT
 # wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/bootscript -O /home/.essentials/boot_script && wait
 
-# SETUP BOOT SCRIPT 
+# SETUP BOOT SCRIPT
 echo "post-up /home/.essentials/boot_script" >> /etc/network/interfaces  && wait
 
 # DOWNLOAD TCP SYSCTL OPTIMIZATIONS
@@ -67,7 +67,7 @@ wget https://github.com/mgherghi/CalPoly_Infrastructure/blob/main/"$(hostname)"/
 apt_setup() {
     apt update && apt install ethtool vlan linstor-satellite ovn-host linux-cpupower linux-headers-amd64 linux-image-amd64 drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv dkms drbd-dkms drbd-utils nvme-cli lvm2 firmware-linux -y  && wait
     echo "8021q" >> /etc/modules
-    update-initramfs -u -k all 
+    update-initramfs -u -k all
 }
 
 path_setup
@@ -78,7 +78,7 @@ hostname=$(hostname)
 
 if [[ "$hostname" == "r730xd-1" ]]; then
 
-  
+
 # Apt install for remaining stuff
   apt update -y && apt install ovn-central linstor-controller linstor-client python3-setuptools
 
@@ -119,7 +119,7 @@ elif [[ "$hostname" == "r730xd-2" ]]; then
 #   echo "4.0.2.8 incus-$(hostname).local" >> /etc/avahi/hosts
 
 # ALLOW MULTIPATH FOR NVME
-  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait  
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait
 
 # CHANGE IO POLICY ON NVME DRIVES
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
@@ -148,7 +148,7 @@ elif [[ "$hostname" == "r730xd-3" ]]; then
 #   echo "4.0.2.9 incus-$(hostname).local" >> /etc/avahi/hosts
 
 # ALLOW MULTIPATH FOR NVME
-  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait 
+  wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/nvme_core.conf -O /etc/modprobe.d/nvme_core.conf && wait
 
 # CHANGE IO POLICY ON NVME DRIVES
   wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy -O /home/.essentials/startup/iopolicy && wait
@@ -164,6 +164,7 @@ elif [[ "$hostname" == "r730xd-3" ]]; then
   echo "/home/.essentials/startup/cpupower" >> /home/.essentials/boot_script
   echo "/home/.essentials/startup/mlnx-prep" >> /home/.essentials/boot_script
   echo "/home/.essentials/startup/network" >> /home/.essentials/boot_script
+
 
 
 elif [[ "$hostname" == "supermicro" ]]; then
