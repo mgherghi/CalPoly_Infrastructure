@@ -25,7 +25,7 @@ incus_setup() {
     Components: main
     Architectures: $(dpkg --print-architecture)
     Signed-By: /etc/apt/keyrings/zabbly.asc
-    EOF
+EOF
 
 
     echo "[*] Incus repo setup complete."
