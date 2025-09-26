@@ -80,7 +80,7 @@ if [[ "$hostname" == "r730xd-1" ]]; then
 
 
 # Apt install for remaining stuff
-  apt update -y && apt install ovn-central linstor-controller linstor-client python3-setuptools
+  apt update -y && apt install ovn-central linstor-controller linstor-client python3-setuptools -y
 
 # # FIX MDNS FOR EASY LOOKUP
 #   echo "5.0.0.7 lan-$(hostname).local" >> /etc/avahi/hosts
