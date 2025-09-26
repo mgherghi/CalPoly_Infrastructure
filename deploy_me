@@ -112,7 +112,7 @@ wget https://github.com/mgherghi/CalPoly_Infrastructure/blob/main/"$(hostname)"/
 
 # SETUP APP INSTALLS
 apt_setup() {
-    apt update && apt install ethtool vlan rdma-core  libibverbs1 librdmacm1 libibmad5 libibumad3 librdmacm1 ibverbs-providers rdmacm-utils infiniband-diags libfabric1 ibverbs-utils linstor-satellite ovn-host linux-cpupower linux-headers-amd64 linux-image-amd64 drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv dkms drbd-dkms drbd-utils nvme-cli lvm2 firmware-linux -y  && wait
+    apt update && apt install ethtool vlan linstor-satellite ovn-host linux-cpupower linux-headers-amd64 linux-image-amd64 drbd-utils bcache-tools tini lvm2 zstd socat curl udev lsscsi nvme-cli cryptsetup thin-provisioning-tools thin-send-recv dkms drbd-dkms drbd-utils nvme-cli lvm2 firmware-linux -y  && wait
     echo "8021q" >> /etc/modules
     update-initramfs -u -k all 
 }
