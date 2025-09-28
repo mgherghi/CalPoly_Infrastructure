@@ -1,40 +1,84 @@
-#!/bin/bash
+# Setup 802.3ad bond connection
+modprobe bonding mode=802.3ad miimon=100
+ip link  add mlnx-bond type bond
+ip link  set enp65s0f0np0 mtu 9000
+ip link  set enp65s0f1np1 mtu 9000
+ip link  set mlnx-bond mtu 9000
+ip link  set enp65s0f0np0 master mlnx-bond
+ip link  set enp65s0f1np1 master mlnx-bond
+ip link  set mlnx-bond up
 
-# Setup OVS MGMT Layer
-ip link set enp65s0f0v0 name ovs-mgmt
+# Setup OVS  MGMT
+ip link add link mlnx-bond name ovs-mgmt type vlan id 10
 ip addr add 4.0.0.5/24 brd + dev ovs-mgmt
-ip link set ovs-mgmt up
+ip link  set ovs-mgmt mtu 9000
+ip link  set ovs-mgmt up
 
-# Setup Linstor MGMT Layer
-ip link set enp65s0f0v1 name linstor-mgmt
+# Setup LINSTOR MGMT
+ip link add link mlnx-bond name linstor-mgmt type vlan id 20
 ip addr add 4.0.1.5/24 brd + dev linstor-mgmt
-ip link set linstor-mgmt up
+ip link  set linstor-mgmt mtu 9000
+ip link  set linstor-mgmt up
 
-# Setup Incus MGMT Layer
-ip link set enp65s0f0v2 name incus-mgmt
+# Setup INCUS MGMT
+ip link add link mlnx-bond name incus-mgmt type vlan id 30
 ip addr add 4.0.2.5/24 brd + dev incus-mgmt
-ip link set incus-mgmt up
+ip link  set incus-mgmt mtu 9000
+ip link  set incus-mgmt up
 
-# Setup admin_labs interface
-ip link set enp65s0f0v3 name admin-labs
-ip link set admin-labs up
+# # Setup admin-labs UPLINK network
+ip link add link mlnx-bond name admin-labs type vlan id 40
+ip link  set admin-labs up
 
-# Setup research_labs interface
-ip link set enp65s0f0v4 name research-labs
-ip link set research-labs up
+# # Setup research-labs UPLINK network
+ip link add link mlnx-bond name research-labs type vlan id 50
+ip link  set research-labs up
 
-# Setup bdebruhl interface
-ip link set enp65s0f0v5 name bdebruhl
-ip link set bdebruhl up
+# Setup bdebruhl UPLINK network
+ip link add link mlnx-bond name bdebruhl type vlan id 60
+ip link  set bdebruhl up
 
-# Setup phoenix interface
-ip link set enp65s0f0v6 name dofang
-ip link set dofang up
+# Setup phoenix UPLINK network
+ip link add link mlnx-bond name dofang type vlan id 70
+ip link  set dofang up
 
-# Setup bahartma interface
-ip link set enp65s0f0v7 name bahartma
-ip link set bahartma up
+# Setup bahartma UPLINK network
+ip link add link mlnx-bond name bahartma type vlan id 80
+ip link  set bahartma up
 
-# Setup infra interface
-ip link set enp65s0f0v8 name infra
-ip link set infra up
+# Setup infra UPLINK network
+ip link add link mlnx-bond name infra type vlan id 90
+ip link  set infra up
+
+# Setup srbeard UPLINK network
+ip link add link mlnx-bond name srbeard type vlan id 100
+ip link  set srbeard up
+
+
+MTU=9000
+
+echo "=== Linux interfaces (except lo and eno*) ==="
+for iface in $(ls /sys/class/net | grep -v '^lo$' | grep -v '^eno'); do
+  echo "Setting $iface to MTU=$MTU"
+  ip link set dev "$iface" mtu $MTU || echo "⚠️ Failed $iface"
+done
+
+echo
+echo "=== OVS existing ports ==="
+if command -v ovs-vsctl >/dev/null 2>&1; then
+  for port in $(ovs-vsctl list Interface | awk -F\" '/^name/{print $2}'); do
+    echo "Setting OVS port $port MTU=$MTU"
+    ovs-vsctl set Interface "$port" mtu_request=$MTU || echo "⚠️ Failed $port"
+  done
+
+  echo
+  echo "=== OVS global default MTU ==="
+  ovs-vsctl set Open_vSwitch . other_config:mtu_default=$MTU
+else
+  echo "⚠️ ovs-vsctl not found"
+fi
+ethtool -A enp65s0f0np0 rx on tx on
+ethtool -A enp65s0f1np1 rx on tx on
+#echo off > /sys/devices/system/cpu/smt/control
+ethtool -G enp65s0f0np0 rx 8192 tx 8192
+ethtool -G enp65s0f1np1 rx 8192 tx 8192
