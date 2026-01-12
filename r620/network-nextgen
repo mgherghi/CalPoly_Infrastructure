@@ -3,7 +3,7 @@ ip link set enp66s0 mtu 9000
 ip link set enp66s0 up
 
 # SETUP DRBD REPLICATION
-ip link set enp66s0 name drbd type vlan id 10
+ip link add link enp66s0 name drbd type vlan id 10
 ip link set drbd mtu 9000
 ip link set drbd up
 ip addr add 4.1.0.6/24 dev drbd
