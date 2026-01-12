@@ -1,6 +1,3 @@
-# SET PATH
-export PATH=$PATH:/sbin
-
 # SETUP MTU
 ip link set enp132s0 mtu 9000
 ip link set enp132s0 up
