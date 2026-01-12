@@ -1,0 +1,57 @@
+# SETUP MTU
+ip link set enp66s0 mtu 9000
+ip link set enp66s0 up
+
+# SETUP DRBD REPLICATION
+ip link set enp66s0 name drbd type vlan id 10
+ip link set drbd mtu 9000
+ip link set drbd up
+ip addr add 4.1.0.6/24 dev drbd
+
+# SETUP LINSTOR MGMT 
+ip link add link enp66s0 name linstor-mgmt type vlan id 20
+ip link set linstor-mgmt mtu 9000 
+ip link set linstor-mgmt up
+ip addr add 4.2.0.6/24 dev linstor-mgmt
+
+# SETUP OVN NETWORK
+ip link add link enp66s0 name ovn-mgmt type vlan id 30
+ip link set ovn-mgmt mtu 9000
+ip link set ovn-mgmt up
+ip addr add 4.3.0.6/24 dev ovn-mgmt
+
+# SETUP INCUS NETWORK
+ip link add link enp66s0 name incus-mgmt type vlan id 40
+ip link set incus-mgmt mtu 9000
+ip link set incus-mgmt up
+ip addr add 4.4.0.6/24 dev incus-mgmt
+
+# SETUP INFRA NETWORK
+ip link add link enp66s0 name infra type vlan id 50
+ip link set infra mtu 9000
+ip link set infra up
+
+# SETUP ADMIN-LABS NETWORK
+ip link add link enp66s0 name admin-labs type vlan id 60
+ip link set admin-labs mtu 9000
+ip link set admin-labs up
+
+# SETUP BDEBRUHL NETWORK
+ip link add link enp66s0 name bdebruhl type vlan id 70
+ip link set bdebruhl mtu 9000
+ip link set bdebruhl up
+
+# SETUP HARTMA NETWORK
+ip link add link enp66s0 name bhartma type vlan id 80
+ip link set bhartma mtu 9000
+ip link set bhartma up
+
+# SETUP BEARD NETWORK
+ip link add link enp66s0 name sbeard type vlan id 90
+ip link set sbeard mtu 9000
+ip link set sbeard up
+
+# SETUP PHOENIX NETWORK
+ip link add link enp66s0 name dofang type vlan id 100
+ip link set dofang mtu 9000
+ip link set dofang up
