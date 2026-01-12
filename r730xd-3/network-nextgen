@@ -1,6 +1,8 @@
 # SETUP MTU
 ip link set enp131s0 mtu 9000
+ip link set enp131s0 up
 ip link set enp131s0d1 mtu 9000
+ip link set enp131s0d1 up
 
 # SETUP DRBD REPLICATION
 ip link set enp131s0 name drbd
