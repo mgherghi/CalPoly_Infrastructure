@@ -11,4 +11,4 @@ ip addr add 4.2.0.7/24 dev linstor-mgmt
 # SETUP OVN NETWORK
 ip link add link enp132s0d1 name ovn-mgmt mtu 9000 type vlan id 30
 ip link set ovn-mgmt up
-ip addr add 4.3.0.7/24 dev linstor-mgmt
+ip addr add 4.3.0.7/24 dev ovn-mgmt
