@@ -1,5 +1,8 @@
-# Setup 802.3ad bond connection
-modprobe bonding mode=802.3ad miimon=100
+# Unload bonding module 
+modprobe -r bonding || true
+
+# SETUP MTU
+modprobe bonding mode=802.3ad miimon=100 xmit_hash_policy=layer3+4
 ip link  add mlnx-bond type bond
 ip link  set enp175s0 mtu 9000
 ip link  set enp175s0d1 mtu 9000
