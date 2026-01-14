@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -euo pipefail
-export DEBIAN_FRONTEND=noninteractive
-
 # Get the hostname of the system
 hostname=$(hostname)
 
@@ -104,7 +101,7 @@ echo "wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructur
 if [[ "$hostname" == "gigabyte" ]]; then
     
     # Install CUDA and GPU drivers
-    install_cuda_with_drivers
+    #install_cuda_with_drivers
 
     # Install Incus
     install_incus_stable
