@@ -19,7 +19,6 @@ apt install dkms linux-headers-amd64 build-essential make lvm2 linux-image-amd64
 
 # Allow NVME multipathing 
 echo "options nvme_core multipath=Y" >> /etc/modprobe.d/nvme_core.conf
-update-initramfs -u 
 
 install_cuda_with_drivers() {
     wget https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb
