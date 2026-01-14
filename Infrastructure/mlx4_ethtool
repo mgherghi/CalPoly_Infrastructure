@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Detecting Mellanox CX3 Pro NICs (dual-port aware)..."
+
+for dev in /sys/bus/pci/devices/*; do
+  # Mellanox vendor ID
+  [[ "$(cat "$dev/vendor" 2>/dev/null)" != "0x15b3" ]] && continue
+
+  # CX3 Pro uses mlx4 driver
+  [[ ! -e "$dev/driver" ]] && continue
+  [[ "$(basename "$(readlink "$dev/driver")")" != "mlx4_core" ]] && continue
+
+  # Enumerate all netdevs under this PCI function (ports)
+  if [[ -d "$dev/net" ]]; then
+    for iface in "$dev"/net/*; do
+      iface=$(basename "$iface")
+      [[ "$iface" == "lo" ]] && continue
+
+      echo "Configuring CX3 Pro port: $iface"
+      ethtool -K "$iface" tso on gso on gro on lro off
+    done
+  fi
+done
