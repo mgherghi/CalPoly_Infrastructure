@@ -32,8 +32,8 @@ install_doca_all() {
 install_cuda_with_drivers() {
     wget https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb
     dpkg -i cuda-keyring_1.1-1_all.deb
-    apt update 
-    apt install cuda-toolkit-13-1 cuda-drivers -y 
+    apt-get update 
+    apt-get install cuda-toolkit cuda-drivers -y 
     rm cuda-keyring_1.1-1_all.deb
     echo 'export LD_LIBRARY_PATH="/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"' >> "$admin/.bashrc"
     echo 'export PATH="$PATH:/usr/local/cuda/bin"' >> "$admin/.bashrc"
