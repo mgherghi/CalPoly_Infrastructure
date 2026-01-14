@@ -19,6 +19,14 @@ apt install dkms linux-headers-amd64 build-essential make lvm2 linux-image-amd64
 
 # Allow NVME multipathing 
 echo "options nvme_core multipath=Y" >> /etc/modprobe.d/nvme_core.conf
+update-initramfs -u 
+
+install_doca_all() {
+    wget https://www.mellanox.com/downloads/DOCA/DOCA_v3.2.1/host/doca-host_3.2.1-044000-25.10-debian13_amd64.deb
+    dpkg -i doca-host_3.2.1-044000-25.10-debian13_amd64.deb
+    apt-get update
+    apt-get -y install doca-all
+}
 
 install_cuda_with_drivers() {
     wget https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb
@@ -104,6 +112,9 @@ if [[ "$hostname" == "gigabyte" ]]; then
 
     # Install needed applications
     linbit_sources
+
+    # Install DOCA-ALL
+    install_doca_all
 
 elif [ "$hostname" == "supermicro" ]; then
     
