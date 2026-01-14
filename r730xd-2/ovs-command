@@ -1,6 +1,6 @@
 #!/bin/bash
 
 ovs-vsctl set open_vswitch . \
-   external_ids:ovn-remote=tcp:4.0.0.7:6642,tcp:4.0.0.8:6642,tcp:4.0.0.9:6642 \
+   external_ids:ovn-remote=tcp:4.3.0.7:6642,tcp:4.3.0.8:6642,tcp:4.3.0.9:6642 \
    external_ids:ovn-encap-type=geneve \
-   external_ids:ovn-encap-ip=4.0.0.8
+   external_ids:ovn-encap-ip=4.3.0.8
