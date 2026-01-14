@@ -26,6 +26,7 @@ install_doca_all() {
     dpkg -i doca-host_3.2.1-044000-25.10-debian13_amd64.deb
     apt-get update
     apt-get -y install doca-all
+    rm doca-host_3.2.1-044000-25.10-debian13_amd64.deb
 }
 
 install_cuda_with_drivers() {
@@ -33,6 +34,7 @@ install_cuda_with_drivers() {
     dpkg -i cuda-keyring_1.1-1_all.deb
     apt update 
     apt install cuda-toolkit-13-1 cuda-drivers -y 
+    rm cuda-keyring_1.1-1_all.deb
     echo 'export LD_LIBRARY_PATH="/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"' >> "$admin/.bashrc"
     echo 'export PATH="$PATH:/usr/local/cuda/bin"' >> "$admin/.bashrc"
 
