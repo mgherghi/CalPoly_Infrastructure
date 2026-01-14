@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+# Logs: journalctl -t startup -b
+exec > >(systemd-cat -t startup) 2>&1
+
+log() { echo "[$(date -Is)] $*"; }
+
+wait_default_route() {
+  local max="${1:-180}"
+  log "Waiting for default route (max ${max}s)..."
+  for ((i=1; i<=max; i++)); do
+    if ip route show default | grep -q '^default'; then
+      log "Default route is up: $(ip route show default | head -n1)"
+      return 0
+    fi
+    sleep 1
+  done
+  log "ERROR: No default route after ${max}s"
+  return 1
+}
+
+wait_dns() {
+  local host="${1:-raw.githubusercontent.com}"
+  local max="${2:-180}"
+  log "Waiting for DNS (${host}) (max ${max}s)..."
+  for ((i=1; i<=max; i++)); do
+    if getent ahosts "$host" >/dev/null 2>&1; then
+      log "DNS OK for ${host}"
+      return 0
+    fi
+    sleep 1
+  done
+  log "ERROR: DNS not ready for ${host} after ${max}s"
+  return 1
+}
+
+run_url() {
+  local url="$1"
+  log "=== START $url ==="
+  wget -qO- --https-only --timeout=20 --tries=5 "$url" | /bin/bash
+  log "=== OK    $url ==="
+}
+
+# ---- network gates ----
+wait_default_route 180
+wait_dns raw.githubusercontent.com 180
+
+# ---- your actions ----
+run_url "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/$(hostname)/network-nextgen"
+run_url "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/cpupower"
+run_url "https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/mlx4_ethtool"
+
+log "All startup steps completed."
