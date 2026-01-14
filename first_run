@@ -1,0 +1,201 @@
+#!/bin/bash
+
+# Get the hostname of the system
+hostname=$(hostname)
+
+# Set admin home folder
+admin="/home/mihai"
+
+# Fix Debian PATH
+echo "export PATH=/sbin:$PATH" >> $admin/.bashrc
+
+# Source the file
+source /home/"$admin"/.bashrc
+
+# create the directory for startup scripts
+mkdir -p /home/.essentials 
+
+apt install dkms linux-headers-amd64 build-essential make lvm2 linux-image-amd64 nvme-cli linux-cpupower -y 
+
+# Allow NVME multipathing 
+echo "options nvme_core multipath=Y" >> /etc/modprobe.d/nvme_core.conf
+update-initramfs -u 
+
+install_cuda_with_drivers() {
+    wget https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb
+    dpkg -i cuda-keyring_1.1-1_all.deb
+    apt update 
+    apt install cuda-toolkit-13-1 cuda-drivers 
+    echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda/lib64" >> $admin/.bashrc
+    echo "export PATH=$PATH:/usr/local/cuda/bin" >> $admin/.bashrc
+
+    # Setup symbolic link for incus
+    ln -s /usr/local/cuda /srv/cuda
+}
+
+install_incus_stable() {
+    wget -O /etc/apt/keyrings/zabbly.asc https://pkgs.zabbly.com/key.asc
+    sh -c 'cat <<EOF > /etc/apt/sources.list.d/zabbly-incus-stable.sources
+    Enabled: yes
+    Types: deb
+    URIs: https://pkgs.zabbly.com/incus/stable
+    Suites: $(. /etc/os-release && echo ${VERSION_CODENAME})
+    Components: main
+    Architectures: $(dpkg --print-architecture)
+    Signed-By: /etc/apt/keyrings/zabbly.asc
+    EOF'
+    apt update 
+    apt install incus qemu-system -y
+}
+
+nvme_io_policy() {
+    echo "wget -q0- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/iopolicy | /bin/bash" >> /sbin/startup
+}
+
+linbit_sources() {
+
+    #Debian style repo
+    wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linstor.sources -O /etc/apt/sources.list.d/linstor.list
+
+    #linbit key
+    wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/linbit.asc -O /etc/apt/keyrings/linbit.asc
+    
+    apt update
+    apt install drbd-dkms linstor-satellite drbd-utils thin-send-recv
+}
+
+mlx4_rdma() {
+    apt install rdma-core ibverbs-utils infiniband-diags perftest ethtool irqbalance -y
+}
+
+mlx4_ethtool() {
+    echo "wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/mlx4_ethtool | /bin/bash" >> /sbin/startup
+}
+
+ovn_central_setup() {
+    # Setup OVN
+    apt install ovn-central -y 
+    systemctl enable ovn-central
+    systemctl enable ovn-host
+    systemctl stop ovn-central
+
+    wget https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/$(hostname)/ovn-central -O /etc/default/ovn-central
+    wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/$(hostname)/ovs-command | /bin/bash
+    systemctl start ovn-central
+}
+
+# Setup startup script after network
+echo "post-up /sbin/startup" >> /etc/network/interfaces
+
+# Setup startup script
+echo "#!/usr/bin/env bash" >> /sbin/startup
+chmod u+x /sbin/startup
+
+# Setup networks at startup
+echo "wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/$hostname/network-nextgen | /bin/bash" >> /sbin/startup
+
+# Setup performance mode at startup 
+echo "wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/Infrastructure/cpupower | /bin/bash" >> /sbin/startup
+
+
+
+# Check the hostname and run the appropriate command
+if [[ "$hostname" == "gigabyte" ]]; then
+    
+    # Install CUDA and GPU drivers
+    install_cuda_with_drivers
+
+    # Install Incus
+    install_incus_stable
+
+    # Install IO-Policy for NVME
+    nvme_io_policy
+
+    # Install needed applications
+    linbit_sources
+
+elif [ "$hostname" == "supermicro" ]; then
+    
+    # Install needed applications
+    mlx4_rdma
+    linbit_sources
+    apt install ovn-host -y
+
+    # Install Incus
+    install_incus_stable
+
+    # Install IO-Policy for NVME
+    nvme_io_policy
+
+    # CX3-Pro RDMA 
+    mlx4_ethtool
+
+    # OVN host setup
+    wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/$(hostname)/ovs-command | /bin/bash
+
+elif [ "$hostname" == "r620" ]; then
+    # Install needed applications
+    mlx4_rdma
+    linbit_sources
+    apt install ovn-host -y
+
+    # Install Incus
+    install_incus_stable
+
+    # CX3-Pro RDMA 
+    mlx4_ethtool
+
+    # OVN host setup
+    wget -qO- https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/$(hostname)/ovs-command | /bin/bash
+
+elif [ "$hostname" == "r730xd-1" ]; then
+    # Install needed applications
+    mlx4_rdma
+    linbit_sources
+    apt install ovn-host linstor-controller -y
+
+    # Install IO-Policy for NVME
+    nvme_io_policy
+
+    # CX3-Pro RDMA 
+    mlx4_ethtool
+
+    # OVN central Setup
+    ovn_central_setup
+
+elif [ "$hostname" == "r730xd-2" ]; then
+    # Install needed applications
+    mlx4_rdma
+    linbit_sources
+    apt install ovn-host -y
+
+    # Install IO-Policy for NVME
+    nvme_io_policy
+
+    # CX3-Pro RDMA 
+    mlx4_ethtool
+
+    # OVN central Setup
+    ovn_central_setup
+
+
+elif [ "$hostname" == "r730xd-3" ]; then
+    # Install needed applications
+    mlx4_rdma
+    linbit_sources
+    apt install ovn-host  -y
+
+    # Install IO-Policy for NVME
+    nvme_io_policy
+
+    # CX3-Pro RDMA 
+    mlx4_ethtool
+
+    # OVN central Setup
+    ovn_central_setup
+else
+    echo "Hostname does not match."
+fi
+
+update-initramfs -u 
+update-grub
