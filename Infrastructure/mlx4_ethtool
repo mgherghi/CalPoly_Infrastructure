@@ -18,7 +18,7 @@ for dev in /sys/bus/pci/devices/*; do
       [[ "$iface" == "lo" ]] && continue
 
       echo "Configuring CX3 Pro port: $iface"
-      ethtool -K "$iface" tso on gso on gro on lro off
+      ethtool -K "$iface" tso on gso on gro on lro on
     done
   fi
 done
