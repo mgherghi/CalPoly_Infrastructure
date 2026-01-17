@@ -21,7 +21,7 @@ for dev in /sys/bus/pci/devices/*; do
       ethtool -C "$iface" adaptive-rx on adaptive-tx on
       ethtool -G "$iface" rx 8192 tx 8192
       ethtool -A "$iface" rx on tx on 
-      ethtool -K "$iface" tso on gso on gro on lro on 
+      ethtool -K "$iface" tso on gso on gro off lro off 
     done
   fi
 done
