@@ -12,10 +12,10 @@ ip link  set enp175s0d1 master mlnx-bond
 ip link  set mlnx-bond up
 
 # SETUP DRBD REPLICATION
-#ip link add link mlnx-bond name drbd type vlan id 10
-#ip link set drbd mtu 9000
-#ip link set drbd up
-#ip addr add 4.1.0.10/24 dev drbd
+ip link add link mlnx-bond name rdma type vlan id 10
+ip link set rdma mtu 9000
+ip link set rdma up
+ip addr add 4.1.0.10/24 dev rdma
 
 # SETUP LINSTOR MGMT 
 ip link add link mlnx-bond name linstor-mgmt type vlan id 20
