@@ -3,10 +3,10 @@ ip link set enp66s0 mtu 9000
 ip link set enp66s0 up
 
 # SETUP DRBD REPLICATION
-ip link add link enp66s0 name rdma type vlan id 10
-ip link set rdma mtu 9000
-ip link set rdma up
-ip addr add 4.1.0.6/24 dev rdma
+#ip link add link enp66s0 name rdma type vlan id 10
+#ip link set rdma mtu 9000
+#ip link set rdma up
+#ip addr add 4.1.0.6/24 dev rdma
 
 # SETUP LINSTOR MGMT 
 ip link add link enp66s0 name linstor-mgmt type vlan id 20
