@@ -1,0 +1,40 @@
+for dev in /sys/bus/pci/devices/*; do
+  # Mellanox vendor ID
+  [[ "$(cat "$dev/vendor" 2>/dev/null)" != "0x15b3" ]] && continue
+
+  # CX3 Pro uses mlx4 driver
+  [[ ! -e "$dev/driver" ]] && continue
+  [[ "$(basename "$(readlink "$dev/driver")")" != "mlx5_core" ]] && continue
+
+  # Enumerate all netdevs under this PCI function (ports)
+  if [[ -d "$dev/net" ]]; then
+    for iface in "$dev"/net/*; do
+      iface=$(basename "$iface")
+      [[ "$iface" == "lo" ]] && continue
+
+      echo "Configuring CX6 DX port: $iface"
+      ethtool -C "$iface" adaptive-rx on adaptive-tx on
+      ethtool -G "$iface" rx 8192 tx 8192
+      ethtool -A "$iface" rx on tx on 
+      ethtool -K "$iface" tso on gso on gro on lro on 
+    done
+  fi
+done
+
+
+tee /etc/sysctl.d/10-tcp.conf > /dev/null <<'EOF'
+# allow TCP with buffers up to 2GB (Max allowed in Linux is 2GB-1)
+net.core.rmem_max=2147483647
+net.core.wmem_max=2147483647
+# increase TCP autotuning buffer limits. 
+net.ipv4.tcp_rmem=4096 131072 1073741824 
+net.ipv4.tcp_wmem=4096 16384 1073741824
+# recommended for hosts with jumbo frames enabled
+net.ipv4.tcp_mtu_probing=1
+# recommended to enable 'fair queueing'
+net.core.default_qdisc = fq
+# need to increase this to use MSG_ZEROCOPY
+net.core.optmem_max = 1048576 
+EOF
+
+sysctl -p /etc/sysctl.d/10-tcp.conf
