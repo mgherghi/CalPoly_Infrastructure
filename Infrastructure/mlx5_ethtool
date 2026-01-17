@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Detecting Mellanox CX6-DX Pro NICs ..."
+
 for dev in /sys/bus/pci/devices/*; do
   # Mellanox vendor ID
   [[ "$(cat "$dev/vendor" 2>/dev/null)" != "0x15b3" ]] && continue
