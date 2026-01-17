@@ -18,7 +18,6 @@ for dev in /sys/bus/pci/devices/*; do
       [[ "$iface" == "lo" ]] && continue
 
       echo "Configuring CX3 Pro port: $iface"
-      ethtool -C "$iface" adaptive-rx on adaptive-tx on
       ethtool -G "$iface" rx 8192 tx 8192
       ethtool -A "$iface" rx on tx on 
       ethtool -K "$iface" tso on gso on gro on lro on 
