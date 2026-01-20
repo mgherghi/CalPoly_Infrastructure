@@ -1,3 +1,6 @@
+ethtool -L enp65s0f0np0 combined 32
+ethtool -L enp65s0f1np1 combined 32
+
 # Unload bonding module 
 modprobe -r bonding || true
 
