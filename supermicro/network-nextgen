@@ -1,0 +1,61 @@
+# Unload bonding module 
+modprobe -r bonding || true
+
+# SETUP MTU
+modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+ip link  add mlnx-bond type bond
+ip link  set enp175s0 mtu 9000
+ip link  set enp175s0d1 mtu 9000
+ip link  set mlnx-bond mtu 9000
+ip link  set enp175s0 master mlnx-bond
+ip link  set enp175s0d1 master mlnx-bond
+ip link  set mlnx-bond up
+
+# SETUP LINSTOR MGMT 
+ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+ip link set linstor-mgmt mtu 9000 
+ip link set linstor-mgmt up
+ip addr add 4.2.0.10/24 dev linstor-mgmt
+
+# SETUP OVN NETWORK
+ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+ip link set ovn-mgmt mtu 9000
+ip link set ovn-mgmt up
+ip addr add 4.3.0.10/24 dev ovn-mgmt
+
+# SETUP INCUS NETWORK
+ip link add link mlnx-bond name incus-mgmt type vlan id 40
+ip link set incus-mgmt mtu 9000
+ip link set incus-mgmt up
+ip addr add 4.4.0.10/24 dev incus-mgmt
+
+# Add mlnx-bond in ovs-mlnx OVS bridge
+ovs-vsctl --may-exist add-br ovs-mlnx
+ovs-vsctl --may-exist add-port ovs-mlnx mlnx-bond
+ovs-vsctl set port mlnx-bond trunks=10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
+ovs-vsctl set interface br-int mtu_request=9000
+ovs-vsctl set interface ovs-mlnx mtu_request=9000
+
+# Jumbo frames for all geneve interfaces
+for i in $(ovs-vsctl --format=csv --data=bare --no-heading --columns=name find interface type=geneve); do
+  ovs-vsctl set interface "$i" mtu_request=8950
+done
+
+# set transmission queues to 16 for ethernet only (not rdma)
+for i in $(ovs-vsctl --format=csv --data=bare --no-heading --columns=name find interface type=geneve); do
+  ovs-vsctl set interface "$i" options:n_txq=16
+done
+
+# Restart openvswitch
+systemctl restart openvswitch-switch
+
+# Bring interfaces up 
+ip link set br-int up 
+ip link set ovs-mlnx up 
+
+# SETUP INFRA NETWORK vlan 50
+# SETUP ADMIN-LABS NETWORK vlan 60
+# SETUP BDEBRUHL NETWORK vlan 70
+# SETUP HARTMA NETWORK vlan 80
+# SETUP BEARD NETWORK vlan 90
+# SETUP PHOENIX NETWORK vlan 100
