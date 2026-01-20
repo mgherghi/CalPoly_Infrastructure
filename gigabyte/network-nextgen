@@ -35,34 +35,35 @@ ip link set incus-mgmt mtu 9000
 ip link set incus-mgmt up
 ip addr add 4.4.0.5/24 dev incus-mgmt
 
-# SETUP INFRA NETWORK
-ip link add link mlnx-bond name infra type vlan id 50
-ip link set infra mtu 9000
-ip link set infra up
+# Add mlnx-bond in ovs-mlnx OVS bridge
+ovs-vsctl --may-exist add-br ovs-mlnx
+ovs-vsctl --may-exist add-port ovs-mlnx mlnx-bond
+ovs-vsctl set port mlnx-bond trunks=10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
+ovs-vsctl set interface br-int mtu_request=9000
+ovs-vsctl set interface ovs-mlnx mtu_request=9000
 
-# SETUP ADMIN-LABS NETWORK
-ip link add link mlnx-bond name admin-labs type vlan id 60
-ip link set admin-labs mtu 9000
-ip link set admin-labs up
+# Jumbo frames for all geneve interfaces
+for i in $(ovs-vsctl --format=csv --data=bare --no-heading --columns=name find interface type=geneve); do
+  ovs-vsctl set interface "$i" mtu_request=8950
+done
 
-# SETUP BDEBRUHL NETWORK
-ip link add link mlnx-bond name bdebruhl type vlan id 70
-ip link set bdebruhl mtu 9000
-ip link set bdebruhl up
+# set transmission queues to 16 for ethernet only (not rdma)
+for i in $(ovs-vsctl --format=csv --data=bare --no-heading --columns=name find interface type=geneve); do
+  ovs-vsctl set interface "$i" options:n_txq=16
+done
 
-# SETUP HARTMA NETWORK
-ip link add link mlnx-bond name bhartma type vlan id 80
-ip link set bhartma mtu 9000
-ip link set bhartma up
+# Restart openvswitch
+systemctl restart openvswitch-switch
 
-# SETUP BEARD NETWORK
-ip link add link mlnx-bond name sbeard type vlan id 90
-ip link set sbeard mtu 9000
-ip link set sbeard up
+# Bring interfaces up 
+ip link set br-int up 
+ip link set ovs-mlnx up 
 
-# SETUP PHOENIX NETWORK
-ip link add link mlnx-bond name dofang type vlan id 100
-ip link set dofang mtu 9000
-ip link set dofang up
+# SETUP INFRA NETWORK vlan 50
+# SETUP ADMIN-LABS NETWORK vlan 60
+# SETUP BDEBRUHL NETWORK vlan 70
+# SETUP HARTMA NETWORK vlan 80
+# SETUP BEARD NETWORK vlan 90
+# SETUP PHOENIX NETWORK vlan 100
 
 
