@@ -4,11 +4,14 @@ ethtool -L enp66s0 rx 16 tx 16
 ip link set enp66s0 mtu 9000
 ip link set enp66s0 up
 
-# Setup RDMA Replication (DRBD)
+# SETUP DRBD REPLICATION (RDMA)
 ip link add link enp66s0 name rdma type vlan id 10
-ip link set rdma mtu 9000
+ip link set dev rdma type vlan egress-qos-map 0:3
 ip link set rdma up
+ip link set rdma mtu 9000
 ip addr add 4.1.0.6/24 dev rdma
+ip route del default dev rdma 2>/dev/null || true
+ip route add prohibit 0.0.0.0/0 dev rdma metric 50
 
 # Setup NFS Share
 ip link add link enp66s0 name nfs type vlan id 15
