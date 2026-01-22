@@ -50,7 +50,7 @@ ip addr add 4.4.0.5/24 dev incus-mgmt
 # Add mlnx-bond in ovs-mlnx OVS bridge
 ovs-vsctl --may-exist add-br ovs-mlnx
 ovs-vsctl --may-exist add-port ovs-mlnx mlnx-bond
-ovs-vsctl set port mlnx-bond trunks=10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
+ovs-vsctl set port mlnx-bond trunks=10,15,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
 ovs-vsctl set interface br-int mtu_request=9000
 ovs-vsctl set interface ovs-mlnx mtu_request=9000
 
