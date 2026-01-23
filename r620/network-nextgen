@@ -4,14 +4,6 @@ ethtool -L enp66s0 rx 16 tx 16
 ip link set enp66s0 mtu 9000
 ip link set enp66s0 up
 
-# Setup NFS Share
-ip link add link enp66s0 name nfs type vlan id 15
-ip link set nfs mtu 9000
-ip link set nfs up
-ip addr add 4.115.0.6/24 dev nfs 
-ip route del default dev nfs 2>/dev/null || true
-ip route add prohibit 0.0.0.0/0 dev nfs metric 50
-
 # SETUP LINSTOR MGMT 
 ip link add link enp66s0 name linstor-mgmt type vlan id 20
 ip link set linstor-mgmt mtu 9000 
