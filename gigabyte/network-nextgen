@@ -14,6 +14,12 @@ ip link  set enp65s0f0np0 master mlnx-bond
 ip link  set enp65s0f1np1 master mlnx-bond
 ip link  set mlnx-bond up
 
+# SETUP DRBD REPLICATION
+ip link add link mlnx-bond name rdma type vlan id 10
+ip link set dev rdma type vlan egress-qos-map 0:3
+ip link set rdma mtu 9000
+ip link set rdma up
+ip addr add 4.1.0.5/24 dev rdma
 
 # Setup NFS Share
 ip link add link mlnx-bond name nfs type vlan id 15
