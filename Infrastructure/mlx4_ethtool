@@ -35,4 +35,5 @@ sysctl -w net.ipv4.tcp_mtu_probing=1
 # recommended to enable 'fair queueing'
 sysctl -w net.core.default_qdisc = fq
 sysctl -w net.ipv4.conf.all.rp_filter=0
+sysctl -w net.ipv4.conf.rdma.rp_filter=0
 sysctl -w net.ipv4.conf.default.rp_filter=0
