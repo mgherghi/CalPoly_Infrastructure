@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 for i in $(seq 0 20); do
     echo "round-robin" > /sys/class/nvme-subsystem/nvme-subsys"$i"/iopolicy
 done
