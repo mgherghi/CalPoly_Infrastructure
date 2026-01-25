@@ -3,7 +3,7 @@ ethtool -L enp65s0f1np1 combined 32
 
 # Unload bonding module 
 modprobe -r bonding || true
-
+ovs-vsctl del-br ovs-mlnx
 # SETUP MTU
 modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
 ip link  add mlnx-bond type bond
