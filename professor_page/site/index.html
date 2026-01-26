@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guacamole YAML Generator</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0;
+      background: #0b1220;
+      color: #e7eefc;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    p { margin: 0 0 14px; opacity: .9; }
+    .card {
+      background: #121c33;
+      border: 1px solid #223055;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 6px;
+      font-weight: 900;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 10px;
+      border: 1px solid #2a3a63;
+      background: #0e1730;
+      color: #e7eefc;
+      padding: 10px 12px;
+      outline: none;
+    }
+    textarea {
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      min-height: 260px;
+    }
+    .checkboxes {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 20px;
+    }
+    .checkboxes label {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+    input[type="checkbox"] {
+      transform: scale(1.15);
+    }
+    .btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 900;
+      background: #2a67ff;
+      color: white;
+    }
+    button.secondary {
+      background: #26324f;
+      border: 1px solid #2a3a63;
+    }
+    .out {
+      margin-top: 14px;
+      padding: 12px;
+      background: #0e1730;
+      border: 1px dashed #2a3a63;
+      border-radius: 12px;
+      overflow: auto;
+      max-height: 360px;
+      white-space: pre;
+    }
+    .hint {
+      font-size: 12px;
+      opacity: .85;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+    .enforced {
+      font-size: 13px;
+      background: #0e1730;
+      border: 1px solid #2a3a63;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 6px;
+    }
+    .enforced code {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Guacamole YAML Generator</h1>
+  <p>
+    Outputs <b>only</b> your exact Guacamole connection block format.<br>
+    RDP · root / dietpi · IPv4 before <code>(eth0)</code>
+  </p>
+
+  <div class="card">
+    <label for="group">Group</label>
+    <input id="group" type="text" placeholder="ROOT/Parent Group" />
+
+    <label for="students">Student list / incus output</label>
+    <textarea id="students" placeholder="| crn9438-ajoshi16 | RUNNING | 10.5.20.5 (eth0) |
+| crn9438-amende50 | RUNNING | 10.5.20.6 (eth0) |"></textarea>
+
+    <label>Attributes</label>
+    <div class="enforced">
+      <b>Always included:</b>
+      <code>cert-tofu: true</code>
+      <code>disable-glyph-caching: true</code>
+      <code>disable-offscreen-caching: true</code>
+      <code>disable-bitmap-caching: true</code>
+      <code>resize-method: display-update</code>
+    </div>
+
+    <div class="checkboxes">
+      <label><input type="checkbox" id="attr_guacd_encryption"> guacd-encryption: none</label>
+      <label><input type="checkbox" id="attr_enable_sftp"> enable-sftp: true</label>
+      <label><input type="checkbox" id="attr_ignore_cert"> ignore-cert: true</label>
+      <label><input type="checkbox" id="attr_console"> console: true</label>
+    </div>
+
+    <div class="btns">
+      <button onclick="generate()">Generate preview</button>
+      <button onclick="downloadYaml()">Download guac-import.yaml</button>
+      <button class="secondary" onclick="loadExample()">Load example</button>
+      <button class="secondary" onclick="clearAll()">Clear</button>
+    </div>
+
+    <div class="out" id="output">(preview)</div>
+  </div>
+</div>
+
+<script>
+function extractFullName(line) {
+  const m = line.match(/\b([A-Za-z0-9]+-[A-Za-z0-9._-]+)\b/);
+  return m ? m[1] : null;
+}
+
+function extractEth0Ip(line) {
+  const m = line.match(/\b(\d{1,3}(?:\.\d{1,3}){3})\b\s*\(eth0\)/i);
+  return m ? m[1] : null;
+}
+
+function userAfterDash(name) {
+  const i = name.indexOf("-");
+  return (i >= 0 && i < name.length - 1) ? name.slice(i + 1) : name;
+}
+
+function selectedExtraAttributes() {
+  const attrs = [];
+  if (document.getElementById("attr_guacd_encryption").checked)
+    attrs.push("guacd-encryption: none");
+  if (document.getElementById("attr_enable_sftp").checked)
+    attrs.push("enable-sftp: true");
+  if (document.getElementById("attr_ignore_cert").checked)
+    attrs.push("ignore-cert: true");
+  if (document.getElementById("attr_console").checked)
+    attrs.push("console: true");
+
+  return attrs.map(a => `      ${a}`).join("\n") + (attrs.length ? "\n" : "");
+}
+
+function buildYaml(group, rawStudents) {
+  const lines = rawStudents.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  let out = "";
+
+  for (const line of lines) {
+    const name = extractFullName(line);
+    const ip = extractEth0Ip(line);
+    if (!name || !ip) continue;
+
+    out +=
+`  - name: ${name}
+    protocol: rdp
+    parameters:
+      username: root
+      password: dietpi
+      hostname: ${ip}
+    group: ${group}
+    users:
+      - ${userAfterDash(name)}
+    attributes:
+      cert-tofu: true
+      disable-glyph-caching: true
+      disable-offscreen-caching: true
+      disable-bitmap-caching: true
+      resize-method: display-update
+${selectedExtraAttributes()}`;
+  }
+  return out;
+}
+
+function generate() {
+  const group = document.getElementById("group").value.trim() || "ROOT/Parent Group";
+  const students = document.getElementById("students").value;
+  document.getElementById("output").textContent =
+    buildYaml(group, students) || "(no output)";
+}
+
+function downloadYaml() {
+  const group = document.getElementById("group").value.trim() || "ROOT/Parent Group";
+  const students = document.getElementById("students").value;
+  const text = buildYaml(group, students);
+
+  const blob = new Blob([text], { type: "application/x-yaml;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "guac-import.yaml";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function clearAll() {
+  document.getElementById("group").value = "";
+  document.getElementById("students").value = "";
+  document.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
+  document.getElementById("output").textContent = "(preview)";
+}
+
+function loadExample() {
+  document.getElementById("group").value = "ROOT/Parent Group";
+  document.getElementById("students").value =
+`| crn9438-ajoshi16 | RUNNING | 10.5.20.5 (eth0) |
+| crn9438-amende50 | RUNNING | 10.5.20.6 (eth0) |`;
+  document.getElementById("attr_guacd_encryption").checked = true;
+}
+</script>
+</body>
+</html>

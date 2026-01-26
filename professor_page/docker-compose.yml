@@ -1,0 +1,8 @@
+services:
+  guac-yaml-web:
+    build: .
+    container_name: guac-yaml-web
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
