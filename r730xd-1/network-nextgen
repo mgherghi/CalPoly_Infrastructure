@@ -1,6 +1,11 @@
 ethtool -L enp132s0 rx 16 tx 16
 ethtool -L enp132s0d1 rx 16 tx 16
 
+ip link set enp132s0 mtu 9000
+ip link set enp132s0d1 mtu 9000
+ip link set enp132s0 up
+ip link set enp132s0d1 up
+
 # Unload bonding module 
 # modprobe -r bonding || true
 
