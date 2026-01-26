@@ -26,16 +26,13 @@ ip link set dev rdma type vlan egress-qos-map 0:3 1:3 2:3 3:3 4:3 5:3 6:3 7:3
 ip link set rdma mtu 9000
 ip link set rdma up
 ip addr add 4.1.0.10/24 dev rdma
-ip route del default dev rdma 2>/dev/null || true
-ip route add prohibit 0.0.0.0/0 dev rdma metric 50
 
 # SETUP NFS SHARE
 ip link add enp175s0d1 name nfs type vlan id 15
 ip link set nfs mtu 9000
 ip link set nfs up
 ip addr add 4.115.0.10/24 nfs
-ip route del default dev nfs 2>/dev/null || true
-ip route add prohibit 0.0.0.0/0 dev nfs metric 50
+
 
 # SETUP LINSTOR MGMT 
 ip link add link enp175s0d1 name linstor-mgmt type vlan id 20
