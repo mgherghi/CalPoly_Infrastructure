@@ -1,9 +1,14 @@
 ethtool -L enp65s0f0np0 combined 32
 ethtool -L enp65s0f1np1 combined 32
 
+ip link set enp65s0f0np0 mtu 9000
+ip link set enp65s0f1np1 mtu 9000
+ip link set enp65s0f0np0 up
+ip link set enp65s0f1np1 up
+
 # Unload bonding module 
 #modprobe -r bonding || true
-ovs-vsctl del-br ovs-mlnx
+
 
 # SETUP MTU
 # modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
@@ -45,7 +50,7 @@ ip link set ovn-mgmt up
 ip addr add 4.3.0.5/24 dev ovn-mgmt
 
 # SETUP INCUS NETWORK
-ip link add link enp65s0f1np1name incus-mgmt type vlan id 40
+ip link add link enp65s0f1np1 name incus-mgmt type vlan id 40
 ip link set incus-mgmt mtu 9000
 ip link set incus-mgmt up
 ip addr add 4.4.0.5/24 dev incus-mgmt
