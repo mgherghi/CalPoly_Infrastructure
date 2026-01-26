@@ -2,20 +2,21 @@ ethtool -L enp65s0f0np0 combined 32
 ethtool -L enp65s0f1np1 combined 32
 
 # Unload bonding module 
-modprobe -r bonding || true
+#modprobe -r bonding || true
 ovs-vsctl del-br ovs-mlnx
+
 # SETUP MTU
-modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-ip link  add mlnx-bond type bond
-ip link  set enp65s0f0np0 mtu 9000
-ip link  set enp65s0f1np1 mtu 9000
-ip link  set mlnx-bond mtu 9000
-ip link  set enp65s0f0np0 master mlnx-bond
-ip link  set enp65s0f1np1 master mlnx-bond
-ip link  set mlnx-bond up
+# modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+# ip link  add mlnx-bond type bond
+# ip link  set enp65s0f0np0 mtu 9000
+# ip link  set enp65s0f1np1 mtu 9000
+# ip link  set mlnx-bond mtu 9000
+# ip link  set enp65s0f0np0 master mlnx-bond
+# ip link  set enp65s0f1np1 master mlnx-bond
+# ip link  set mlnx-bond up
 
 # SETUP DRBD REPLICATION
-ip link add link mlnx-bond name rdma type vlan id 10
+ip link add link enp65s0f0np0 name rdma type vlan id 10
 ip link set dev rdma type vlan egress-qos-map 0:3 1:3 2:3 3:3 4:3 5:3 6:3 7:3
 ip link set rdma mtu 9000
 ip link set rdma up
@@ -24,7 +25,7 @@ ip route del default dev nfs 2>/dev/null || true
 ip route add prohibit 0.0.0.0/0 dev nfs metric 50
 
 # Setup NFS Share
-ip link add link mlnx-bond name nfs type vlan id 15
+ip link add link enp65s0f1np1 name nfs type vlan id 15
 ip link set nfs mtu 9000
 ip link set nfs up
 ip addr add 4.115.0.5/24 dev nfs 
@@ -32,27 +33,27 @@ ip route del default dev nfs 2>/dev/null || true
 ip route add prohibit 0.0.0.0/0 dev nfs metric 50
 
 # SETUP LINSTOR MGMT 
-ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+ip link add link enp65s0f1np1 name linstor-mgmt type vlan id 20
 ip link set linstor-mgmt mtu 9000 
 ip link set linstor-mgmt up
 ip addr add 4.2.0.5/24 dev linstor-mgmt
 
 # SETUP OVN NETWORK
-ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+ip link add link enp65s0f1np1 name ovn-mgmt type vlan id 30
 ip link set ovn-mgmt mtu 9000
 ip link set ovn-mgmt up
 ip addr add 4.3.0.5/24 dev ovn-mgmt
 
 # SETUP INCUS NETWORK
-ip link add link mlnx-bond name incus-mgmt type vlan id 40
+ip link add link enp65s0f1np1name incus-mgmt type vlan id 40
 ip link set incus-mgmt mtu 9000
 ip link set incus-mgmt up
 ip addr add 4.4.0.5/24 dev incus-mgmt
 
 # Add mlnx-bond in ovs-mlnx OVS bridge
 ovs-vsctl --may-exist add-br ovs-mlnx
-ovs-vsctl --may-exist add-port ovs-mlnx mlnx-bond
-ovs-vsctl set port mlnx-bond trunks=50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
+ovs-vsctl --may-exist add-port ovs-mlnx enp65s0f1np1
+ovs-vsctl set port enp65s0f1np1 trunks=50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
 ovs-vsctl set interface br-int mtu_request=9000
 ovs-vsctl set interface ovs-mlnx mtu_request=9000
 
@@ -79,5 +80,3 @@ ip link set ovs-mlnx up
 # SETUP HARTMA NETWORK vlan 80
 # SETUP BEARD NETWORK vlan 90
 # SETUP PHOENIX NETWORK vlan 100
-
-
