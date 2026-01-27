@@ -198,15 +198,15 @@ function buildYaml(group, rawStudents) {
       username: root
       password: dietpi
       hostname: ${ip}
-    group: ${group}
-    users:
-      - ${userAfterDash(name)}
-    attributes:
       cert-tofu: true
       disable-glyph-caching: true
       disable-offscreen-caching: true
       disable-bitmap-caching: true
       resize-method: display-update
+    group: ${group}
+    users:
+      - ${userAfterDash(name)}
+
 ${selectedExtraAttributes()}`;
   }
   return out;
