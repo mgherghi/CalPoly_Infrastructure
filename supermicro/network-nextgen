@@ -1,64 +1,69 @@
 ethtool -L enp175s0 rx 16 tx 16
 ethtool -L enp175s0d1 rx 16 tx 16
 
-ip link set enp175s0 mtu 9000
-ip link set enp175s0d1 mtu 9000
-ip link set enp175s0 up 
-ip link set enp175s0d1 up
+# Setup 802.3ad bond connection
+modprobe bonding mode=802.3ad miimon=100
+ip link  add mlnx-bond type bond
+ip link  set enp175s0 mtu 9000
+ip link  set enp175s0d1 mtu 9000
+ip link  set mlnx-bond mtu 9000
+ip link  set enp175s0 master mlnx-bond
+ip link  set enp175s0d1 master mlnx-bond
+ip link  set mlnx-bond up
 
 # SETUP DRBD REPLICATION
-ip link add link enp175s0 name rdma type vlan id 10
+ip link add link mlnx-bond name rdma type vlan id 10
 ip link set dev rdma type vlan egress-qos-map 0:3 1:3 2:3 3:3 4:3 5:3 6:3 7:3
 ip link set rdma mtu 9000
 ip link set rdma up
 ip addr add 4.1.0.10/24 dev rdma
 
 # SETUP NFS SHARE
-ip link add enp175s0d1 name nfs type vlan id 15
+ip link add mlnx-bond name nfs type vlan id 15
 ip link set nfs mtu 9000
 ip link set nfs up
 ip addr add 4.115.0.10/24 nfs
 
 # SETUP LINSTOR MGMT 
-ip link add link enp175s0d1 name linstor-mgmt type vlan id 20
+ip link add link mlnx-bond name linstor-mgmt type vlan id 20
 ip link set linstor-mgmt mtu 9000 
 ip link set linstor-mgmt up
 ip addr add 4.2.0.10/24 dev linstor-mgmt
 
 # SETUP OVN NETWORK
-ip link add link enp175s0d1 name ovn-mgmt type vlan id 30
+ip link add link mlnx-bond name ovn-mgmt type vlan id 30
 ip link set ovn-mgmt mtu 9000
 ip link set ovn-mgmt up
 ip addr add 4.3.0.10/24 dev ovn-mgmt
 
 # SETUP INCUS NETWORK
-ip link add link enp175s0d1 name incus-mgmt type vlan id 40
+ip link add link mlnx-bond name incus-mgmt type vlan id 40
 ip link set incus-mgmt mtu 9000
 ip link set incus-mgmt up
 ip addr add 4.4.0.10/24 dev incus-mgmt
 
 # SETUP INCUS NETWORKS
-ip link add link enp175s0d1 name infra type vlan id 50
+ip link add link mlnx-bond name infra type vlan id 50
 ip link set infra mtu 9000
 ip link set infra up
 
-ip link add link enp175s0d1 name admin-labs type vlan id 60
+ip link add link mlnx-bond name admin-labs type vlan id 60
 ip link set admin-labs mtu 9000
 ip link set admin-labs up
 
-ip link add link enp175s0d1 name bdebruhl type vlan id 70
+ip link add link mlnx-bond name bdebruhl type vlan id 70
 ip link set bdebruhl mtu 9000
 ip link set bdebruhl up
 
-ip link add link enp175s0d1 name bahartma type vlan id 80
+ip link add link mlnx-bond name bahartma type vlan id 80
 ip link set bahartma mtu 9000
 ip link set bahartma up
 
-ip link add link enp175s0d1 name srbeard type vlan id 90
+ip link add link mlnx-bond name srbeard type vlan id 90
 ip link set srbeard mtu 9000
 ip link set srbeard up
 
-ip link add link enp175s0d1 name dofang type vlan id 100
+ip link add link mlnx-bond name dofang type vlan id 100
 ip link set dofang mtu 9000
 ip link set dofang up
 
