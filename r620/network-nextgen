@@ -1,4 +1,4 @@
-ethtool -L enp66s0 combined 16
+ethtool -L enp66s0 rx 32 tx 32
 
 # SETUP MTU
 ip link set enp66s0 mtu 9000
