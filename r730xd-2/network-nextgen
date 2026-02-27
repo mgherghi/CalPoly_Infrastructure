@@ -1,5 +1,5 @@
-ethtool -L enp131s0 combined 16
-ethtool -L enp131s0d1 combined 16
+ethtool -L enp131s0 rx 32 tx 32
+ethtool -L enp131s0d1 rx 32 tx 32
 
 # Unload bonding module 
 modprobe -r bonding || true
