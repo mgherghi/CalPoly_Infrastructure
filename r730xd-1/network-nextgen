@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ethtool -L enp132s0 rx 32 tx 32
 ethtool -L enp132s0d1 rx 32 tx 32
 
