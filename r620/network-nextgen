@@ -14,7 +14,7 @@ ip link set rdma up
 ip addr add 4.1.0.6/24 dev rdma
 
 # Setup NFS Share
-ip link add link mlnx-bond name nfs type vlan id 15
+ip link add link enp66s0 name nfs type vlan id 15
 ip link set nfs mtu 9000
 ip link set nfs up
 ip addr add 4.115.0.6/24 dev nfs 
