@@ -1,6 +1,5 @@
-ethtool -L enp175s0 rx 16 tx 16
-ethtool -L enp175s0d1 rx 16 tx 16
-
+ethtool -L enp175s0 combined 16
+ethtool -L enp175s0d1 combined 16
 
 # Unload bonding module 
 modprobe -r bonding || true
