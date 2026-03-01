@@ -10,7 +10,9 @@ modprobe -r bonding || true
 modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
 ip link  add mlnx-bond type bond
 ip link  set enp132s0 mtu 9000
+ip link  set enp132s0 down
 ip link  set enp132s0d1 mtu 9000
+ip link set enp132s0d1 down
 ip link  set mlnx-bond mtu 9000
 ip link  set enp132s0 master mlnx-bond
 ip link  set enp132s0d1 master mlnx-bond
