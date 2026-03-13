@@ -1,10 +1,9 @@
 #!/bin/bash
 
-ethtool -L enp66s0 rx 32 tx 32
-
 # SETUP MTU
-ip link set enp66s0 mtu 9000
-ip link set enp66s0 up
+ip link set enp65s0 down
+ip link set enp66s0 down
+
 
 
 # SETUP DRBD REPLICATION
