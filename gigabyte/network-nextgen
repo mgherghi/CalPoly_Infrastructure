@@ -46,10 +46,10 @@ ip link set admin-labs up
 ip link add link mlnx-bond name bdebruhl type vlan id 70
 ip link set bdebruhl up
 
-ip link add link mlnx-bond name bahartma type vlan id 80
+ip link add link mlnx-bond name bhartma type vlan id 80
 ip link set bahartma up
 
-ip link add link mlnx-bond name srbeard type vlan id 90
+ip link add link mlnx-bond name sbeard type vlan id 90
 ip link set srbeard up
 
 ip link add link mlnx-bond name dofang type vlan id 100
