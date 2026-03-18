@@ -1,56 +1,48 @@
-# Unload bonding module 
-modprobe -r bonding || true
+ip link set enp65s0f0np0 up
+ip link set enp65s0f1np1 up
 
-# SETUP MTU
-modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-ip link  add mlnx-bond type bond
-ip link  set enp65s0f0np0 down
-ip link  set enp65s0f1np1 down
-ip link  set enp65s0f0np0 master mlnx-bond
-ip link  set enp65s0f1np1 master mlnx-bond
-ip link  set mlnx-bond up
-
-# SETUP DRBD REPLICATION
-ip link add link mlnx-bond name drbd type vlan id 10 
+ip link set name en41f0pf0sf1 drbd 
+ip link set name enp41s0f0s1 drbd-rep
 ip link set drbd mtu 9000
-ip link set drbd up
-ip addr add 4.1.0.11/24 dev drbd
+ip link set drbd up 
+ip  addr add 4.1.0.11/24 dev drbd 
 
-# Setup NFS Share
-ip link add link mlnx-bond name nfs type vlan id 15
-ip link set nfs up
-ip addr add 4.115.0.11/24 dev nfs 
+ip link set en41f0pf0sf2 name linstor-mgmt 
+ip link set enp41s0f0s2  name linstor-rep
+ip link set linstor-mgmt up 
+ip  addr add 4.2.0.11/24 dev linstor-mgmt 
 
-# SETUP LINSTOR MGMT 
-ip link add link mlnx-bond name linstor-mgmt type vlan id 20
-ip link set linstor-mgmt up
-ip addr add 4.2.0.11/24 dev linstor-mgmt
+ip link set  en41f0pf0sf3 name ovn-mgmt 
+ip link set  enp41s0f0s3 name ovn-rep
+ip link set ovn-mgmt up 
+ip  addr add 4.3.0.11/24 dev ovn-mgmt 
 
-# SETUP OVN NETWORK
-ip link add link mlnx-bond name ovn-mgmt type vlan id 30
-ip link set ovn-mgmt up
-ip addr add 4.3.0.11/24 dev ovn-mgmt
+ip link set  en41f0pf0sf4 name incus-mgmt 
+ip link set  enp41s0f0s4 name incus-rep
+ip link set incus-mgmt up 
+ip  addr add 4.4.0.11/24 dev incus-mgmt 
 
-# SETUP INCUS NETWORK
-ip link add link mlnx-bond name incus-mgmt type vlan id 40
-ip link set incus-mgmt up
-ip addr add 4.4.0.11/24 dev incus-mgmt
+ip link set  en41f1pf1sf1 name infra
+ip link set  enp41s0f1s1 name infra-rep
+ip link set infra up 
+ip link set infra-rep up
 
-# SETUP INCUS NETWORKS
-ip link add link mlnx-bond name infra type vlan id 50
-ip link set infra up
-
-ip link add link mlnx-bond name admin-labs type vlan id 60
+ip link set  en41f1pf1sf2 name admin-labs 
+ip link set  enp41s0f1s2 name admin-rep
 ip link set admin-labs up
 
-ip link add link mlnx-bond name bdebruhl type vlan id 70
+ip link set  en41f1pf1sf3 name bdebruhl 
+ip link set  enp41s0f1s3 name bdebruhl-rep
 ip link set bdebruhl up
 
-ip link add link mlnx-bond name bhartma type vlan id 80
+ip link set  en41f1pf1sf4 name bhartma 
+ip link set  enp41s0f1s4 name bhartma-rep
 ip link set bhartma up
 
-ip link add link mlnx-bond name sbeard type vlan id 90
+ip link set  en41f1pf1sf5 name sbeard
+ip link set  enp41s0f1s5 name sbeard-rep
 ip link set sbeard up
 
-ip link add link mlnx-bond name dofang type vlan id 100
+ip link set  en41f1pf1sf6 name dofang
+ip link set  enp41s0f1s6 name dofang-rep
 ip link set dofang up
