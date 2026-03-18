@@ -1,5 +1,19 @@
 #!/bin/bash
 
+ovs-vsctl --may-exist add-br  br-mlnx 
+ovs-vsctl --may-exist add-bond br-mlnx mlnx-bond enp65s0f0np0 enp65s0f1np1
+ovs-vsctl set port mlnx-bond lacp=active bond_mode=balance-tcp vlan_mode=trunk trunks=10,20,30,40,50,60,70,80,90,100  other_config:lacp-time=fast other_config:hw-offload=true
+ovs-vsctl --may-exist add-port br-mlnx drbd-rep tag=10 -- set Interface drbd-rep mtu_request=9000
+ovs-vsctl --may-exist add-port br-mlnx linstor-rep tag=20
+ovs-vsctl --may-exist add-port br-mlnx ovn-rep  tag=30
+ovs-vsctl --may-exist add-port br-mlnx incus-rep  tag=40
+ovs-vsctl --may-exist add-port br-mlnx infra-rep  tag=50
+ovs-vsctl --may-exist add-port br-mlnx admin-rep  tag=60
+ovs-vsctl --may-exist add-port br-mlnx bdebruhl-rep  tag=70
+ovs-vsctl --may-exist add-port br-mlnx bhartma-rep  tag=80
+ovs-vsctl --may-exist add-port br-mlnx sbeard-rep  tag=90
+ovs-vsctl --may-exist add-port br-mlnx dofang-rep  tag=100
+
 devlink dev eswitch set pci/0000:41:00.0 mode switchdev
 devlink dev eswitch set pci/0000:41:00.1 mode switchdev
 
