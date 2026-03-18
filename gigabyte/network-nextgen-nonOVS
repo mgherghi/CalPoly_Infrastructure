@@ -1,3 +1,5 @@
+ovs-vsctl del-br br-mlnx 
+
 # Unload bonding module 
 modprobe -r bonding || true
 
