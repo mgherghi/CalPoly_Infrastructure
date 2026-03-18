@@ -1,9 +1,6 @@
 devlink dev eswitch set pci/0000:41:00.0 mode switchdev
 devlink dev eswitch set pci/0000:41:00.1 mode switchdev
 
-ip link set enp65s0f0np0 up
-ip link set enp65s0f1np1 up
-
 /opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 1
 /opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 2
 /opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 3
@@ -27,8 +24,12 @@ ip link set enp65s0f1np1 up
 /opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98308 hw_addr 00:00:00:00:05:00 state active
 /opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98309 hw_addr 00:00:00:00:06:00 state active
 
-ip link set name en41f0pf0sf1 drbd 
-ip link set name enp41s0f0s1 drbd-rep
+
+ip link set enp65s0f0np0 up
+ip link set enp65s0f1np1 up
+
+ip link set  en41f0pf0sf1 name drbd 
+ip link set  enp41s0f0s1 name drbd-rep
 ip link set drbd mtu 9000
 ip link set drbd up 
 ip  addr add 4.1.0.11/24 dev drbd 
