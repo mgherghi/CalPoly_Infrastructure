@@ -32,21 +32,25 @@ ip link set  en41f0pf0sf1 name drbd
 ip link set  enp41s0f0s1 name drbd-rep
 ip link set drbd mtu 9000
 ip link set drbd up 
+ip link set drbd-rep up 
 ip  addr add 4.1.0.11/24 dev drbd 
 
 ip link set en41f0pf0sf2 name linstor-mgmt 
 ip link set enp41s0f0s2  name linstor-rep
-ip link set linstor-mgmt up 
+ip link set linstor-mgmt up
+ip link set linstor-rep up 
 ip  addr add 4.2.0.11/24 dev linstor-mgmt 
 
 ip link set  en41f0pf0sf3 name ovn-mgmt 
 ip link set  enp41s0f0s3 name ovn-rep
 ip link set ovn-mgmt up 
+ip link set ovn-rep up 
 ip  addr add 4.3.0.11/24 dev ovn-mgmt 
 
 ip link set  en41f0pf0sf4 name incus-mgmt 
 ip link set  enp41s0f0s4 name incus-rep
 ip link set incus-mgmt up 
+ip link set incus-rep up 
 ip  addr add 4.4.0.11/24 dev incus-mgmt 
 
 ip link set  en41f1pf1sf1 name infra
@@ -57,19 +61,24 @@ ip link set infra-rep up
 ip link set  en41f1pf1sf2 name admin-labs 
 ip link set  enp41s0f1s2 name admin-rep
 ip link set admin-labs up
+ip link set admin-rep up 
 
 ip link set  en41f1pf1sf3 name bdebruhl 
 ip link set  enp41s0f1s3 name bdebruhl-rep
 ip link set bdebruhl up
+ip link set bdebruhl-rep up
 
 ip link set  en41f1pf1sf4 name bhartma 
 ip link set  enp41s0f1s4 name bhartma-rep
 ip link set bhartma up
+ip link set bharmt-rep up
 
 ip link set  en41f1pf1sf5 name sbeard
 ip link set  enp41s0f1s5 name sbeard-rep
 ip link set sbeard up
+ip link set sbeard-rep up
 
 ip link set  en41f1pf1sf6 name dofang
 ip link set  enp41s0f1s6 name dofang-rep
 ip link set dofang up
+ip link set dofang-rep up
