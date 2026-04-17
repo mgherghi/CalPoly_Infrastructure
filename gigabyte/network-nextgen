@@ -8,6 +8,10 @@ modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
 
 ip link add mlnx-bond type bond mode 802.3ad miimon 100 lacp_rate fast xmit_hash_policy layer3+4
 
+ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
+ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
+systemctl restart openvswitch-switch
+
 ip link set enp65s0f0np0 down
 ip link set enp65s0f1np1 down
 
@@ -22,12 +26,9 @@ ip link set mlnx-bond mtu 9000
 ip link set mlnx-bond up
 
 # 3) Create the OVS-DOCA bridge and attach the bond
-ovs-vsctl --may-exist add-br br-mlnx -- set Bridge br-mlnx datapath_type=doca
+ovs-vsctl --may-exist add-br br-mlnx -- set Bridge br-mlnx
 ovs-vsctl --may-exist add-port br-mlnx mlnx-bond \
-  -- set Interface mlnx-bond type=doca 
-ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
-ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
-systemctl restart openvswitch-switch
+  -- set Interface mlnx-bond 
 ovs-vsctl set port mlnx-bond vlan_mode=trunk trunks=10,20,30,40,50,60,70,80,90,100 
 ovs-vsctl --may-exist add-port br-mlnx drbd-rep tag=10 -- set Interface drbd-rep mtu_request=9000
 ovs-vsctl --may-exist add-port br-mlnx linstor-rep tag=20
