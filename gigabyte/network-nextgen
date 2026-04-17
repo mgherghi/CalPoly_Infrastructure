@@ -24,7 +24,10 @@ ip link set mlnx-bond up
 # 3) Create the OVS-DOCA bridge and attach the bond
 ovs-vsctl --may-exist add-br br-mlnx -- set Bridge br-mlnx datapath_type=doca
 ovs-vsctl --may-exist add-port br-mlnx mlnx-bond \
-  -- set Interface mlnx-bond type=doca options:dpdk-lsc-interrupt=true
+  -- set Interface mlnx-bond type=doca 
+ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
+ovs-vsctl set Open_vSwitch . other_config:tc-policy=hw-offload
+systemctl restart openvswitch-switch
 ovs-vsctl set port mlnx-bond vlan_mode=trunk trunks=10,20,30,40,50,60,70,80,90,100 
 ovs-vsctl --may-exist add-port br-mlnx drbd-rep tag=10 -- set Interface drbd-rep mtu_request=9000
 ovs-vsctl --may-exist add-port br-mlnx linstor-rep tag=20
@@ -64,65 +67,60 @@ ovs-vsctl --may-exist add-port br-mlnx dofang-rep  tag=100
 
 
 ip link set en41f0pf0sf1 name drbd mtu 9000
-wait
+ip link set drbd up 
 ip link set enp41s0f0s1 name drbd-rep mtu 9000
 ip link set drbd-rep up 
-ip link set drbd up 
 ip addr add 4.1.0.11/24 dev drbd 
 
-ip link set en41f0pf0sf2 name linstor-mgmt 
-wait 
+ip link set en41f0pf0sf2 name linstor-mgmt  
+ip link set linstor-mgmt up
 ip link set enp41s0f0s2  name linstor-rep  
 ip link set linstor-rep up 
-ip link set linstor-mgmt up
 ip addr add 4.2.0.11/24 dev linstor-mgmt 
 
 ip link set  en41f0pf0sf3 name ovn-mgmt  
-wait
+ip link set ovn-mgmt up 
 ip link set  enp41s0f0s3 name ovn-rep  
 ip link set ovn-rep up 
-ip link set ovn-mgmt up 
 ip addr add 4.3.0.11/24 dev ovn-mgmt 
 
 ip link set  en41f0pf0sf4 name incus-mgmt 
-wait
+ip link set incus-mgmt up 
 ip link set  enp41s0f0s4 name incus-rep
 ip link set incus-rep up 
-ip link set incus-mgmt up 
 ip addr add 4.4.0.11/24 dev incus-mgmt 
 
 ip link set en41f1pf1sf1 name infra
-wait
+ip link set infra up 
 ip link set enp41s0f1s1 name infra-rep
 ip link set infra-rep up
-ip link set infra up 
+
 
 ip link set  en41f1pf1sf2 name admin-labs 
-wait
+ip link set admin-labs up
 ip link set  enp41s0f1s2 name admin-rep
 ip link set admin-rep up 
-ip link set admin-labs up
+
 
 ip link set  en41f1pf1sf3 name bdebruhl 
-wait
+ip link set bdebruhl up
 ip link set  enp41s0f1s3 name bdebruhl-rep
 ip link set bdebruhl-rep up
-ip link set bdebruhl up
+
 
 ip link set  en41f1pf1sf4 name bhartma 
-wait
+ip link set bhartma up
 ip link set  enp41s0f1s4 name bhartma-rep
 ip link set bhartma-rep up
-ip link set bhartma up
+
 
 ip link set  en41f1pf1sf5 name sbeard
-wait
+ip link set sbeard up
 ip link set  enp41s0f1s5 name sbeard-rep
 ip link set sbeard-rep up
-ip link set sbeard up
+
 
 ip link set  en41f1pf1sf6 name dofang
-wait
+ip link set dofang up
 ip link set  enp41s0f1s6 name dofang-rep
 ip link set dofang-rep up
-ip link set dofang up
