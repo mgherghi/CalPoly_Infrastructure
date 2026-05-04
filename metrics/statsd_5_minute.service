@@ -1,0 +1,7 @@
+[Unit]
+Decription=Run a set of metrics every 5 minutes
+After=network.target
+[Service]
+Type=oneshot
+ExecStart=/sbin/metrics_5min
+
