@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+import sys
+import time
+import socket
+
+OBSERVATION_WINDOW_SECONDS = 5
+
+def send_statsd_metric_with_tags(metric_name, tags, value, metric_type, host='127.0.0.1', port=8125):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    metric = f"{metric_name},{tags}:{value}|{metric_type}"
+    try:
+       sock.sendto(metric.encode('utf-8'), (host, port))
+    finally:
+       sock.close()
+
+def read_cpu():
+    with open("/proc/stat", "r", encoding="utf-8") as f:
+        fields = f.readline().split()[1:]
+
+    values = [int(x) for x in fields]
+
+    idle = values[3]
+    iowait = values[4]
+    idle_total = idle + iowait
+
+    total = sum(values)
+
+    return total, idle_total
+
+
+def main():
+    try:
+        total1, idle1 = read_cpu()
+        time.sleep(OBSERVATION_WINDOW_SECONDS)
+        total2, idle2 = read_cpu()
+
+        total_delta = total2 - total1
+        idle_delta = idle2 - idle1
+
+        if total_delta <= 0:
+            print("0.00")
+            return 0
+
+        cpu_usage = (1 - idle_delta / total_delta) * 100
+        print(f"{cpu_usage:.2f}")
+
+        send_statsd_metric_with_tags(metric_name='statsd_cpu_usage(avg)', value=f"{cpu_usage:.2f}", metric_type='g',tags=f"node_type=storage,hostname={socket.gethostname()}")
+
+        return 0
+
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
