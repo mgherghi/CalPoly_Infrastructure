@@ -42,7 +42,6 @@ def main():
             return 0
 
         cpu_usage = (1 - idle_delta / total_delta) * 100
-        print(f"{cpu_usage:.2f}")
 
         send_statsd_metric_with_tags(metric_name='statsd_cpu_usage(avg)', value=f"{cpu_usage:.2f}", metric_type='g',tags=f"node_type=storage,hostname={socket.gethostname()}")
 
