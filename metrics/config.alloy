@@ -1,5 +1,5 @@
 // Listen for StatsD metrics
-prometheus.exporter.statsd "$(hostname)" {
+prometheus.exporter.statsd "default" {
   listen_udp = "0.0.0.0:8125"
   listen_tcp = "0.0.0.0:8125"
 
@@ -8,7 +8,7 @@ prometheus.exporter.statsd "$(hostname)" {
 
 // Scrape the StatsD exporter
 prometheus.scrape "statsd_scraper" {
-  targets    = prometheus.exporter.statsd."$(hostname).targets
+  targets    = prometheus.exporter.statsd.default.targets
   forward_to = [prometheus.remote_write.metrics_service.receiver]
 }
 
