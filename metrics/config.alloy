@@ -28,7 +28,7 @@ prometheus.scrape "statsd_scraper" {
 
 remotecfg {
   url            = "https://fleet-management-prod-014.grafana.net"
-  id             = "$(hostname)"
+  id             = sys.env("HOSTNAME")
   poll_frequency = "60s"
   attributes     = {}
 
