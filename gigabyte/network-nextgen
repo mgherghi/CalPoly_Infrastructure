@@ -125,7 +125,7 @@ ip link set dofang-rep up
 ###########   ALSO ENABLE SPDK FOR LINSTOR ##########
 ## https://docs.nvidia.com/doca/archive/2-10-0/ovs-dpdk-hardware-acceleration/index.html
 
-ovs-vsctl --may-exist add-br br-mlnx -- set bridge br-mlnx 
+ovs-vsctl --may-exist add-br br-mlnx 
 ovs-vsctl --may-exist add-port br-mlnx mlnx-bond -- set Port mlnx-bond vlan_mode=trunk trunks=5,10,20,30,40,50,60,70,80,90,100 
 ovs-vsctl --may-exist add-port br-mlnx drbd-rdma-rep tag=5 -- set Interface drbd-rdma-rep  mtu_request=9000 
 ovs-vsctl --may-exist add-port br-mlnx drbd-rep tag=10 -- set Interface drbd-rep  mtu_request=9000 
