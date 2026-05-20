@@ -13,15 +13,16 @@ ip link set enp66s0 master mlnx-bond
 ip link set mlnx-bond up
 
 # SETUP DRBD REPLICATION
+ip link add link mlnx-bond name drbd-rdma type vlan id 5
+ip link set drbd-rdma mtu 9000
+ip link set drbd-rdma up
+ip addr add 4.0.0.12/24 dev drbd-rdma
+
+# SETUP DRBD REPLICATION
 ip link add link mlnx-bond name drbd type vlan id 10
 ip link set drbd mtu 9000
 ip link set drbd up
 ip addr add 4.1.0.12/24 dev drbd
-
-# Setup NFS Share
-ip link add link mlnx-bond name nfs type vlan id 15
-ip link set nfs up
-ip addr add 4.115.0.12/24 dev nfs 
 
 # SETUP LINSTOR MGMT 
 ip link add link mlnx-bond name linstor-mgmt type vlan id 20
