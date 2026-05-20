@@ -1,14 +1,4 @@
 #!/bin/bash
-ethtool -K enp65s0f0np0 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
-
-ethtool -K enp65s0f1np1 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
-
-#Huge pages
-#echo 4 > /sys/devices/system/node/node0/hugepages/hugepages-1048576kB/nr_hugepages
-#echo 4 > /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages
-
-
-
 
 devlink dev eswitch set pci/0000:41:00.0 mode switchdev
 devlink dev eswitch set pci/0000:41:00.1 mode switchdev
@@ -30,6 +20,29 @@ ip link set enp65s0f1np1 up
 ip link set mlnx-bond mtu 9000
 ip link set mlnx-bond up
 
+# 3) Create the OVS-DOCA bridge and attach the bond
+## https://docs.nvidia.com/doca/archive/2-10-0/ovs-doca-hardware-acceleration/index.html
+## https://docs.nvidia.com/doca/archive/2-10-0/ovs-dpdk-hardware-acceleration/index.html
+
+ovs-vsctl --may-exist add-br br-mlnx
+ovs-vsctl --may-exist add-port br-mlnx mlnx-bond 
+ovs-vsctl set port mlnx-bond vlan_mode=trunk trunks=5,10,20,30,40,50,60,70,80,90,100 
+ovs-vsctl --may-exist add-port br-mlnx drbd-rdma-rep tag=5 
+ovs-vsctl --may-exist add-port br-mlnx drbd-rep tag=10 
+ovs-vsctl --may-exist add-port br-mlnx linstor-rep tag=20
+ovs-vsctl --may-exist add-port br-mlnx ovn-rep  tag=30
+ovs-vsctl --may-exist add-port br-mlnx incus-rep  tag=40
+ovs-vsctl --may-exist add-port br-mlnx infra-rep  tag=50
+ovs-vsctl --may-exist add-port br-mlnx admin-rep  tag=60
+ovs-vsctl --may-exist add-port br-mlnx bdebruhl-rep  tag=70
+ovs-vsctl --may-exist add-port br-mlnx bhartma-rep  tag=80
+ovs-vsctl --may-exist add-port br-mlnx sbeard-rep  tag=90
+ovs-vsctl --may-exist add-port br-mlnx dofang-rep  tag=100
+
+ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
+#ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_sw
+ovs-vsctl set Open_vSwitch . other_config:enable-tso=true
+systemctl restart openvswitch-switch
 
 /opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 1
 /opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 2
@@ -56,6 +69,13 @@ ip link set mlnx-bond up
 /opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98308 hw_addr 00:00:00:00:05:00 state active
 /opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98309 hw_addr 00:00:00:00:06:00 state active
 
+
+ip link set  en41f0pf0sf5 name drbd-rdma mtu 9000
+ip link set drbd-rdma up 
+ip link set  enp41s0f0s5 name drbd-rdma-rep mtu 9000
+ip link set drbd-rdma-rep up 
+ip addr add 4.0.0.11/24 dev drbd-rdma
+
 ip link set en41f0pf0sf1 name drbd mtu 9000
 ip link set drbd up 
 ip link set enp41s0f0s1 name drbd-rep mtu 9000
@@ -79,12 +99,6 @@ ip link set incus-mgmt up
 ip link set  enp41s0f0s4 name incus-rep
 ip link set incus-rep up 
 ip addr add 4.4.0.11/24 dev incus-mgmt 
-
-ip link set  en41f0pf0sf5 name drbd-rdma
-ip link set drbd-rdma up 
-ip link set  enp41s0f0s5 name drbd-rdma-rep mtu 9000
-ip link set drbd-rdma-rep up 
-ip addr add 4.0.0.11/24 dev drbd-rdma
 
 ip link set en41f1pf1sf1 name infra
 ip link set infra up 
@@ -118,30 +132,3 @@ ip link set  en41f1pf1sf6 name dofang
 ip link set dofang up
 ip link set  enp41s0f1s6 name dofang-rep
 ip link set dofang-rep up
-
-
-# 3) Create the OVS-DOCA bridge and attach the bond
-## https://docs.nvidia.com/doca/archive/2-10-0/ovs-doca-hardware-acceleration/index.html
-###########   ALSO ENABLE SPDK FOR LINSTOR ##########
-## https://docs.nvidia.com/doca/archive/2-10-0/ovs-dpdk-hardware-acceleration/index.html
-
-ovs-vsctl --may-exist add-br br-mlnx 
-ovs-vsctl --may-exist add-port br-mlnx mlnx-bond -- set Port mlnx-bond vlan_mode=trunk trunks=5,10,20,30,40,50,60,70,80,90,100 
-ovs-vsctl --may-exist add-port br-mlnx drbd-rdma-rep tag=5 -- set Interface drbd-rdma-rep  mtu_request=9000 
-ovs-vsctl --may-exist add-port br-mlnx drbd-rep tag=10 -- set Interface drbd-rep  mtu_request=9000 
-ovs-vsctl --may-exist add-port br-mlnx linstor-rep tag=20 
-ovs-vsctl --may-exist add-port br-mlnx ovn-rep tag=30 
-ovs-vsctl --may-exist add-port br-mlnx incus-rep tag=40
-ovs-vsctl --may-exist add-port br-mlnx infra-rep tag=50 
-ovs-vsctl --may-exist add-port br-mlnx admin-rep tag=60 
-ovs-vsctl --may-exist add-port br-mlnx bdebruhl-rep tag=70
-ovs-vsctl --may-exist add-port br-mlnx bhartma-rep tag=80 
-ovs-vsctl --may-exist add-port br-mlnx sbeard-rep tag=90 
-ovs-vsctl --may-exist add-port br-mlnx dofang-rep tag=100
-
-#ovs-vsctl set Open_vSwitch . other_config:dpdk-socket-mem="2048,2048"
-#ovs-vsctl --no-wait set Open_vSwitch . other_config:doca-init=true
-ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
-#ovs-vsctl set Open_vSwitch . other_config:enable-tso=true
-
-systemctl restart openvswitch-switch
