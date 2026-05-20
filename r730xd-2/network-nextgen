@@ -1,4 +1,6 @@
 #!/bin/bash
+ethtool -K enp131s0 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
+ethtool -K enp131s0d1 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
 
 # Unload bonding module 
 modprobe -r bonding || true
@@ -10,6 +12,12 @@ ip link  set enp131s0 down
 ip link  set enp131s0 master mlnx-bond
 ip link  set enp131s0d1 master mlnx-bond
 ip link  set mlnx-bond up
+
+# SETUP DRBD-RDMA REPLICATION
+ip link add link mlnx-bond name drbd-rdma type vlan id 5
+ip link set drbd-rdma mtu 9000
+ip link set drbd-rdma up
+ip addr add 4.0.0.8/24 dev drbd-rdma
 
 # SETUP DRBD REPLICATION
 ip link add link mlnx-bond name drbd type vlan id 10 
