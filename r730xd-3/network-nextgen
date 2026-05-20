@@ -1,5 +1,8 @@
 #!/bin/bash
 
+ethtool -K enp131s0 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
+ethtool -K enp131s0d1 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
+
 # Unload bonding module 
 modprobe -r bonding || true
 
