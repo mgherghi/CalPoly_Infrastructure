@@ -142,6 +142,6 @@ ovs-vsctl --may-exist add-port br-mlnx dofang-rep tag=100
 #ovs-vsctl set Open_vSwitch . other_config:dpdk-socket-mem="2048,2048"
 #ovs-vsctl --no-wait set Open_vSwitch . other_config:doca-init=true
 ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
-ovs-vsctl set Open_vSwitch . other_config:enable-tso=true
+#ovs-vsctl set Open_vSwitch . other_config:enable-tso=true
 
 systemctl restart openvswitch-switch
