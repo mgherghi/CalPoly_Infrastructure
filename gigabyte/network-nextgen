@@ -39,6 +39,8 @@ ovs-vsctl --may-exist add-port br-mlnx bhartma-rep  tag=80
 ovs-vsctl --may-exist add-port br-mlnx sbeard-rep  tag=90
 ovs-vsctl --may-exist add-port br-mlnx dofang-rep  tag=100
 
+ip link set br-mlnx up 
+
 ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
 #ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_sw
 ovs-vsctl set Open_vSwitch . other_config:enable-tso=true
