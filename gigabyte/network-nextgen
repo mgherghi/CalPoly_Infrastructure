@@ -1,5 +1,7 @@
 #!/bin/bash
 
+/sbin/dhcpcd
+
 devlink dev eswitch set pci/0000:41:00.0 mode switchdev
 devlink dev eswitch set pci/0000:41:00.1 mode switchdev
 
