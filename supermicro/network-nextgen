@@ -1,7 +1,6 @@
 #!/bin/bash
 ethtool -K enp175s0 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
 ethtool -K enp175s0d1 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
-/sbin/dhcpcd
 
 # Unload bonding module 
 modprobe -r bonding || true
