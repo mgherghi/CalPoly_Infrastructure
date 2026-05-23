@@ -2,6 +2,8 @@
 ethtool -K enp65s0 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
 ethtool -K enp66s0 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
 
+/sbin/dhcpcd
+
 # Unload bonding module 
 modprobe -r bonding || true
 
