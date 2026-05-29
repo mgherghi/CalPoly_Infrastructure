@@ -1,7 +1,31 @@
 #!/bin/bash
 
-#ethtool -K enp131s0 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
-#ethtool -K enp131s0d1 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
+ethtool -G enp131s0 rx 8192 tx 8192
+ethtool -K enp131s0 rx on 
+ethtool -K enp131s0 tx on 
+ethtool -K enp131s0 sg on 
+ethtool -K enp131s0 tso on 
+ethtool -K enp131s0 gso on 
+ethtool -K enp131s0 gro on 
+ethtool -K enp131s0 rxvlan on 
+ethtool -K enp131s0 txvlan on 
+ethtool -K enp131s0 rx-checksum on 
+ethtool -K enp131s0 tx-checksum on 
+ethtool -K enp131s0 tx-udp_tnl-segmentation on
+
+ethtool -G enp131s0d1 rx 8192 tx 8192
+ethtool -K enp131s0d1 rx on 
+ethtool -K enp131s0d1 tx on 
+ethtool -K enp131s0d1 sg on 
+ethtool -K enp131s0d1 tso on 
+ethtool -K enp131s0d1 gso on 
+ethtool -K enp131s0d1 gro on 
+ethtool -K enp131s0d1 rxvlan on 
+ethtool -K enp131s0d1 txvlan on 
+ethtool -K enp131s0d1 rx-checksum on 
+ethtool -K enp131s0d1 tx-checksum on 
+ethtool -K enp131s0d1 tx-udp_tnl-segmentation on
+
 
 # Unload bonding module 
 modprobe -r bonding || true
@@ -11,28 +35,34 @@ modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
 ip link  add mlnx-bond type bond
 ip link  set enp131s0 down
 ip link  set enp131s0d1 down
+ip link set enp131s0 mtu 9216
+ip link set enp131s0d1 mtu 9216
 ip link  set enp131s0 master mlnx-bond
 ip link  set enp131s0d1 master mlnx-bond
 ip link  set mlnx-bond up
 
 # SETUP DRBD REPLICATION
 ip link add link mlnx-bond name drbd-rdma type vlan id 5
-ip link set drbd-rdma mtu 9000
+ip link set drbd-rdma mtu 9216
 ip link set drbd-rdma up
 ip addr add 4.0.0.9/24 dev drbd-rdma
 
 # SETUP DRBD REPLICATION
 ip link add link mlnx-bond name drbd type vlan id 10 
-ip link set drbd mtu 9000
+ip link set drbd mtu 9216
 ip link set drbd up
 ip addr add 4.1.0.9/24 dev drbd
 
 # SETUP LINSTOR MGMT 
 ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+ip link set linstor-mgmt mtu 9000
 ip link set linstor-mgmt up
 ip addr add 4.2.0.9/24 dev linstor-mgmt
 
 # SETUP OVN NETWORK
 ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+ip link set ovn-mgmt mtu 9216
 ip link set ovn-mgmt up
 ip addr add 4.3.0.9/24 dev ovn-mgmt
+
+systemctl restart openvswitch-switch
