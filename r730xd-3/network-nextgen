@@ -55,8 +55,9 @@ ip addr add 4.1.0.9/24 dev drbd
 
 # SETUP LINSTOR MGMT 
 ip link add link mlnx-bond name linstor-mgmt type vlan id 20
-ip link set linstor-mgmt mtu 9000
+
 ip link set linstor-mgmt up
+ip link set linstor-mgmt mtu 9000
 ip addr add 4.2.0.9/24 dev linstor-mgmt
 
 # SETUP OVN NETWORK
