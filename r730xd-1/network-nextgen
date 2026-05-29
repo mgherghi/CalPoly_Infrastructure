@@ -1,7 +1,31 @@
 #!/bin/bash
 
-#ethtool -K enp132s0 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
-#ethtool -K enp132s0d1 hw-tc-offload on tx on rx on tso on gso on gro on rxvlan on txvlan on
+
+ethtool -G enp132s0 rx 8192 tx 8192
+ethtool -K enp132s0 rx on 
+ethtool -K enp132s0 tx on 
+ethtool -K enp132s0 sg on 
+ethtool -K enp132s0 tso on 
+ethtool -K enp132s0 gso on 
+ethtool -K enp132s0 gro on 
+ethtool -K enp132s0 rxvlan on 
+ethtool -K enp132s0 txvlan on 
+ethtool -K enp132s0 rx-checksum on 
+ethtool -K enp132s0 tx-checksum on 
+ethtool -K enp132s0 tx-udp_tnl-segmentation on
+
+ethtool -G enp132s0d1 rx 8192 tx 8192
+ethtool -K enp132s0d1 rx on 
+ethtool -K enp132s0d1 tx on 
+ethtool -K enp132s0d1 sg on 
+ethtool -K enp132s0d1 tso on 
+ethtool -K enp132s0d1 gso on 
+ethtool -K enp132s0d1 gro on 
+ethtool -K enp132s0d1 rxvlan on 
+ethtool -K enp132s0d1 txvlan on 
+ethtool -K enp132s0d1 rx-checksum on 
+ethtool -K enp132s0d1 tx-checksum on 
+ethtool -K enp132s0d1 tx-udp_tnl-segmentation on
 
 # Unload bonding module 
 modprobe -r bonding || true
@@ -17,13 +41,11 @@ ip link  set mlnx-bond up
 
 # SETUP DRBD-RDMA REPLICATION
 ip link add link mlnx-bond name drbd-rdma type vlan id 5
-ip link set drbd-rdma mtu 9000
 ip link set drbd-rdma up
 ip addr add 4.0.0.7/24 dev drbd-rdma
 
 # SETUP DRBD REPLICATION
 ip link add link mlnx-bond name drbd type vlan id 10 
-ip link set drbd mtu 9000
 ip link set drbd up
 ip addr add 4.1.0.7/24 dev drbd
 
