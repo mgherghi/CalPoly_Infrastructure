@@ -13,31 +13,28 @@ ip link set enp65s0f1np1 down
 ip link set enp65s0f0np0 master mlnx-bond
 ip link set enp65s0f1np1 master mlnx-bond
 
-ip link set enp65s0f0np0 mtu 9000
 ip link set enp65s0f0np0 up
-ip link set enp65s0f1np1 mtu 9000
 ip link set enp65s0f1np1 up
-ip link set mlnx-bond mtu 9000
 ip link set mlnx-bond up
 
 # 3) Create the OVS-DOCA bridge and attach the bond
 ## https://docs.nvidia.com/doca/archive/2-10-0/ovs-doca-hardware-acceleration/index.html
 ## https://docs.nvidia.com/doca/archive/2-10-0/ovs-dpdk-hardware-acceleration/index.html
 
-ovs-vsctl --may-exist add-br br-mlnx
-ovs-vsctl --may-exist add-port br-mlnx mlnx-bond 
+ovs-vsctl --may-exist add-br br-mlnx -- set Interface br-mlnx mtu_request=9216
+ovs-vsctl --may-exist add-port br-mlnx mlnx-bond -- set Interface mlnx-bond mtu_request=9216
 ovs-vsctl set port mlnx-bond vlan_mode=trunk trunks=5,10,20,30,40,50,60,70,80,90,100 
-ovs-vsctl --may-exist add-port br-mlnx drbd-rdma-rep tag=5 
-ovs-vsctl --may-exist add-port br-mlnx drbd-rep tag=10 
+ovs-vsctl --may-exist add-port br-mlnx drbd-rdma-rep tag=5 -- set Interface drbd-rdma-rep mtu_request=9216
+ovs-vsctl --may-exist add-port br-mlnx drbd-rep tag=10 -- set Interface drbd-rep mtu_request=9216
 ovs-vsctl --may-exist add-port br-mlnx linstor-rep tag=20
-ovs-vsctl --may-exist add-port br-mlnx ovn-rep  tag=30
-ovs-vsctl --may-exist add-port br-mlnx incus-rep  tag=40
-ovs-vsctl --may-exist add-port br-mlnx infra-rep  tag=50
-ovs-vsctl --may-exist add-port br-mlnx admin-rep  tag=60
-ovs-vsctl --may-exist add-port br-mlnx bdebruhl-rep  tag=70
-ovs-vsctl --may-exist add-port br-mlnx bhartma-rep  tag=80
-ovs-vsctl --may-exist add-port br-mlnx sbeard-rep  tag=90
-ovs-vsctl --may-exist add-port br-mlnx dofang-rep  tag=100
+ovs-vsctl --may-exist add-port br-mlnx ovn-rep  tag=30 -- set Interface ovn-rep mtu_request=9216
+ovs-vsctl --may-exist add-port br-mlnx incus-rep  tag=40 -- set Interface incus-rep mtu_request=9216
+ovs-vsctl --may-exist add-port br-mlnx infra-rep  tag=50 -- set Interface mlnx-bond mtu_request=9000
+ovs-vsctl --may-exist add-port br-mlnx admin-rep  tag=60 -- set Interface mlnx-bond mtu_request=9000
+ovs-vsctl --may-exist add-port br-mlnx bdebruhl-rep  tag=70 -- set Interface mlnx-bond mtu_request=9000
+ovs-vsctl --may-exist add-port br-mlnx bhartma-rep  tag=80 -- set Interface mlnx-bond mtu_request=9000
+ovs-vsctl --may-exist add-port br-mlnx sbeard-rep  tag=90 -- set Interface mlnx-bond mtu_request=9000
+ovs-vsctl --may-exist add-port br-mlnx dofang-rep  tag=100 -- set Interface mlnx-bond mtu_request=9000
 
 ip link set br-mlnx up 
 
@@ -74,13 +71,11 @@ systemctl restart openvswitch-switch
 
 ip link set  en41f0pf0sf5 name drbd-rdma mtu 9000
 ip link set drbd-rdma up 
-ip link set  enp41s0f0s5 name drbd-rdma-rep mtu 9000
 ip link set drbd-rdma-rep up 
 ip addr add 4.0.0.11/24 dev drbd-rdma
 
 ip link set en41f0pf0sf1 name drbd mtu 9000
 ip link set drbd up 
-ip link set enp41s0f0s1 name drbd-rep mtu 9000
 ip link set drbd-rep up 
 ip addr add 4.1.0.11/24 dev drbd 
 
