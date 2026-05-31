@@ -1,30 +1,32 @@
 #!/bin/bash
 
-ethtool -G enp131s0 rx 8192 tx 8192
-ethtool -K enp131s0 rx on 
-ethtool -K enp131s0 tx on 
-ethtool -K enp131s0 sg on 
-ethtool -K enp131s0 tso on 
-ethtool -K enp131s0 gso on 
-ethtool -K enp131s0 gro on 
-ethtool -K enp131s0 rxvlan on 
-ethtool -K enp131s0 txvlan on 
-ethtool -K enp131s0 rx-checksum on 
-ethtool -K enp131s0 tx-checksum on 
-ethtool -K enp131s0 tx-udp_tnl-segmentation on
+ethtool -G enp131s0 rx 4096 tx 4096
+ethtool -K enp131s0 lro off tso off gso off gro on rx on tx on
+#ethtool -K enp131s0 rx on 
+#ethtool -K enp131s0 tx on 
+#ethtool -K enp131s0 sg on 
+#ethtool -K enp131s0 tso on 
+#ethtool -K enp131s0 gso on 
+#ethtool -K enp131s0 gro on 
+#ethtool -K enp131s0 rxvlan on 
+##ethtool -K enp131s0 txvlan on 
+#ethtool -K enp131s0 rx-checksum on 
+#ethtool -K enp131s0 tx-checksum on 
+#ethtool -K enp131s0 tx-udp_tnl-segmentation on
 
-ethtool -G enp131s0d1 rx 8192 tx 8192
-ethtool -K enp131s0d1 rx on 
-ethtool -K enp131s0d1 tx on 
-ethtool -K enp131s0d1 sg on 
-ethtool -K enp131s0d1 tso on 
-ethtool -K enp131s0d1 gso on 
-ethtool -K enp131s0d1 gro on 
-ethtool -K enp131s0d1 rxvlan on 
-ethtool -K enp131s0d1 txvlan on 
-ethtool -K enp131s0d1 rx-checksum on 
-ethtool -K enp131s0d1 tx-checksum on 
-ethtool -K enp131s0d1 tx-udp_tnl-segmentation on
+ethtool -G enp131s0d1 rx 4096 tx 4096
+ethtool -K enp131s0d1 lro off tso off gso off gro on rx on tx on
+#ethtool -K enp131s0d1 rx on 
+#ethtool -K enp131s0d1 tx on 
+#ethtool -K enp131s0d1 sg on 
+#ethtool -K enp131s0d1 tso on 
+#ethtool -K enp131s0d1 gso on 
+#ethtool -K enp131s0d1 gro on 
+#ethtool -K enp131s0d1 rxvlan on 
+#ethtool -K enp131s0d1 txvlan on 
+#ethtool -K enp131s0d1 rx-checksum on 
+#ethtool -K enp131s0d1 tx-checksum on 
+#ethtool -K enp131s0d1 tx-udp_tnl-segmentation on
 # Unload bonding module 
 modprobe -r bonding || true
 
