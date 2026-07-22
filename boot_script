@@ -1,3 +1,9 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+hostname="$(hostname -s)"
+
 network_r730xd1() {
     # Unload bonding module 
     modprobe -r bonding || true
