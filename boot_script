@@ -23,6 +23,9 @@ network_r730xd1() {
     ip link  set enp132s0 master mlnx-bond
     ip link  set enp132s0d1 master mlnx-bond
     ip link  set mlnx-bond up
+    ip link set enp132s0 mtu 9000
+    ip link set enp132s0d1 mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD-RDMA REPLICATION
     ip link add link mlnx-bond name drbd-rdma type vlan id 5
@@ -32,6 +35,7 @@ network_r730xd1() {
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
     ip link set drbd up
+    ip link set drbd mtu 9000
     ip addr add 4.1.0.7/24 dev drbd
 
     # SETUP LINSTOR MGMT 
@@ -63,6 +67,9 @@ network_r730xd2() {
     ip link  set enp131s0 master mlnx-bond
     ip link  set enp131s0d1 master mlnx-bond
     ip link  set mlnx-bond up
+    ip link set enp131s0 mtu 9000
+    ip link set enp131s0d1 mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD-RDMA REPLICATION
     ip link add link mlnx-bond name drbd-rdma type vlan id 5
@@ -72,6 +79,7 @@ network_r730xd2() {
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
     ip link set drbd up
+    ip link set drbd mtu 9000
     ip addr add 4.1.0.8/24 dev drbd
 
     # SETUP LINSTOR MGMT 
@@ -104,6 +112,9 @@ network_r730xd3() {
     ip link  set enp131s0 master mlnx-bond
     ip link  set enp131s0d1 master mlnx-bond
     ip link  set mlnx-bond up
+    ip link set enp131s0 mtu 9000
+    ip link set enp131s0d1 mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd-rdma type vlan id 5
@@ -113,6 +124,7 @@ network_r730xd3() {
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
     ip link set drbd up
+    ip link set drbd mtu 9000
     ip addr add 4.1.0.9/24 dev drbd
 
     # SETUP LINSTOR MGMT 
@@ -145,10 +157,14 @@ network_supermicro() {
     ip link  set enp175s0 master mlnx-bond
     ip link  set enp175s0d1 master mlnx-bond
     ip link  set mlnx-bond up
+    ip link set enp175s0 mtu 9000
+    ip link set enp175s0d1 mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10
     ip link set drbd up
+    ip link set drbd mtu 9000
     ip addr add 4.1.0.10/24 dev drbd
 
     # SETUP LINSTOR MGMT 
@@ -209,6 +225,9 @@ network_gigabyte() {
     ip link set enp65s0f0np0 up
     ip link set enp65s0f1np1 up
     ip link set mlnx-bond up
+    ip link set enp65s0f0np0 mtu 9000
+    ip link set enp65s0f1np1 mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     ip link add link mlnx-bond name drbd-rdma type vlan id 5 
     ip link set drbd-rdma mtu 9000
@@ -270,6 +289,9 @@ network_r620() {
     ip link set enp65s0 master mlnx-bond
     ip link set enp66s0 master mlnx-bond
     ip link set mlnx-bond up
+    ip link set enp65s0 mtu 9000
+    ip link set enp66s0 mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd-rdma type vlan id 5
@@ -279,6 +301,7 @@ network_r620() {
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10
     ip link set drbd up
+    ip link set drbd mtu 9000
     ip addr add 4.1.0.12/24 dev drbd
 
     # SETUP LINSTOR MGMT 
