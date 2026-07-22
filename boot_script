@@ -280,31 +280,29 @@ cpu_performance() {
 
 if [[ "$hostname" == "gigabyte" ]]; then
     cpu_performance
-    ethtool -K enp65s0f0np0 \
-    rx on \
-    tx on \
-    sg on \
-    tso on \
-    gso on \
-    gro on \
-    lro off \
-    rxvlan on \
-    txvlan on \
-    rxhash on \
-    hw-tc-offload on
+    ethtool -K enp65s0f0np0 rx on 
+    ethtool -K enp65s0f0np0 tx on 
+    ethtool -K enp65s0f0np0 sg on 
+    ethtool -K enp65s0f0np0 tso on 
+    ethtool -K enp65s0f0np0 gso on 
+    ethtool -K enp65s0f0np0 gro on 
+    ethtool -K enp65s0f0np0 lro off 
+    ethtool -K enp65s0f0np0 rxvlan on 
+    ethtool -K enp65s0f0np0 txvlan on 
+    ethtool -K enp65s0f0np0 rxhash on 
+    ethtool -K enp65s0f0np0 hw-tc-offload on
     
-    ethtool -K enp65s0f1np1 \
-    rx on \
-    tx on \
-    sg on \
-    tso on \
-    gso on \
-    gro on \
-    lro off \
-    rxvlan on \
-    txvlan on \
-    rxhash on \
-    hw-tc-offload on
+    ethtool -K enp65s0f1np1 rx on 
+    ethtool -K enp65s0f1np1 tx on 
+    ethtool -K enp65s0f1np1 sg on 
+    ethtool -K enp65s0f1np1 tso on 
+    ethtool -K enp65s0f1np1 gso on 
+    ethtool -K enp65s0f1np1 gro on 
+    ethtool -K enp65s0f1np1 lro off 
+    ethtool -K enp65s0f1np1 rxvlan on 
+    ethtool -K enp65s0f1np1 txvlan on 
+    ethtool -K enp65s0f1np1 rxhash on 
+    ethtool -K enp65s0f1np1 hw-tc-offload on
 
     ethtool -C enp65s0f0np0 adaptive-rx on adaptive-tx on
     ethtool -C enp65s0f1np1 adaptive-rx on adaptive-tx on
@@ -312,29 +310,27 @@ if [[ "$hostname" == "gigabyte" ]]; then
 
 elif [ "$hostname" == "supermicro" ]; then
     cpu_performance
-    ethtool -K enp175s0 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp175s0    rx on 
+    ethtool -K enp175s0    tx on 
+    ethtool -K enp175s0    sg on 
+    ethtool -K enp175s0    tso on 
+    ethtool -K enp175s0    gso on 
+    ethtool -K enp175s0   gro on 
+    ethtool -K enp175s0    lro off 
+    ethtool -K enp175s0    rxvlan on 
+    ethtool -K enp175s0    txvlan on 
+    ethtool -K enp175s0    rxhash on
 
-    ethtool -K enp175s0d1 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp175s0d1    rx on 
+    ethtool -K enp175s0d1    tx on 
+    ethtool -K enp175s0d1    sg on 
+    ethtool -K enp175s0d1    tso on 
+    ethtool -K enp175s0d1    gso on 
+    ethtool -K enp175s0d1    gro on 
+    ethtool -K enp175s0d1    lro off 
+    ethtool -K enp175s0d1    rxvlan on 
+    ethtool -K enp175s0d1    txvlan on 
+    ethtool -K enp175s0d1    rxhash on
 
     ethtool -C enp175s0 adaptive-rx on adaptive-tx on
     ethtool -C enp175s0d1 adaptive-rx on adaptive-tx on
@@ -342,29 +338,27 @@ elif [ "$hostname" == "supermicro" ]; then
 
 elif [ "$hostname" == "r620" ]; then
     cpu_performance
-    ethtool -K enp65s0 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp65s0    rx on 
+    ethtool -K enp65s0    tx on 
+    ethtool -K enp65s0    sg on 
+    ethtool -K enp65s0    tso on 
+    ethtool -K enp65s0    gso on 
+    ethtool -K enp65s0    gro on 
+    ethtool -K enp65s0    lro off 
+    ethtool -K enp65s0    rxvlan on 
+    ethtool -K enp65s0    txvlan on 
+    ethtool -K enp65s0    rxhash on
 
-    ethtool -K enp66s0 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp66s0    rx on 
+    ethtool -K enp66s0    tx on 
+    ethtool -K enp66s0    sg on 
+    ethtool -K enp66s0    tso on 
+    ethtool -K enp66s0    gso on 
+    ethtool -K enp66s0    gro on 
+    ethtool -K enp66s0    lro off 
+    ethtool -K enp66s0    rxvlan on 
+    ethtool -K enp66s0    txvlan on 
+    ethtool -K enp66s0    rxhash on
 
     ethtool -C enp65s0 adaptive-rx on adaptive-tx on
     ethtool -C enp66s0 adaptive-rx on adaptive-tx on
@@ -381,7 +375,7 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -K enp132s0    lro off 
     ethtool -K enp132s0    rxvlan on 
     ethtool -K enp132s0    txvlan on 
-     ethtool -K enp132s0   rxhash on
+    ethtool -K enp132s0   rxhash on
 
     ethtool -K enp132s0d1 rx on 
     ethtool -K enp132s0d1    tx on 
@@ -393,59 +387,60 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -K enp132s0d1    rxvlan on 
     ethtool -K enp132s0d1    txvlan on 
     ethtool -K enp132s0d1    rxhash on
+    ethtool -C enp132s0 adaptive-rx on adaptive-tx on
+    ethtool -C enp132s0d1 adaptive-rx on adaptive-tx on
     network_r730xd1
 elif [ "$hostname" == "r730xd-2" ]; then
     cpu_performance
-    ethtool -K enp131s0 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp131s0    rx on 
+    ethtool -K enp131s0    tx on 
+    ethtool -K enp131s0   sg on 
+    ethtool -K enp131s0    tso on 
+    ethtool -K enp131s0    gso on 
+    ethtool -K enp131s0    gro on 
+    ethtool -K enp131s0    lro off 
+    ethtool -K enp131s0    rxvlan on 
+    ethtool -K enp131s0    txvlan on 
+    ethtool -K enp131s0    rxhash on
 
-    ethtool -K enp131s0d1 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp131s0d1    rx on 
+    ethtool -K enp131s0d1    tx on 
+    ethtool -K enp131s0d1    sg on 
+    ethtool -K enp131s0d1   tso on 
+    ethtool -K enp131s0d1   gso on 
+    ethtool -K enp131s0d1   gro on 
+    ethtool -K enp131s0d1   lro off 
+    ethtool -K enp131s0d1  rxvlan on 
+    ethtool -K enp131s0d1  txvlan on 
+    ethtool -K enp131s0d1   rxhash on
+    ethtool -C enp131s0 adaptive-rx on adaptive-tx on
+    ethtool -C enp131s0d1 adaptive-rx on adaptive-tx on
     network_r730xd2
 elif [ "$hostname" == "r730xd-3" ]; then
     cpu_performance
-    ethtool -K enp131s0 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp131s0    rx on 
+    ethtool -K enp131s0    tx on 
+    ethtool -K enp131s0    sg on 
+    ethtool -K enp131s0    tso on 
+    ethtool -K enp131s0    gso on 
+    ethtool -K enp131s0    gro on 
+    ethtool -K enp131s0    lro off 
+    ethtool -K enp131s0    rxvlan on 
+    ethtool -K enp131s0    txvlan on 
+    ethtool -K enp131s0    rxhash on
 
-    ethtool -K enp131s0d1 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
-
+    ethtool -K enp131s0d1    rx on 
+    ethtool -K enp131s0d1    tx on 
+    ethtool -K enp131s0d1    sg on 
+    ethtool -K enp131s0d1    tso on 
+    ethtool -K enp131s0d1    gso on 
+    ethtool -K enp131s0d1    gro on 
+    ethtool -K enp131s0d1    lro off 
+    ethtool -K enp131s0d1    rxvlan on 
+    ethtool -K enp131s0d1    txvlan on 
+    ethtool -K enp131s0d1    rxhash on
+    ethtool -C enp131s0 adaptive-rx on adaptive-tx on
+    ethtool -C enp131s0d1 adaptive-rx on adaptive-tx on
     network_r730xd3
 else
     echo "Hostname does not match."
