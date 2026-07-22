@@ -159,7 +159,7 @@ network_supermicro() {
     ip link  set mlnx-bond up
     ip link set enp175s0 mtu 9000
     ip link set enp175s0d1 mtu 9000
-    ip link set mlnx-bond mtu 9000
+
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10
