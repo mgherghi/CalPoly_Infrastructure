@@ -372,29 +372,27 @@ elif [ "$hostname" == "r620" ]; then
     
 elif [ "$hostname" == "r730xd-1" ]; then
     cpu_performance
-    ethtool -K enp132s0 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp132s0 rx on 
+    ethtool -K enp132s0    tx on 
+    ethtool -K enp132s0    sg on 
+    ethtool -K enp132s0    tso on 
+    ethtool -K enp132s0   gso on 
+    ethtool -K enp132s0    gro on 
+    ethtool -K enp132s0    lro off 
+    ethtool -K enp132s0    rxvlan on 
+    ethtool -K enp132s0    txvlan on 
+     ethtool -K enp132s0   rxhash on
 
-    ethtool -K enp132s0d1 \
-        rx on \
-        tx on \
-        sg on \
-        tso on \
-        gso on \
-        gro on \
-        lro off \
-        rxvlan on \
-        txvlan on \
-        rxhash on
+    ethtool -K enp132s0d1 rx on 
+    ethtool -K enp132s0d1    tx on 
+    ethtool -K enp132s0d1    sg on 
+    ethtool -K enp132s0d1    tso on 
+    ethtool -K enp132s0d1    gso on 
+    ethtool -K enp132s0d1    gro on 
+    ethtool -K enp132s0d1    lro off 
+    ethtool -K enp132s0d1    rxvlan on 
+    ethtool -K enp132s0d1    txvlan on 
+    ethtool -K enp132s0d1    rxhash on
     network_r730xd1
 elif [ "$hostname" == "r730xd-2" ]; then
     cpu_performance
