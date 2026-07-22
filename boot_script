@@ -1,0 +1,456 @@
+network_r730xd1() {
+    # Unload bonding module 
+    modprobe -r bonding || true
+
+    # SETUP MTU
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link  add mlnx-bond type bond
+    ip link  set enp132s0 down
+    ip link set enp132s0d1 down
+    ip link  set enp132s0 master mlnx-bond
+    ip link  set enp132s0d1 master mlnx-bond
+    ip link  set mlnx-bond up
+
+    # SETUP DRBD-RDMA REPLICATION
+    ip link add link mlnx-bond name drbd-rdma type vlan id 5
+    ip link set drbd-rdma up
+    ip addr add 4.0.0.7/24 dev drbd-rdma
+
+    # SETUP DRBD REPLICATION
+    ip link add link mlnx-bond name drbd type vlan id 10 
+    ip link set drbd up
+    ip addr add 4.1.0.7/24 dev drbd
+
+    # SETUP LINSTOR MGMT 
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt up
+    ip addr add 4.2.0.7/24 dev linstor-mgmt
+
+    # SETUP OVN NETWORK
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt up
+    ip addr add 4.3.0.7/24 dev ovn-mgmt
+}
+
+network_r730xd2() {
+    # Unload bonding module 
+    modprobe -r bonding || true
+
+    # SETUP MTU
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link  add mlnx-bond type bond
+    ip link  set enp131s0 down
+    ip link  set enp131s0 master mlnx-bond
+    ip link  set enp131s0d1 master mlnx-bond
+    ip link  set mlnx-bond up
+
+    # SETUP DRBD-RDMA REPLICATION
+    ip link add link mlnx-bond name drbd-rdma type vlan id 5
+    ip link set drbd-rdma up
+    ip addr add 4.0.0.8/24 dev drbd-rdma
+
+    # SETUP DRBD REPLICATION
+    ip link add link mlnx-bond name drbd type vlan id 10 
+    ip link set drbd up
+    ip addr add 4.1.0.8/24 dev drbd
+
+    # SETUP LINSTOR MGMT 
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt up
+    ip addr add 4.2.0.8/24 dev linstor-mgmt
+
+    # SETUP OVN NETWORK
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt up
+    ip addr add 4.3.0.8/24 dev ovn-mgmt
+}
+
+network_r730xd3() {
+    # Unload bonding module 
+    modprobe -r bonding || true
+
+    # SETUP MTU
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link  add mlnx-bond type bond
+    ip link  set enp131s0 down
+    ip link  set enp131s0d1 down
+    ip link  set enp131s0 master mlnx-bond
+    ip link  set enp131s0d1 master mlnx-bond
+    ip link  set mlnx-bond up
+
+    # SETUP DRBD REPLICATION
+    ip link add link mlnx-bond name drbd-rdma type vlan id 5
+    ip link set drbd-rdma up
+    ip addr add 4.0.0.9/24 dev drbd-rdma
+
+    # SETUP DRBD REPLICATION
+    ip link add link mlnx-bond name drbd type vlan id 10 
+    ip link set drbd up
+    ip addr add 4.1.0.9/24 dev drbd
+
+    # SETUP LINSTOR MGMT 
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt up
+    ip addr add 4.2.0.9/24 dev linstor-mgmt
+
+    # SETUP OVN NETWORK
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt up
+    ip addr add 4.3.0.9/24 dev ovn-mgmt
+}
+
+network_supermicro() {
+    # Unload bonding module 
+    modprobe -r bonding || true
+
+    # SETUP MTU
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link  add mlnx-bond type bond
+    ip link  set enp175s0 down
+    ip link  set enp175s0d1 down
+    ip link  set enp175s0 master mlnx-bond
+    ip link  set enp175s0d1 master mlnx-bond
+    ip link  set mlnx-bond up
+
+    # SETUP DRBD REPLICATION
+    ip link add link mlnx-bond name drbd type vlan id 10
+    ip link set drbd up
+    ip addr add 4.1.0.10/24 dev drbd
+
+    # SETUP LINSTOR MGMT 
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt up
+    ip addr add 4.2.0.10/24 dev linstor-mgmt
+
+    # SETUP OVN NETWORK
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt up
+    ip addr add 4.3.0.10/24 dev ovn-mgmt
+
+    # SETUP INCUS NETWORK
+    ip link add link mlnx-bond name incus-mgmt type vlan id 40
+    ip link set incus-mgmt up
+    ip addr add 4.4.0.10/24 dev incus-mgmt
+
+    # SETUP INCUS NETWORKS
+    ip link add link mlnx-bond name infra type vlan id 50
+    ip link set infra up
+
+    ip link add link mlnx-bond name admin-labs type vlan id 60
+    ip link set admin-labs up
+
+    ip link add link mlnx-bond name bdebruhl type vlan id 70
+    ip link set bdebruhl up
+
+    ip link add link mlnx-bond name bhartma type vlan id 80
+    ip link set bhartma up
+
+    ip link add link mlnx-bond name sbeard type vlan id 90
+    ip link set sbeard up
+
+    ip link add link mlnx-bond name dofang type vlan id 100
+    ip link set dofang up
+}
+
+network_gigabyte() {
+    # Unload bonding module 
+    modprobe -r bonding || true
+
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link add mlnx-bond type bond 
+
+    ip link set enp65s0f0np0 down
+    ip link set enp65s0f1np1 down
+
+    ip link set enp65s0f0np0 master mlnx-bond
+    ip link set enp65s0f1np1 master mlnx-bond
+
+    ip link set enp65s0f0np0 up
+    ip link set enp65s0f1np1 up
+    ip link set mlnx-bond up
+
+    ip link add link mlnx-bond name drbd-rdma type vlan id 5 
+    ip link set drbd-rdma mtu 9000
+    ip link set drbd-rdma up 
+    ip addr add 4.0.0.11/24 dev drbd-rdma
+
+    ip link add link mlnx-bond name drbd type vlan id 10 
+    ip link set drbd mtu 9000
+    ip link set drbd up 
+    ip addr add 4.1.0.11/24 dev drbd 
+
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20 
+    ip link set linstor-mgmt up
+    ip addr add 4.2.0.11/24 dev linstor-mgmt 
+
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30 
+    ip link set ovn-mgmt up 
+    ip addr add 4.3.0.11/24 dev ovn-mgmt 
+
+    ip link add link mlnx-bond name incus-mgmt type vlan id 40 
+    ip link set incus-mgmt up 
+    ip addr add 4.4.0.11/24 dev incus-mgmt 
+
+    ip link add link mlnx-bond name infra type vlan id 50 
+    ip link set infra up 
+
+    ip link add link mlnx-bond name admin-labs type vlan id 60 
+    ip link set admin-labs up
+
+    ip link add link mlnx-bond name bdebruhl type vlan id 70  
+    ip link set bdebruhl up
+
+    ip link add link mlnx-bond name bhartma type vlan id 80 
+    ip link set bhartma up
+
+    ip link add link mlnx-bond name sbeard type vlan id 90 
+    ip link set sbeard up
+
+    ip link add link mlnx-bond name dofang type vlan id 100 
+    ip link set dofang up
+}
+
+network_r620() {
+    # Unload bonding module 
+    modprobe -r bonding || true
+
+    # SETUP MTU
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link add mlnx-bond type bond
+    ip link set enp65s0 down
+    ip link set enp66s0 down
+    ip link set enp65s0 master mlnx-bond
+    ip link set enp66s0 master mlnx-bond
+    ip link set mlnx-bond up
+
+    # SETUP DRBD REPLICATION
+    ip link add link mlnx-bond name drbd-rdma type vlan id 5
+    ip link set drbd-rdma up
+    ip addr add 4.0.0.12/24 dev drbd-rdma
+
+    # SETUP DRBD REPLICATION
+    ip link add link mlnx-bond name drbd type vlan id 10
+    ip link set drbd up
+    ip addr add 4.1.0.12/24 dev drbd
+
+    # SETUP LINSTOR MGMT 
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt up
+    ip addr add 4.2.0.12/24 dev linstor-mgmt
+
+    # SETUP OVN NETWORK
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt up
+    ip addr add 4.3.0.12/24 dev ovn-mgmt
+
+    # SETUP INCUS NETWORK
+    ip link add link mlnx-bond name incus-mgmt type vlan id 40
+    ip link set incus-mgmt up
+    ip addr add 4.4.0.12/24 dev incus-mgmt
+
+    # SETUP INCUS NETWORKS
+    ip link add link mlnx-bond name infra type vlan id 50
+    ip link set infra up
+
+    ip link add link mlnx-bond name admin-labs type vlan id 60
+    ip link set admin-labs up
+
+    ip link add link mlnx-bond name bdebruhl type vlan id 70
+    ip link set bdebruhl up
+
+    ip link add link mlnx-bond name bhartma type vlan id 80
+    ip link set bhartma up
+
+    ip link add link mlnx-bond name sbeard type vlan id 90
+    ip link set sbeard up
+
+    ip link add link mlnx-bond name dofang type vlan id 100
+    ip link set dofang up
+}
+
+cpu_performance() {
+    cpupower -c all  frequency-set --governor performance
+}
+
+if [[ "$hostname" == "gigabyte" ]]; then
+    cpu_performance
+    ethtool -K enp65s0f0np0 \
+    rx on \
+    tx on \
+    sg on \
+    tso on \
+    gso on \
+    gro on \
+    lro off \
+    rxvlan on \
+    txvlan on \
+    rxhash on \
+    hw-tc-offload on
+    
+    ethtool -K enp65s0f1np1 \
+    rx on \
+    tx on \
+    sg on \
+    tso on \
+    gso on \
+    gro on \
+    lro off \
+    rxvlan on \
+    txvlan on \
+    rxhash on \
+    hw-tc-offload on
+
+    ethtool -C enp65s0f0np0 adaptive-rx on adaptive-tx on
+    ethtool -C enp65s0f1np1 adaptive-rx on adaptive-tx on
+    network_gigabyte
+
+elif [ "$hostname" == "supermicro" ]; then
+    cpu_performance
+    ethtool -K enp175s0 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -K enp175s0d1 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -C enp175s0 adaptive-rx on adaptive-tx on
+    ethtool -C enp175s0d1 adaptive-rx on adaptive-tx on
+    network_supermicro
+
+elif [ "$hostname" == "r620" ]; then
+    cpu_performance
+    ethtool -K enp65s0 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -K enp66s0 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -C enp65s0 adaptive-rx on adaptive-tx on
+    ethtool -C enp66s0 adaptive-rx on adaptive-tx on
+    network_r620
+    
+elif [ "$hostname" == "r730xd-1" ]; then
+    cpu_performance
+    ethtool -K enp132s0 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -K enp132s0d1 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -C enp132s0 adaptive-rx on adaptive-tx on
+    ethtool -C enp132s0d1 adaptive-rx on adaptive-tx on
+    network_r730xd1
+elif [ "$hostname" == "r730xd-2" ]; then
+    cpu_performance
+    ethtool -K enp131s0 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -K enp131s0d1 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -C enp131s0 adaptive-rx on adaptive-tx on
+    ethtool -C enp131s0d1 adaptive-rx on adaptive-tx on
+    network_r730xd2
+elif [ "$hostname" == "r730xd-3" ]; then
+    cpu_performance
+    ethtool -K enp131s0 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -K enp131s0d1 \
+        rx on \
+        tx on \
+        sg on \
+        tso on \
+        gso on \
+        gro on \
+        lro off \
+        rxvlan on \
+        txvlan on \
+        rxhash on
+
+    ethtool -C enp131s0 adaptive-rx on adaptive-tx on
+    ethtool -C enp131s0d1 adaptive-rx on adaptive-tx on
+    network_r730xd3
+else
+    echo "Hostname does not match."
+fi
