@@ -448,8 +448,7 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -K enp132s0d1    rxvlan on 
     ethtool -K enp132s0d1    txvlan on 
     ethtool -K enp132s0d1    rxhash on
-    ethtool -C enp132s0 adaptive-rx on adaptive-tx on
-    ethtool -C enp132s0d1 adaptive-rx on adaptive-tx on
+
     network_r730xd1
 elif [ "$hostname" == "r730xd-2" ]; then
     cpu_performance
@@ -474,8 +473,7 @@ elif [ "$hostname" == "r730xd-2" ]; then
     ethtool -K enp131s0d1  rxvlan on 
     ethtool -K enp131s0d1  txvlan on 
     ethtool -K enp131s0d1   rxhash on
-    ethtool -C enp131s0 adaptive-rx on adaptive-tx on
-    ethtool -C enp131s0d1 adaptive-rx on adaptive-tx on
+
     network_r730xd2
 elif [ "$hostname" == "r730xd-3" ]; then
     cpu_performance
@@ -500,8 +498,7 @@ elif [ "$hostname" == "r730xd-3" ]; then
     ethtool -K enp131s0d1    rxvlan on 
     ethtool -K enp131s0d1    txvlan on 
     ethtool -K enp131s0d1    rxhash on
-    ethtool -C enp131s0 adaptive-rx on adaptive-tx on
-    ethtool -C enp131s0d1 adaptive-rx on adaptive-tx on
+
     network_r730xd3
 else
     echo "Hostname does not match."
