@@ -397,8 +397,8 @@ elif [ "$hostname" == "supermicro" ]; then
     ethtool -K enp175s0d1    txvlan on 
     ethtool -K enp175s0d1    rxhash on
 
-    ethtool -C enp175s0 adaptive-rx on adaptive-tx on
-    ethtool -C enp175s0d1 adaptive-rx on adaptive-tx on
+    #ethtool -C enp175s0 adaptive-rx on adaptive-tx on
+    #ethtool -C enp175s0d1 adaptive-rx on adaptive-tx on
     network_supermicro
 
 elif [ "$hostname" == "r620" ]; then
@@ -425,8 +425,8 @@ elif [ "$hostname" == "r620" ]; then
     ethtool -K enp66s0    txvlan on 
     ethtool -K enp66s0    rxhash on
 
-    ethtool -C enp65s0 adaptive-rx on adaptive-tx on
-    ethtool -C enp66s0 adaptive-rx on adaptive-tx on
+    #ethtool -C enp65s0 adaptive-rx on adaptive-tx on
+    #ethtool -C enp66s0 adaptive-rx on adaptive-tx on
     network_r620
     
 elif [ "$hostname" == "r730xd-1" ]; then
