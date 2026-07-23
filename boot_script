@@ -28,9 +28,9 @@ network_r730xd1() {
     ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD-RDMA REPLICATION
-    ip link add link mlnx-bond name drbd-rdma type vlan id 5
-    ip link set drbd-rdma up
-    ip addr add 4.0.0.7/24 dev drbd-rdma
+    ip link add link mlnx-bond name keepalived type vlan id 5
+    ip link set keepalived up
+    ip addr add 4.0.0.7/24 dev keepalived
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
@@ -72,9 +72,9 @@ network_r730xd2() {
     ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD-RDMA REPLICATION
-    ip link add link mlnx-bond name drbd-rdma type vlan id 5
-    ip link set drbd-rdma up
-    ip addr add 4.0.0.8/24 dev drbd-rdma
+    ip link add link mlnx-bond name keepalived type vlan id 5
+    ip link set keepalived up
+    ip addr add 4.0.0.8/24 dev keepalived
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
@@ -117,9 +117,9 @@ network_r730xd3() {
     ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD REPLICATION
-    ip link add link mlnx-bond name drbd-rdma type vlan id 5
-    ip link set drbd-rdma up
-    ip addr add 4.0.0.9/24 dev drbd-rdma
+    ip link add link mlnx-bond name keepalived type vlan id 5
+    ip link set keepalived up
+    ip addr add 4.0.0.9/24 dev keepalived
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
