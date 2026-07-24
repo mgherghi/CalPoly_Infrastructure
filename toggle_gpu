@@ -1,0 +1,76 @@
+#!/bin/bash
+# Check for root privileges
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Please run this script as root (sudo)."
+  exit 1
+fi
+
+GPU="0000:81:00.0"
+AUDIO="0000:81:00.1"
+
+if [ "$1" == "vm" ]; then
+    echo "=== Isolating GPU for Virtual Machine ==="
+
+    # 1. Stop background services holding the drivers
+    echo "Stopping NVIDIA persistence daemon..."
+    systemctl stop nvidia-persistenced 2>/dev/null
+
+    # 2. Detach the Linux virtual console so it doesn't freeze the kernel
+    echo "Detaching virtual consoles..."
+    if [ -e /sys/class/vtconsole/vtcon0/bind ]; then echo 0 > /sys/class/vtconsole/vtcon0/bind; fi
+    if [ -e /sys/class/vtconsole/vtcon1/bind ]; then echo 0 > /sys/class/vtconsole/vtcon1/bind; fi
+
+    # 3. Unbind the hardware from the active NVIDIA kernel drivers
+    echo "Unbinding GPU and Audio from host drivers..."
+    if [ -d /sys/bus/pci/drivers/nvidia-drm ]; then echo "$GPU" > /sys/bus/pci/drivers/nvidia-drm/unbind 2>/dev/null; fi
+    if [ -d /sys/bus/pci/drivers/nvidia ]; then echo "$GPU" > /sys/bus/pci/drivers/nvidia/unbind 2>/dev/null; fi
+    if [ -d /sys/bus/pci/drivers/snd_hda_intel ]; then echo "$AUDIO" > /sys/bus/pci/drivers/snd_hda_intel/unbind 2>/dev/null; fi
+
+    # 4. Safely unload the NVIDIA kernel modules out of memory
+    echo "Unloading NVIDIA modules from kernel space..."
+    modprobe -r nvidia_drm 2>/dev/null
+    modprobe -r nvidia_modeset 2>/dev/null
+    modprobe -r nvidia_uvm 2>/dev/null
+    modprobe -r nvidia 2>/dev/null
+
+    # 5. Hand the GPU over to the VFIO system
+    echo "Loading VFIO-PCI and binding hardware..."
+    modprobe vfio-pci
+    echo "$GPU" > /sys/bus/pci/drivers/vfio-pci/bind 2>/dev/null
+    echo "$AUDIO" > /sys/bus/pci/drivers/vfio-pci/bind 2>/dev/null
+
+    echo "Success! GPU is isolated and ready for the VM."
+
+elif [ "$1" == "host" ]; then
+    echo "=== Returning GPU to Debian Host ==="
+
+    # 1. Strip the GPU from VFIO
+    echo "Unbinding hardware from VFIO..."
+    if [ -d /sys/bus/pci/drivers/vfio-pci ]; then
+        echo "$GPU" > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null
+        echo "$AUDIO" > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null
+    fi
+
+    # 2. Reload core host modules
+    echo "Reloading host drivers..."
+    modprobe nvidia
+    modprobe nvidia_uvm
+    modprobe nvidia_modeset
+    modprobe nvidia_drm
+    modprobe snd_hda_intel
+
+    # 3. Force re-bind to the original drivers
+    echo "Binding hardware to NVIDIA and Intel Audio..."
+    echo "$GPU" > /sys/bus/pci/drivers/nvidia/bind 2>/dev/null
+    echo "$AUDIO" > /sys/bus/pci/drivers/snd_hda_intel/bind 2>/dev/null
+
+    # 4. Restore console and persistence service
+    echo "Re-attaching virtual consoles and starting background services..."
+    if [ -e /sys/class/vtconsole/vtcon0/bind ]; then echo 1 > /sys/class/vtconsole/vtcon0/bind; fi
+    systemctl start nvidia-persistenced 2>/dev/null
+
+    echo "Success! GPU is back in host control."
+
+else
+    echo "Usage: sudo $0 [vm|host]"
+fi
