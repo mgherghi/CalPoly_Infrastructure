@@ -46,6 +46,7 @@ network_r730xd1() {
 
     # SETUP OVN NETWORK
     ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.7/24 dev ovn-mgmt
 }
@@ -91,6 +92,7 @@ network_r730xd2() {
 
     # SETUP OVN NETWORK
     ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.8/24 dev ovn-mgmt
 }
@@ -137,6 +139,7 @@ network_r730xd3() {
 
     # SETUP OVN NETWORK
     ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.9/24 dev ovn-mgmt
 }
@@ -182,6 +185,7 @@ network_supermicro() {
 
     # SETUP OVN NETWORK
     ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.10/24 dev ovn-mgmt
 
@@ -336,6 +340,7 @@ network_r620() {
 
     # SETUP OVN NETWORK
     ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.12/24 dev ovn-mgmt
 
