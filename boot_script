@@ -388,7 +388,7 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -K enp65s0f0np0 tso on 
     ethtool -K enp65s0f0np0 gso on 
     ethtool -K enp65s0f0np0 gro on 
-    ethtool -K enp65s0f0np0 lro off 
+    ethtool -K enp65s0f0np0 lro on
     ethtool -K enp65s0f0np0 rxvlan on 
     ethtool -K enp65s0f0np0 txvlan on 
     ethtool -K enp65s0f0np0 rxhash on 
@@ -400,7 +400,7 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -K enp65s0f1np1 tso on 
     ethtool -K enp65s0f1np1 gso on 
     ethtool -K enp65s0f1np1 gro on 
-    ethtool -K enp65s0f1np1 lro off 
+    ethtool -K enp65s0f1np1 lro on 
     ethtool -K enp65s0f1np1 rxvlan on 
     ethtool -K enp65s0f1np1 txvlan on 
     ethtool -K enp65s0f1np1 rxhash on 
@@ -417,8 +417,8 @@ elif [ "$hostname" == "supermicro" ]; then
     ethtool -K enp175s0    sg on 
     ethtool -K enp175s0    tso on 
     ethtool -K enp175s0    gso on 
-    ethtool -K enp175s0   gro on 
-    ethtool -K enp175s0    lro off 
+    ethtool -K enp175s0    gro on 
+    ethtool -K enp175s0    lro on 
     ethtool -K enp175s0    rxvlan on 
     ethtool -K enp175s0    txvlan on 
     ethtool -K enp175s0    rxhash on
@@ -429,7 +429,7 @@ elif [ "$hostname" == "supermicro" ]; then
     ethtool -K enp175s0d1    tso on 
     ethtool -K enp175s0d1    gso on 
     ethtool -K enp175s0d1    gro on 
-    ethtool -K enp175s0d1    lro off 
+    ethtool -K enp175s0d1    lro on 
     ethtool -K enp175s0d1    rxvlan on 
     ethtool -K enp175s0d1    txvlan on 
     ethtool -K enp175s0d1    rxhash on
@@ -444,7 +444,7 @@ elif [ "$hostname" == "r620" ]; then
     ethtool -K enp65s0    tso on 
     ethtool -K enp65s0    gso on 
     ethtool -K enp65s0    gro on 
-    ethtool -K enp65s0    lro off 
+    ethtool -K enp65s0    lro on 
     ethtool -K enp65s0    rxvlan on 
     ethtool -K enp65s0    txvlan on 
     ethtool -K enp65s0    rxhash on
@@ -455,7 +455,7 @@ elif [ "$hostname" == "r620" ]; then
     ethtool -K enp66s0    tso on 
     ethtool -K enp66s0    gso on 
     ethtool -K enp66s0    gro on 
-    ethtool -K enp66s0    lro off 
+    ethtool -K enp66s0    lro on
     ethtool -K enp66s0    rxvlan on 
     ethtool -K enp66s0    txvlan on 
     ethtool -K enp66s0    rxhash on
@@ -468,12 +468,12 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -K enp132s0    tx on 
     ethtool -K enp132s0    sg on 
     ethtool -K enp132s0    tso on 
-    ethtool -K enp132s0   gso on 
+    ethtool -K enp132s0    gso on 
     ethtool -K enp132s0    gro on 
-    ethtool -K enp132s0    lro off 
+    ethtool -K enp132s0    lro on
     ethtool -K enp132s0    rxvlan on 
     ethtool -K enp132s0    txvlan on 
-    ethtool -K enp132s0   rxhash on
+    ethtool -K enp132s0    rxhash on
 
     ethtool -K enp132s0d1 rx on 
     ethtool -K enp132s0d1    tx on 
@@ -481,7 +481,7 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -K enp132s0d1    tso on 
     ethtool -K enp132s0d1    gso on 
     ethtool -K enp132s0d1    gro on 
-    ethtool -K enp132s0d1    lro off 
+    ethtool -K enp132s0d1    lro on 
     ethtool -K enp132s0d1    rxvlan on 
     ethtool -K enp132s0d1    txvlan on 
     ethtool -K enp132s0d1    rxhash on
@@ -495,7 +495,7 @@ elif [ "$hostname" == "r730xd-2" ]; then
     ethtool -K enp131s0    tso on 
     ethtool -K enp131s0    gso on 
     ethtool -K enp131s0    gro on 
-    ethtool -K enp131s0    lro off 
+    ethtool -K enp131s0    lro on
     ethtool -K enp131s0    rxvlan on 
     ethtool -K enp131s0    txvlan on 
     ethtool -K enp131s0    rxhash on
@@ -506,9 +506,9 @@ elif [ "$hostname" == "r730xd-2" ]; then
     ethtool -K enp131s0d1   tso on 
     ethtool -K enp131s0d1   gso on 
     ethtool -K enp131s0d1   gro on 
-    ethtool -K enp131s0d1   lro off 
-    ethtool -K enp131s0d1  rxvlan on 
-    ethtool -K enp131s0d1  txvlan on 
+    ethtool -K enp131s0d1   lro on 
+    ethtool -K enp131s0d1   rxvlan on 
+    ethtool -K enp131s0d1   txvlan on 
     ethtool -K enp131s0d1   rxhash on
 
     network_r730xd2
@@ -520,7 +520,7 @@ elif [ "$hostname" == "r730xd-3" ]; then
     ethtool -K enp131s0    tso on 
     ethtool -K enp131s0    gso on 
     ethtool -K enp131s0    gro on 
-    ethtool -K enp131s0    lro off 
+    ethtool -K enp131s0    lro on
     ethtool -K enp131s0    rxvlan on 
     ethtool -K enp131s0    txvlan on 
     ethtool -K enp131s0    rxhash on
@@ -531,7 +531,7 @@ elif [ "$hostname" == "r730xd-3" ]; then
     ethtool -K enp131s0d1    tso on 
     ethtool -K enp131s0d1    gso on 
     ethtool -K enp131s0d1    gro on 
-    ethtool -K enp131s0d1    lro off 
+    ethtool -K enp131s0d1    lro on 
     ethtool -K enp131s0d1    rxvlan on 
     ethtool -K enp131s0d1    txvlan on 
     ethtool -K enp131s0d1    rxhash on
