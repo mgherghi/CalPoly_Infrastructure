@@ -34,12 +34,13 @@ network_r730xd1() {
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
-    ip link set drbd up
     ip link set drbd mtu 9000
+    ip link set drbd up
     ip addr add 4.1.0.7/24 dev drbd
 
     # SETUP LINSTOR MGMT 
     ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.7/24 dev linstor-mgmt
 
@@ -78,12 +79,13 @@ network_r730xd2() {
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
-    ip link set drbd up
     ip link set drbd mtu 9000
+    ip link set drbd up
     ip addr add 4.1.0.8/24 dev drbd
 
     # SETUP LINSTOR MGMT 
     ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.8/24 dev linstor-mgmt
 
@@ -123,12 +125,13 @@ network_r730xd3() {
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10 
-    ip link set drbd up
     ip link set drbd mtu 9000
+    ip link set drbd up
     ip addr add 4.1.0.9/24 dev drbd
 
     # SETUP LINSTOR MGMT 
     ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.9/24 dev linstor-mgmt
 
@@ -161,19 +164,19 @@ network_supermicro() {
     ip link set enp175s0d1 mtu 9000
     ip link set mlnx-bond mtu 9000
 
-    ip link add link mlnx-bond name drbd-rdma type vlan id 5 
-    ip link set drbd-rdma mtu 9000
-    ip link set drbd-rdma up 
-    ip addr add 4.0.0.10/24 dev drbd-rdma
+    ip link add link mlnx-bond name keepalived type vlan id 5 
+    ip link set keepalived up 
+    ip addr add 4.0.0.10/24 dev keepalived
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10
-    ip link set drbd up
     ip link set drbd mtu 9000
+    ip link set drbd up
     ip addr add 4.1.0.10/24 dev drbd
 
     # SETUP LINSTOR MGMT 
     ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.10/24 dev linstor-mgmt
 
@@ -184,6 +187,7 @@ network_supermicro() {
 
     # SETUP INCUS NETWORK
     ip link add link mlnx-bond name incus-mgmt type vlan id 40
+    ip link set incus-mgmt mtu 9000
     ip link set incus-mgmt up
     ip addr add 4.4.0.10/24 dev incus-mgmt
 
@@ -241,10 +245,9 @@ network_gigabyte() {
     ip link set mlnx-bond mtu 9000
 
 
-    ip link add link mlnx-bond name drbd-rdma type vlan id 5 
-    ip link set drbd-rdma mtu 9000
-    ip link set drbd-rdma up 
-    ip addr add 4.0.0.11/24 dev drbd-rdma
+    ip link add link mlnx-bond name keepalived type vlan id 5 
+    ip link set keepalived up 
+    ip addr add 4.0.0.11/24 dev keepalived
 
     ip link add link mlnx-bond name drbd type vlan id 10 
     ip link set drbd mtu 9000
@@ -252,6 +255,7 @@ network_gigabyte() {
     ip addr add 4.1.0.11/24 dev drbd 
 
     ip link add link mlnx-bond name linstor-mgmt type vlan id 20 
+    ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.11/24 dev linstor-mgmt 
 
@@ -259,7 +263,8 @@ network_gigabyte() {
     ip link set ovn-mgmt up 
     ip addr add 4.3.0.11/24 dev ovn-mgmt 
 
-    ip link add link mlnx-bond name incus-mgmt type vlan id 40 
+    ip link add link mlnx-bond name incus-mgmt type vlan id 40
+    ip link set incus-mgmt mtu 9000
     ip link set incus-mgmt up 
     ip addr add 4.4.0.11/24 dev incus-mgmt 
 
@@ -312,18 +317,19 @@ network_r620() {
     ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD REPLICATION
-    ip link add link mlnx-bond name drbd-rdma type vlan id 5
-    ip link set drbd-rdma up
-    ip addr add 4.0.0.12/24 dev drbd-rdma
+    ip link add link mlnx-bond name keepalived type vlan id 5
+    ip link set keepalived up
+    ip addr add 4.0.0.12/24 dev keepalived 
 
     # SETUP DRBD REPLICATION
     ip link add link mlnx-bond name drbd type vlan id 10
-    ip link set drbd up
     ip link set drbd mtu 9000
+    ip link set drbd up
     ip addr add 4.1.0.12/24 dev drbd
 
     # SETUP LINSTOR MGMT 
     ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.12/24 dev linstor-mgmt
 
@@ -334,6 +340,7 @@ network_r620() {
 
     # SETUP INCUS NETWORK
     ip link add link mlnx-bond name incus-mgmt type vlan id 40
+    ip link set incus-mgmt mtu 9000
     ip link set incus-mgmt up
     ip addr add 4.4.0.12/24 dev incus-mgmt
 
