@@ -260,6 +260,7 @@ network_gigabyte() {
     ip addr add 4.2.0.11/24 dev linstor-mgmt 
 
     ip link add link mlnx-bond name ovn-mgmt type vlan id 30 
+    ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up 
     ip addr add 4.3.0.11/24 dev ovn-mgmt 
 
