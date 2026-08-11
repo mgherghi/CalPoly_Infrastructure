@@ -382,6 +382,7 @@ cpu_performance() {
 
 if [[ "$hostname" == "gigabyte" ]]; then
     cpu_performance
+
     ethtool -K enp65s0f0np0 rx on 
     ethtool -K enp65s0f0np0 tx on 
     ethtool -K enp65s0f0np0 sg on 
@@ -392,6 +393,9 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -K enp65s0f0np0 txvlan on 
     ethtool -K enp65s0f0np0 rxhash on 
     ethtool -K enp65s0f0np0 hw-tc-offload on
+    ethtool -K enp65s0f0np0 rx-udp-gro-forwarding on
+    ethtool -K enp65s0f0np0 rx-gro-list on
+    ethtool -K enp65s0f0np0 rx-all off
     
     ethtool -K enp65s0f1np1 rx on 
     ethtool -K enp65s0f1np1 tx on 
@@ -403,6 +407,9 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -K enp65s0f1np1 txvlan on 
     ethtool -K enp65s0f1np1 rxhash on 
     ethtool -K enp65s0f1np1 hw-tc-offload on
+    ethtool -K enp65s0f0np0 rx-udp-gro-forwarding on
+    ethtool -K enp65s0f0np0 rx-gro-list on
+    ethtool -K enp65s0f0np0 rx-all off
 
     ethtool -C enp65s0f0np0 adaptive-rx on adaptive-tx on
     ethtool -C enp65s0f1np1 adaptive-rx on adaptive-tx on
