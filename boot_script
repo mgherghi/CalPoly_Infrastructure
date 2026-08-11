@@ -49,7 +49,15 @@ network_r730xd1() {
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.7/24 dev ovn-mgmt
+
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set keepalived txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+
 }
+
 
 network_r730xd2() {
     sysctl -w net.core.rmem_max=536870912
@@ -73,6 +81,7 @@ network_r730xd2() {
     ip link set enp131s0d1 mtu 9000
     ip link set mlnx-bond mtu 9000
 
+
     # SETUP DRBD-RDMA REPLICATION
     ip link add link mlnx-bond name keepalived type vlan id 5
     ip link set keepalived up
@@ -95,6 +104,13 @@ network_r730xd2() {
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.8/24 dev ovn-mgmt
+
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set keepalived txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+
 }
 
 network_r730xd3() {
@@ -142,6 +158,13 @@ network_r730xd3() {
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.9/24 dev ovn-mgmt
+
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set keepalived txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+
 }
 
 network_supermicro() {
@@ -166,6 +189,7 @@ network_supermicro() {
     ip link set enp175s0 mtu 9000
     ip link set enp175s0d1 mtu 9000
     ip link set mlnx-bond mtu 9000
+
 
     ip link add link mlnx-bond name keepalived type vlan id 5 
     ip link set keepalived up 
@@ -219,6 +243,20 @@ network_supermicro() {
     ip link add link mlnx-bond name dofang type vlan id 100
     ip link set dofang mtu 9000
     ip link set dofang up
+
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set keepalived txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set infra txqueuelen 10000
+    ip link set admin-labs txqueuelen 10000
+    ip link set bdebruhl txqueuelen 10000
+    ip link set bhartma txqueuelen 10000
+    ip link set sbeard txqueuelen 10000
+    ip link set dofang txqueuelen 10000
+
 }
 
 network_gigabyte() {
@@ -247,7 +285,6 @@ network_gigabyte() {
     ip link set enp65s0f0np0 mtu 9000
     ip link set enp65s0f1np1 mtu 9000
     ip link set mlnx-bond mtu 9000
-
 
     ip link add link mlnx-bond name keepalived type vlan id 5 
     ip link set keepalived up 
@@ -296,6 +333,20 @@ network_gigabyte() {
     ip link add link mlnx-bond name dofang type vlan id 100 
     ip link set dofang mtu 9000
     ip link set dofang up
+
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set keepalived txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set infra txqueuelen 10000
+    ip link set admin-labs txqueuelen 10000
+    ip link set bdebruhl txqueuelen 10000
+    ip link set bhartma txqueuelen 10000
+    ip link set sbeard txqueuelen 10000
+    ip link set dofang txqueuelen 10000
+
 }
 
 network_r620() {
@@ -374,6 +425,20 @@ network_r620() {
     ip link add link mlnx-bond name dofang type vlan id 100
     ip link set dofang mtu 9000
     ip link set dofang up
+
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set keepalived txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set infra txqueuelen 10000
+    ip link set admin-labs txqueuelen 10000
+    ip link set bdebruhl txqueuelen 10000
+    ip link set bhartma txqueuelen 10000
+    ip link set sbeard txqueuelen 10000
+    ip link set dofang txqueuelen 10000
+
 }
 
 cpu_performance() {
