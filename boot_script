@@ -200,22 +200,28 @@ network_supermicro() {
 
     # SETUP INCUS NETWORKS
     ip link add link mlnx-bond name infra type vlan id 50
-    ip link set infra up
+    ip link set infra mtu 1500
+    ip link set infra up 
 
     ip link add link mlnx-bond name admin-labs type vlan id 60
-    ip link set admin-labs up
+    ip link set admin-labs mtu 1500
+    ip link set admin-labs up 
 
     ip link add link mlnx-bond name bdebruhl type vlan id 70
-    ip link set bdebruhl up
+    ip link set bdebruhl mtu 1500
+    ip link set bdebruhl up 
 
     ip link add link mlnx-bond name bhartma type vlan id 80
-    ip link set bhartma up
+    ip link set bhartma mtu 1500
+    ip link set bhartma up 
 
     ip link add link mlnx-bond name sbeard type vlan id 90
-    ip link set sbeard up
+    ip link set sbeard mtu 1500
+    ip link set sbeard up 
 
     ip link add link mlnx-bond name dofang type vlan id 100
-    ip link set dofang up
+    ip link set dofang mtu 1500
+    ip link set dofang up      
 }
 
 network_gigabyte() {
@@ -270,22 +276,28 @@ network_gigabyte() {
     ip addr add 4.4.0.11/24 dev incus-mgmt 
 
     ip link add link mlnx-bond name infra type vlan id 50 
-    ip link set infra up 
+    ip link set infra mtu 1500
+    ip link set infra up  
 
     ip link add link mlnx-bond name admin-labs type vlan id 60 
-    ip link set admin-labs up
+    ip link set admin-labs mtu 1500
+    ip link set admin-labs up 
 
     ip link add link mlnx-bond name bdebruhl type vlan id 70  
-    ip link set bdebruhl up
+    ip link set bdebruhl mtu 1500
+    ip link set bdebruhl up 
 
     ip link add link mlnx-bond name bhartma type vlan id 80 
-    ip link set bhartma up
+    ip link set bhartma mtu 1500
+    ip link set bhartma up 
 
     ip link add link mlnx-bond name sbeard type vlan id 90 
-    ip link set sbeard up
+    ip link set sbeard mtu 1500
+    ip link set sbeard up 
 
     ip link add link mlnx-bond name dofang type vlan id 100 
-    ip link set dofang up
+    ip link set dofang mtu 1500
+    ip link set dofang up      
 }
 
 network_r620() {
@@ -342,22 +354,28 @@ network_r620() {
 
     # SETUP INCUS NETWORKS
     ip link add link mlnx-bond name infra type vlan id 50
-    ip link set infra up
+    ip link set infra mtu 1500
+    ip link set infra up 
 
     ip link add link mlnx-bond name admin-labs type vlan id 60
-    ip link set admin-labs up
+    ip link set admin-labs mtu 1500
+    ip link set admin-labs up 
 
     ip link add link mlnx-bond name bdebruhl type vlan id 70
-    ip link set bdebruhl up
+    ip link set bdebruhl mtu 1500
+    ip link set bdebruhl up 
 
     ip link add link mlnx-bond name bhartma type vlan id 80
-    ip link set bhartma up
+    ip link set bhartma mtu 1500
+    ip link set bhartma up 
 
     ip link add link mlnx-bond name sbeard type vlan id 90
-    ip link set sbeard up
+    ip link set sbeard mtu 1500
+    ip link set sbeard up 
 
     ip link add link mlnx-bond name dofang type vlan id 100
-    ip link set dofang up
+    ip link set dofang mtu 1500
+    ip link set dofang up      
 }
 
 cpu_performance() {
