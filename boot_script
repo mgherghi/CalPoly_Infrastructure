@@ -180,6 +180,7 @@ network_r730xd3() {
 }
 
 network_supermicro() {
+    /sbin/toggle_gpu vm 
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
@@ -275,6 +276,7 @@ network_supermicro() {
 }
 
 network_gigabyte() {
+    /sbin/toggle_gpu vm 
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
