@@ -4,6 +4,8 @@ set -Eeuo pipefail
 
 hostname="$(hostname -s)"
 
+modprobe tcp_bbr
+
 network_r730xd1() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
@@ -11,6 +13,8 @@ network_r730xd1() {
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
+    sysctl -w net.ipv4.tcp_congestion_control=bbr
+    sysctl -w netdev_max_backlog=1540875
 
     # Unload bonding module 
     modprobe -r bonding || true
@@ -49,6 +53,14 @@ network_r730xd1() {
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.7/24 dev ovn-mgmt
+
+    ip link set enp132s0 txqueuelen 10000
+    ip link set enp132s0d1 txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set drbd txqueuelen 10000
 }
 
 
@@ -59,6 +71,8 @@ network_r730xd2() {
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
+    sysctl -w net.ipv4.tcp_congestion_control=bbr
+    sysctl -w netdev_max_backlog=1540875
 
     # Unload bonding module 
     modprobe -r bonding || true
@@ -97,6 +111,14 @@ network_r730xd2() {
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.8/24 dev ovn-mgmt
+
+    ip link set enp131s0 txqueuelen 10000
+    ip link set enp131s0d1 txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set drbd txqueuelen 10000
 }
 
 network_r730xd3() {
@@ -106,6 +128,8 @@ network_r730xd3() {
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
+    sysctl -w net.ipv4.tcp_congestion_control=bbr
+    sysctl -w netdev_max_backlog=1347726
 
     # Unload bonding module 
     modprobe -r bonding || true
@@ -144,6 +168,15 @@ network_r730xd3() {
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.9/24 dev ovn-mgmt
+
+    ip link set enp131s0 txqueuelen 10000
+    ip link set enp131s0d1 txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+
 }
 
 network_supermicro() {
@@ -153,6 +186,9 @@ network_supermicro() {
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
+    sysctl -w netdev_max_backlog=1924067
+    sysctl -w net.ipv4.tcp_congestion_control=bbr
+    
 
     # Unload bonding module 
     modprobe -r bonding || true
@@ -200,28 +236,42 @@ network_supermicro() {
 
     # SETUP INCUS NETWORKS
     ip link add link mlnx-bond name infra type vlan id 50
-    ip link set infra mtu 1500
+    ip link set infra mtu 9000
     ip link set infra up 
 
     ip link add link mlnx-bond name admin-labs type vlan id 60
-    ip link set admin-labs mtu 1500
+    ip link set admin-labs mtu 9000
     ip link set admin-labs up 
 
     ip link add link mlnx-bond name bdebruhl type vlan id 70
-    ip link set bdebruhl mtu 1500
+    ip link set bdebruhl mtu 9000
     ip link set bdebruhl up 
 
     ip link add link mlnx-bond name bhartma type vlan id 80
-    ip link set bhartma mtu 1500
+    ip link set bhartma mtu 9000
     ip link set bhartma up 
 
     ip link add link mlnx-bond name sbeard type vlan id 90
-    ip link set sbeard mtu 1500
+    ip link set sbeard mtu 9000
     ip link set sbeard up 
 
     ip link add link mlnx-bond name dofang type vlan id 100
-    ip link set dofang mtu 1500
+    ip link set dofang mtu 9000
     ip link set dofang up      
+
+    ip link set enp175s0 txqueuelen 10000
+    ip link set enp175s0d1 txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set infra txqueuelen 10000 
+    ip link set admin-labs txqueuelen 10000
+    ip link set bdebruhl txqueuelen 10000
+    ip link set bhartma txqueuelen 10000
+    ip link set sbeard txqueuelen 10000
+    ip link set dofang txqueuelen 10000
 }
 
 network_gigabyte() {
@@ -231,6 +281,9 @@ network_gigabyte() {
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
+    sysctl -w net.ipv4.tcp_congestion_control=bbr
+    sysctl -w netdev_max_backlog=24570696
+
 
     # Unload bonding module 
     modprobe -r bonding || true
@@ -277,28 +330,44 @@ network_gigabyte() {
     ip addr add 4.4.0.11/24 dev incus-mgmt 
 
     ip link add link mlnx-bond name infra type vlan id 50 
-    ip link set infra mtu 1500
+    ip link set infra mtu 9000
     ip link set infra up  
 
     ip link add link mlnx-bond name admin-labs type vlan id 60 
-    ip link set admin-labs mtu 1500
+    ip link set admin-labs mtu 9000
     ip link set admin-labs up 
 
     ip link add link mlnx-bond name bdebruhl type vlan id 70  
-    ip link set bdebruhl mtu 1500
+    ip link set bdebruhl mtu 9000
     ip link set bdebruhl up 
 
     ip link add link mlnx-bond name bhartma type vlan id 80 
-    ip link set bhartma mtu 1500
+    ip link set bhartma mtu 9000
     ip link set bhartma up 
 
     ip link add link mlnx-bond name sbeard type vlan id 90 
-    ip link set sbeard mtu 1500
+    ip link set sbeard mtu 9000
     ip link set sbeard up 
 
     ip link add link mlnx-bond name dofang type vlan id 100 
-    ip link set dofang mtu 1500
+    ip link set dofang mtu 9000
     ip link set dofang up      
+
+
+    ip link set enp65s0f0np0 txqueuelen 10000
+    ip link set enp65s0f1np1 txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set infra txqueuelen 10000 
+    ip link set admin-labs txqueuelen 10000
+    ip link set bdebruhl txqueuelen 10000
+    ip link set bhartma txqueuelen 10000
+    ip link set sbeard txqueuelen 10000
+    ip link set dofang txqueuelen 10000
+    
 }
 
 network_r620() {
@@ -308,6 +377,8 @@ network_r620() {
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
+    sysctl -w net.ipv4.tcp_congestion_control=bbr
+    sysctl -w netdev_max_backlog=2313813
 
     # Unload bonding module 
     modprobe -r bonding || true
@@ -355,28 +426,42 @@ network_r620() {
 
     # SETUP INCUS NETWORKS
     ip link add link mlnx-bond name infra type vlan id 50
-    ip link set infra mtu 1500
+    ip link set infra mtu 9000
     ip link set infra up 
 
     ip link add link mlnx-bond name admin-labs type vlan id 60
-    ip link set admin-labs mtu 1500
+    ip link set admin-labs mtu 9000
     ip link set admin-labs up 
 
     ip link add link mlnx-bond name bdebruhl type vlan id 70
-    ip link set bdebruhl mtu 1500
+    ip link set bdebruhl mtu 9000
     ip link set bdebruhl up 
 
     ip link add link mlnx-bond name bhartma type vlan id 80
-    ip link set bhartma mtu 1500
+    ip link set bhartma mtu 9000
     ip link set bhartma up 
 
     ip link add link mlnx-bond name sbeard type vlan id 90
-    ip link set sbeard mtu 1500
+    ip link set sbeard mtu 9000
     ip link set sbeard up 
 
     ip link add link mlnx-bond name dofang type vlan id 100
-    ip link set dofang mtu 1500
+    ip link set dofang mtu 9000
     ip link set dofang up      
+
+    ip link set enp66s0 txqueuelen 10000
+    ip link set enp65s0 txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
+    ip link set incus-mgmt txqueuelen 10000
+    ip link set ovn-mgmt txqueuelen 10000
+    ip link set linstor-mgmt txqueuelen 10000
+    ip link set drbd txqueuelen 10000
+    ip link set infra txqueuelen 10000 
+    ip link set admin-labs txqueuelen 10000
+    ip link set bdebruhl txqueuelen 10000
+    ip link set bhartma txqueuelen 10000
+    ip link set sbeard txqueuelen 10000
+    ip link set dofang txqueuelen 10000
 }
 
 cpu_performance() {
