@@ -57,7 +57,6 @@ network_r730xd1() {
     ip link set enp132s0 txqueuelen 10000
     ip link set enp132s0d1 txqueuelen 10000
     ip link set mlnx-bond txqueuelen 10000
-    ip link set incus-mgmt txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
     ip link set drbd txqueuelen 10000
@@ -115,7 +114,6 @@ network_r730xd2() {
     ip link set enp131s0 txqueuelen 10000
     ip link set enp131s0d1 txqueuelen 10000
     ip link set mlnx-bond txqueuelen 10000
-    ip link set incus-mgmt txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
     ip link set drbd txqueuelen 10000
@@ -172,7 +170,6 @@ network_r730xd3() {
     ip link set enp131s0 txqueuelen 10000
     ip link set enp131s0d1 txqueuelen 10000
     ip link set mlnx-bond txqueuelen 10000
-    ip link set incus-mgmt txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
     ip link set drbd txqueuelen 10000
