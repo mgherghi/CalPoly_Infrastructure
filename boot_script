@@ -6,6 +6,12 @@ hostname="$(hostname -s)"
 
 modprobe tcp_bbr
 
+io_policy() {
+    for i in $(seq 0 20); do
+        echo "round-robin" > /sys/class/nvme-subsystem/nvme-subsys"$i"/iopolicy
+    done
+}
+
 network_r730xd1() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
@@ -481,7 +487,7 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -K enp65s0f0np0 rx-udp-gro-forwarding on
     ethtool -K enp65s0f0np0 rx-gro-list on
     ethtool -K enp65s0f0np0 rx-all off
-    ethtool -G enp65s0f1np1   rx 8192 tx 8192
+    ethtool -G enp65s0f1np1 rx 8192 tx 8192
     
     ethtool -K enp65s0f1np1 rx on 
     ethtool -K enp65s0f1np1 tx on 
@@ -504,6 +510,7 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -C enp65s0f1np1 adaptive-rx on adaptive-tx on
 
     network_gigabyte
+    io_policy
 
 elif [ "$hostname" == "supermicro" ]; then
     cpu_performance
@@ -532,6 +539,7 @@ elif [ "$hostname" == "supermicro" ]; then
     ethtool -G enp175s0d1   rx 8192 tx 8192
 
     network_supermicro
+    io_policy
 
 elif [ "$hostname" == "r620" ]; then
     cpu_performance
@@ -559,6 +567,7 @@ elif [ "$hostname" == "r620" ]; then
     ethtool -G enp66s0   rx 8192 tx 8192
 
     network_r620
+    io_policy
     
 elif [ "$hostname" == "r730xd-1" ]; then
     cpu_performance
@@ -587,6 +596,7 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -G enp132s0d1   rx 8192 tx 8192
 
     network_r730xd1
+    io_policy
 
 elif [ "$hostname" == "r730xd-2" ]; then
     cpu_performance
@@ -615,6 +625,7 @@ elif [ "$hostname" == "r730xd-2" ]; then
     ethtool -G enp131s0d1   rx 8192 tx 8192
 
     network_r730xd2
+    io_policy
 
 elif [ "$hostname" == "r730xd-3" ]; then
     cpu_performance
@@ -643,6 +654,7 @@ elif [ "$hostname" == "r730xd-3" ]; then
     ethtool -G enp131s0    rx 8192 tx 8192
 
     network_r730xd3
+    io_policy
 else
     echo "Hostname does not match."
 fi
