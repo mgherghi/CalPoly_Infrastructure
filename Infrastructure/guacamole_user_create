@@ -1,0 +1,400 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# ============================================================
+# PostgreSQL / Guacamole settings
+# ============================================================
+
+DB_HOST="2.0.0.100"
+DB_PORT="5432"
+DB_NAME="guacamole"
+DB_USER="admin"
+DB_PASSWORD="M23d03b89"
+
+INITIAL_PASSWORD="cyber"
+
+# Existing Guacamole hierarchy
+LEVEL1_GROUP="bdebruhl"
+LEVEL2_GROUP="csc-4212"
+
+# ============================================================
+# Connections / users
+# ============================================================
+
+connections=(
+    "crn8668-aarora28"
+    "crn8668-kbalaji"
+    "crn8668-mchopury"
+    "crn8668-acorte66"
+    "crn8668-jcruz121"
+    "crn8668-cdavi125"
+    "crn8668-rficklin"
+    "crn8668-algalici"
+    "crn8668-amhanus"
+    "crn8668-rharinat"
+    "crn8668-kliu97"
+    "crn8668-nlopez92"
+    "crn8668-htlwin"
+    "crn8668-medinabu"
+    "crn8668-lnelso39"
+    "crn8668-ang59"
+    "crn8668-tpage01"
+    "crn8668-apaidaku"
+    "crn8668-mpark41"
+    "crn8668-jdraj"
+    "crn8668-krhoden"
+    "crn8668-grocha06"
+    "crn8668-mruddick"
+    "crn8668-bsaaty"
+    "crn8668-nsnodgra"
+    "crn8668-dstreif"
+    "crn8668-nrvictor"
+)
+
+# ============================================================
+# PostgreSQL setup
+# ============================================================
+
+export PGPASSWORD="$DB_PASSWORD"
+
+PSQL=(
+    psql
+    -h "$DB_HOST"
+    -p "$DB_PORT"
+    -U "$DB_USER"
+    -d "$DB_NAME"
+    -X
+    -q
+    -t
+    -A
+    -v ON_ERROR_STOP=1
+)
+
+cleanup() {
+    unset PGPASSWORD
+}
+
+trap cleanup EXIT
+
+echo
+echo "============================================================"
+echo " Guacamole User / Permission Creator"
+echo "============================================================"
+echo
+echo "Database : $DB_HOST/$DB_NAME"
+echo "Location : ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP"
+echo "Users    : ${#connections[@]}"
+echo
+
+# ============================================================
+# Find ROOT/bdebruhl
+# ============================================================
+
+echo "Finding ROOT/$LEVEL1_GROUP..."
+
+LEVEL1_ID=$("${PSQL[@]}" -c "
+SELECT connection_group_id
+FROM guacamole_connection_group
+WHERE connection_group_name = '${LEVEL1_GROUP}'
+  AND parent_id IS NULL
+LIMIT 1;
+")
+
+if [[ -z "$LEVEL1_ID" ]]; then
+    echo "ERROR: Could not find ROOT/$LEVEL1_GROUP"
+    exit 1
+fi
+
+echo "Found $LEVEL1_GROUP: ID $LEVEL1_ID"
+
+# ============================================================
+# Find ROOT/bdebruhl/csc-4212
+# ============================================================
+
+echo "Finding ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP..."
+
+LEVEL2_ID=$("${PSQL[@]}" -c "
+SELECT connection_group_id
+FROM guacamole_connection_group
+WHERE connection_group_name = '${LEVEL2_GROUP}'
+  AND parent_id = ${LEVEL1_ID}
+LIMIT 1;
+")
+
+if [[ -z "$LEVEL2_ID" ]]; then
+    echo "ERROR: Could not find ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP"
+    exit 1
+fi
+
+echo "Found $LEVEL2_GROUP: ID $LEVEL2_ID"
+
+echo
+echo "============================================================"
+echo " Processing Users"
+echo "============================================================"
+echo
+
+# ============================================================
+# Process each user
+# ============================================================
+
+for CONNECTION_NAME in "${connections[@]}"; do
+
+    USERNAME="${CONNECTION_NAME#crn8668-}"
+    EMAIL="${USERNAME}@calpoly.edu"
+
+    echo "------------------------------------------------------------"
+    echo "Username   : $USERNAME"
+    echo "Email      : $EMAIL"
+    echo "Connection : $CONNECTION_NAME"
+
+    # ========================================================
+    # Find matching RDP connection
+    # ========================================================
+
+    CONNECTION_ID=$("${PSQL[@]}" -c "
+SELECT connection_id
+FROM guacamole_connection
+WHERE connection_name = '${CONNECTION_NAME}'
+  AND parent_id = ${LEVEL2_ID}
+LIMIT 1;
+")
+
+    if [[ -z "$CONNECTION_ID" ]]; then
+        echo "ERROR: Connection not found:"
+        echo "ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP/$CONNECTION_NAME"
+        echo "Skipping $USERNAME."
+        echo
+        continue
+    fi
+
+    echo "Connection ID: $CONNECTION_ID"
+
+    # ========================================================
+    # Find existing user entity
+    # ========================================================
+
+    ENTITY_ID=$("${PSQL[@]}" -c "
+SELECT entity_id
+FROM guacamole_entity
+WHERE name = '${USERNAME}'
+  AND type = 'USER'
+LIMIT 1;
+")
+
+    # ========================================================
+    # Generate Guacamole password hash
+    # ========================================================
+
+    SALT_HEX=$(openssl rand -hex 32 | tr '[:lower:]' '[:upper:]')
+
+    PASSWORD_HASH=$(
+        printf '%s%s' "$INITIAL_PASSWORD" "$SALT_HEX" \
+        | sha256sum \
+        | awk '{print toupper($1)}'
+    )
+
+    # ========================================================
+    # Create or update user
+    # ========================================================
+
+    if [[ -z "$ENTITY_ID" ]]; then
+
+        echo "Creating user..."
+
+        ENTITY_ID=$("${PSQL[@]}" -c "
+INSERT INTO guacamole_entity
+(
+    name,
+    type
+)
+VALUES
+(
+    '${USERNAME}',
+    'USER'
+)
+RETURNING entity_id;
+")
+
+        USER_ID=$("${PSQL[@]}" -c "
+INSERT INTO guacamole_user
+(
+    entity_id,
+    password_hash,
+    password_salt,
+    password_date,
+    disabled,
+    expired,
+    email_address
+)
+VALUES
+(
+    ${ENTITY_ID},
+    decode('${PASSWORD_HASH}', 'hex'),
+    decode('${SALT_HEX}', 'hex'),
+    CURRENT_TIMESTAMP,
+    FALSE,
+    TRUE,
+    '${EMAIL}'
+)
+RETURNING user_id;
+")
+
+        echo "Created user ID: $USER_ID"
+
+    else
+
+        USER_ID=$("${PSQL[@]}" -c "
+SELECT user_id
+FROM guacamole_user
+WHERE entity_id = ${ENTITY_ID}
+LIMIT 1;
+")
+
+        if [[ -z "$USER_ID" ]]; then
+            echo "ERROR: Entity exists but guacamole_user row does not."
+            echo "Skipping $USERNAME."
+            echo
+            continue
+        fi
+
+        echo "Existing user ID: $USER_ID"
+        echo "Resetting password and user settings..."
+
+        "${PSQL[@]}" -c "
+UPDATE guacamole_user
+SET
+    password_hash = decode('${PASSWORD_HASH}', 'hex'),
+    password_salt = decode('${SALT_HEX}', 'hex'),
+    password_date = CURRENT_TIMESTAMP,
+    disabled = FALSE,
+    expired = TRUE,
+    email_address = '${EMAIL}'
+WHERE user_id = ${USER_ID};
+"
+
+    fi
+
+    # ========================================================
+    # User permissions on own account
+    # ========================================================
+
+    # READ own account
+    "${PSQL[@]}" -c "
+INSERT INTO guacamole_user_permission
+(
+    entity_id,
+    affected_user_id,
+    permission
+)
+VALUES
+(
+    ${ENTITY_ID},
+    ${USER_ID},
+    'READ'
+)
+ON CONFLICT DO NOTHING;
+"
+
+    # UPDATE own account = change own password/account
+    "${PSQL[@]}" -c "
+INSERT INTO guacamole_user_permission
+(
+    entity_id,
+    affected_user_id,
+    permission
+)
+VALUES
+(
+    ${ENTITY_ID},
+    ${USER_ID},
+    'UPDATE'
+)
+ON CONFLICT DO NOTHING;
+"
+
+    # ========================================================
+    # Parent group permissions
+    # ========================================================
+
+    # READ ROOT/bdebruhl
+    "${PSQL[@]}" -c "
+INSERT INTO guacamole_connection_group_permission
+(
+    entity_id,
+    connection_group_id,
+    permission
+)
+VALUES
+(
+    ${ENTITY_ID},
+    ${LEVEL1_ID},
+    'READ'
+)
+ON CONFLICT DO NOTHING;
+"
+
+    # READ ROOT/bdebruhl/csc-4212
+    "${PSQL[@]}" -c "
+INSERT INTO guacamole_connection_group_permission
+(
+    entity_id,
+    connection_group_id,
+    permission
+)
+VALUES
+(
+    ${ENTITY_ID},
+    ${LEVEL2_ID},
+    'READ'
+)
+ON CONFLICT DO NOTHING;
+"
+
+    # ========================================================
+    # Matching connection permission
+    # ========================================================
+
+    "${PSQL[@]}" -c "
+INSERT INTO guacamole_connection_permission
+(
+    entity_id,
+    connection_id,
+    permission
+)
+VALUES
+(
+    ${ENTITY_ID},
+    ${CONNECTION_ID},
+    'READ'
+)
+ON CONFLICT DO NOTHING;
+"
+
+    echo
+    echo "Configured:"
+    echo "  Username                  : $USERNAME"
+    echo "  Initial password          : cyber"
+    echo "  Email                     : $EMAIL"
+    echo "  Password expired          : YES"
+    echo "  Change own password       : YES"
+    echo
+    echo "  READ group:"
+    echo "    ROOT/$LEVEL1_GROUP"
+    echo
+    echo "  READ group:"
+    echo "    ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP"
+    echo
+    echo "  READ connection:"
+    echo "    ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP/$CONNECTION_NAME"
+    echo
+
+done
+
+echo
+echo "============================================================"
+echo " COMPLETE"
+echo "============================================================"
+echo
+echo "${#connections[@]} users processed."
