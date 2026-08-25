@@ -207,9 +207,6 @@ network_supermicro() {
     sysctl -w net.core.default_qdisc=fq
     sysctl -w net.core.netdev_max_backlog=1924067
     sysctl -w net.ipv4.tcp_congestion_control=bbr
-    sysctl -w fs.aio-max-nr=524288
-    sysctl -w net.ipv4.neigh.default.gc_thresh3=8192
-    sysctl -w net.ipv6.neigh.default.gc_thresh3=8192
     sysctl -w vm.max_map_count=1048576
 
     # Unload bonding module 
@@ -306,9 +303,6 @@ network_gigabyte() {
     sysctl -w net.core.default_qdisc=fq
     sysctl -w net.ipv4.tcp_congestion_control=bbr
     sysctl -w net.core.netdev_max_backlog=24570696
-    sysctl -w fs.aio-max-nr=524288
-    sysctl -w net.ipv4.neigh.default.gc_thresh3=8192
-    sysctl -w net.ipv6.neigh.default.gc_thresh3=8192
     sysctl -w vm.max_map_count=1048576
 
     # Unload bonding module 
@@ -406,9 +400,6 @@ network_r620() {
     sysctl -w net.core.default_qdisc=fq
     sysctl -w net.ipv4.tcp_congestion_control=bbr
     sysctl -w net.core.netdev_max_backlog=2313813
-    sysctl -w fs.aio-max-nr=524288
-    sysctl -w net.ipv4.neigh.default.gc_thresh3=8192
-    sysctl -w net.ipv6.neigh.default.gc_thresh3=8192
     sysctl -w vm.max_map_count=1048576
 
     # Unload bonding module 
