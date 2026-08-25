@@ -1,0 +1,261 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# ============================================================
+# PostgreSQL
+# ============================================================
+
+DB_HOST="2.0.0.100"
+DB_PORT="5432"
+DB_NAME="guacamole"
+DB_USER="admin"
+DB_PASSWORD="M23d03b89"
+
+# ============================================================
+# Guacamole location
+# ============================================================
+
+LEVEL1_GROUP="bdebruhl"
+LEVEL2_GROUP="csc-4212"
+
+# ============================================================
+# RDP settings
+# ============================================================
+
+RDP_USERNAME="root"
+RDP_PASSWORD="cyber"
+RDP_PORT="3389"
+
+DNS_SUFFIX=".csc4212.bdebruhl.net"
+
+# ============================================================
+# Connections
+# ============================================================
+
+connections=(
+    "crn8668-aarora28"
+    "crn8668-kbalaji"
+    "crn8668-mchopury"
+    "crn8668-acorte66"
+    "crn8668-jcruz121"
+    "crn8668-cdavi125"
+    "crn8668-rficklin"
+    "crn8668-algalici"
+    "crn8668-amhanus"
+    "crn8668-rharinat"
+    "crn8668-kliu97"
+    "crn8668-nlopez92"
+    "crn8668-htlwin"
+    "crn8668-medinabu"
+    "crn8668-lnelso39"
+    "crn8668-ang59"
+    "crn8668-tpage01"
+    "crn8668-apaidaku"
+    "crn8668-mpark41"
+    "crn8668-jdraj"
+    "crn8668-krhoden"
+    "crn8668-grocha06"
+    "crn8668-mruddick"
+    "crn8668-bsaaty"
+    "crn8668-nsnodgra"
+    "crn8668-dstreif"
+    "crn8668-nrvictor"
+)
+
+# ============================================================
+# PostgreSQL client setup
+# ============================================================
+
+export PGPASSWORD="$DB_PASSWORD"
+
+PSQL=(
+    psql
+    -h "$DB_HOST"
+    -p "$DB_PORT"
+    -U "$DB_USER"
+    -d "$DB_NAME"
+    -X
+    -q
+    -t
+    -A
+    -v ON_ERROR_STOP=1
+)
+
+cleanup() {
+    unset PGPASSWORD
+}
+
+trap cleanup EXIT
+
+echo
+echo "============================================================"
+echo " Guacamole Connection Creator"
+echo "============================================================"
+echo
+echo "Database:  $DB_HOST/$DB_NAME"
+echo "Location:  ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP"
+echo "Protocol:  RDP"
+echo
+
+# ============================================================
+# Locate ROOT/bdebruhl
+# ============================================================
+
+echo "Finding group ROOT/$LEVEL1_GROUP..."
+
+LEVEL1_ID=$("${PSQL[@]}" -c "
+SELECT connection_group_id
+FROM guacamole_connection_group
+WHERE connection_group_name = '${LEVEL1_GROUP}'
+  AND parent_id IS NULL
+LIMIT 1;
+")
+
+if [[ -z "$LEVEL1_ID" ]]; then
+    echo "ERROR: Could not find ROOT/$LEVEL1_GROUP"
+    exit 1
+fi
+
+echo "Found $LEVEL1_GROUP: ID $LEVEL1_ID"
+
+# ============================================================
+# Locate ROOT/bdebruhl/csc-4212
+# ============================================================
+
+echo "Finding group ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP..."
+
+LEVEL2_ID=$("${PSQL[@]}" -c "
+SELECT connection_group_id
+FROM guacamole_connection_group
+WHERE connection_group_name = '${LEVEL2_GROUP}'
+  AND parent_id = ${LEVEL1_ID}
+LIMIT 1;
+")
+
+if [[ -z "$LEVEL2_ID" ]]; then
+    echo "ERROR: Could not find ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP"
+    exit 1
+fi
+
+echo "Found $LEVEL2_GROUP: ID $LEVEL2_ID"
+echo
+
+# ============================================================
+# Process each connection
+# ============================================================
+
+for CONNECTION_NAME in "${connections[@]}"; do
+
+    HOSTNAME="${CONNECTION_NAME}${DNS_SUFFIX}"
+
+    echo "------------------------------------------------------------"
+    echo "Connection : $CONNECTION_NAME"
+    echo "Hostname   : $HOSTNAME"
+
+    # --------------------------------------------------------
+    # Check if connection already exists
+    # --------------------------------------------------------
+
+    CONNECTION_ID=$("${PSQL[@]}" -c "
+SELECT connection_id
+FROM guacamole_connection
+WHERE connection_name = '${CONNECTION_NAME}'
+  AND parent_id = ${LEVEL2_ID}
+LIMIT 1;
+")
+
+    # --------------------------------------------------------
+    # Create connection if it does not exist
+    # --------------------------------------------------------
+
+    if [[ -z "$CONNECTION_ID" ]]; then
+
+        CONNECTION_ID=$("${PSQL[@]}" -c "
+INSERT INTO guacamole_connection
+(
+    connection_name,
+    parent_id,
+    protocol
+)
+VALUES
+(
+    '${CONNECTION_NAME}',
+    ${LEVEL2_ID},
+    'rdp'
+)
+RETURNING connection_id;
+")
+
+        echo "Created connection ID: $CONNECTION_ID"
+
+    else
+        echo "Existing connection ID: $CONNECTION_ID"
+        echo "Updating settings..."
+    fi
+
+    # --------------------------------------------------------
+    # Ensure connection properties are correct
+    # --------------------------------------------------------
+
+    "${PSQL[@]}" -c "
+UPDATE guacamole_connection
+SET
+    connection_name = '${CONNECTION_NAME}',
+    parent_id = ${LEVEL2_ID},
+    protocol = 'rdp'
+WHERE connection_id = ${CONNECTION_ID};
+"
+
+    # --------------------------------------------------------
+    # RDP parameters
+    # --------------------------------------------------------
+
+    "${PSQL[@]}" -c "
+INSERT INTO guacamole_connection_parameter
+(
+    connection_id,
+    parameter_name,
+    parameter_value
+)
+VALUES
+    (${CONNECTION_ID}, 'hostname', '${HOSTNAME}'),
+    (${CONNECTION_ID}, 'port', '${RDP_PORT}'),
+    (${CONNECTION_ID}, 'username', '${RDP_USERNAME}'),
+    (${CONNECTION_ID}, 'password', '${RDP_PASSWORD}'),
+
+    (${CONNECTION_ID}, 'ignore-cert', 'true'),
+    (${CONNECTION_ID}, 'cert-tofu', 'true'),
+
+    (${CONNECTION_ID}, 'force-lossless', 'true'),
+
+    (${CONNECTION_ID}, 'disable-bitmap-caching', 'true'),
+    (${CONNECTION_ID}, 'disable-glyph-caching', 'true'),
+    (${CONNECTION_ID}, 'disable-offscreen-caching', 'true')
+
+ON CONFLICT (connection_id, parameter_name)
+DO UPDATE
+SET parameter_value = EXCLUDED.parameter_value;
+"
+
+    echo "Configured successfully:"
+    echo "  Protocol                         : RDP"
+    echo "  Hostname                         : $HOSTNAME"
+    echo "  Port                             : $RDP_PORT"
+    echo "  Username                         : $RDP_USERNAME"
+    echo "  Ignore server certificate       : ON"
+    echo "  Trust host on first use         : ON"
+    echo "  Force lossless compression      : ON"
+    echo "  Bitmap caching                  : OFF"
+    echo "  Glyph caching                   : OFF"
+    echo "  Off-screen caching              : OFF"
+    echo
+
+done
+
+echo "============================================================"
+echo " COMPLETE"
+echo "============================================================"
+echo
+echo "${#connections[@]} connections processed."
+echo "Location: ROOT/$LEVEL1_GROUP/$LEVEL2_GROUP"
