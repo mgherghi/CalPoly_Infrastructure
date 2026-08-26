@@ -1,0 +1,46 @@
+global:
+  scrape_interval: 60s # How often to fetch metrics
+scrape_configs:
+  - job_name: 'incus_metrics'
+    scheme: https
+    metrics_path: '/1.0/metrics'
+    static_configs:
+      - targets:
+          - '5.0.0.10:8444'
+          - '5.0.0.11:8444'
+          - '5.0.0.12:8444'
+    tls_config:
+      insecure_skip_verify: true
+
+  - job_name: 'node_metrics'
+    scheme: http
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+          - '5.0.0.7:9100'
+          - '5.0.0.8:9100'
+          - '5.0.0.19:9100'
+          - '5.0.0.10:9100'
+          - '5.0.0.11:9100'
+          - '5.0.0.12:9100'
+
+  - job_name: 'linstor_metrics'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+          - '5.0.0.7:3370'
+          - '5.0.0.8:3370'
+          - '5.0.0.9:3370'
+    params:
+      error_reports: ['false']     # Skips processing heavy error-report trees
+      jvm: ['false']         
+
+  - job_name: 'linstor-satellites-drbd'
+    static_configs:
+      - targets:
+          - '5.0.0.7:9942'
+          - '5.0.0.8:9942'
+          - '5.0.0.9:9942'
+          - '5.0.0.10:9942'
+          - '5.0.0.11:9942'
+          - '5.0.0.12:9942'

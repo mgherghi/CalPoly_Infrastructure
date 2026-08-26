@@ -1,0 +1,56 @@
+services:
+  linstor-controller:
+    image: nglab/infra:linstor-controller
+    ports:
+      - "3370:3370" 
+      - "3371:3371"
+      - "3376:3376"
+    volumes:
+      - linstor-controller:/etc/linstor
+      - linstor-controller_var:/var/lib/linstor
+    configs:
+      - source: linstor-controller-config
+        target: /etc/linstor/linstor.toml
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  linstor-gui:
+    image: nglab/infra:linstor-gui
+    ports:
+      - "3373:3373"
+    environment:
+      - LB_LINSTOR_API_HOST=http://2.0.0.100
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+# Define  volumes for data storage
+volumes:
+  linstor-controller_var:
+    name: linstor-controller_var
+    driver: linbit/linstor-docker-volume:latest
+    driver_opts:
+      size: 10GB
+      storagePool: swarm-pool
+      fs: ext4
+
+  linstor-controller:
+    name: linstor-controller
+    driver: linbit/linstor-docker-volume:latest
+    driver_opts:
+      size: 10GB
+      storagePool: swarm-pool
+      fs: ext4
+
+
+configs:
+  linstor-controller-config:
+    file: ./linstor.toml
+
+networks:
+  linstor:
+    name: linstor
+    driver: overlay

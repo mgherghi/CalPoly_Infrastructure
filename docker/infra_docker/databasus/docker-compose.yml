@@ -1,0 +1,24 @@
+services:
+  databasus:
+    image: databasus/databasus:latest
+    container_name: databasus
+    ports:
+      - "4005:4005"
+    volumes:
+      - data:/app/data
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+
+
+volumes:
+  data:
+#  databasus-data:
+#    name: databasus-data
+#    driver: linbit/linstor-docker-volume
+#    driver_opts:
+#      size: 3GB
+#      storagePool: "swarm-pool"

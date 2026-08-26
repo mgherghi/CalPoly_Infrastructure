@@ -1,0 +1,22 @@
+services:
+  # Primary PostgreSQL server
+  postgres:
+    image: postgres:17
+    ports:
+      - "5432:5432"  # PostgreSQL default port
+    environment:
+      - POSTGRES_USER=admin          # Default user
+      - POSTGRES_PASSWORD=M23d03b89   # Password for the user
+      - POSTGRES_DB=postgres                # Default database
+    volumes:
+      - ./data:/var/lib/postgresql/data
+
+
+# Define  volumes for data storage
+#volumes:
+#  postgres_database:
+#    name: postgres
+#    driver: linbit/linstor-docker-volume:latest
+#    driver_opts:
+#      size: 10GB
+#      storagePool: swarm-pool

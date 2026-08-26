@@ -1,0 +1,29 @@
+services:
+  haproxy:
+    image: haproxy:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8404:8404" 
+      - "8405:8405"
+      - "4822:4822"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - haproxy_vol:/haproxy
+    configs:
+      - source: haproxy
+        target: /usr/local/etc/haproxy/haproxy.cfg
+configs:
+  haproxy:
+    file: ./haproxy.cfg
+
+volumes:
+  haproxy_vol:
+    name: haproxy_vol
+    driver: linbit/linstor-docker-volume
+    driver_opts:
+      size: 2GB
+      storagePool: "swarm-pool"

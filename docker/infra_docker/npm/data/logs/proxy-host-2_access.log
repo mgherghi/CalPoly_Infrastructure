@@ -1,0 +1,6 @@
+[26/May/2026:15:04:01 +0000] - - 301 - HEAD http guacamole.calpolynglab.com "/" [Client 10.0.0.2] [Length 0] [Gzip -] [Sent-to 4.5.0.4] "python-httpx/0.28.1" "-"
+[26/May/2026:15:27:06 +0000] - - 301 - GET http guacamole.calpolynglab.com "/" [Client 10.0.0.2] [Length 166] [Gzip -] [Sent-to 4.5.0.4] "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0" "-"
+[26/May/2026:16:16:13 +0000] - - 301 - GET http guacamole.calpolynglab.com "/" [Client 10.0.0.2] [Length 166] [Gzip -] [Sent-to 4.5.0.4] "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0" "-"
+[26/May/2026:16:40:26 +0000] - - 301 - GET http guacamole.calpolynglab.com "/" [Client 10.0.0.2] [Length 166] [Gzip -] [Sent-to 4.5.0.4] "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0" "-"
+[26/May/2026:16:49:41 +0000] - - 301 - GET http guacamole.calpolynglab.com "/.env" [Client 10.0.0.2] [Length 166] [Gzip -] [Sent-to 4.5.0.4] "python-requests/2.32.4" "-"
+[26/May/2026:16:49:41 +0000] - - 301 - POST http guacamole.calpolynglab.com "/" [Client 10.0.0.2] [Length 166] [Gzip -] [Sent-to 4.5.0.4] "python-requests/2.32.4" "-"
