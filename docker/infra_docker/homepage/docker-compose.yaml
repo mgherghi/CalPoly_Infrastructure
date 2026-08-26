@@ -1,0 +1,89 @@
+# docker-compose.yml - Homer Dashboard
+services:
+  homer_student:
+    image: b4bz/homer:latest
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    volumes:
+      # Configuration file and assets
+      - homer_student:/www/assets
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  homer_admin:
+    image: b4bz/homer:latest
+    restart: unless-stopped
+    ports:
+      - "8083:8080"
+    volumes:
+      # Configuration file and assets
+      - homer_admin:/www/assets
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3011:3001"
+    volumes:
+      - kuma:/app/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    environment:
+      - OAUTH2_PROXY_CLIENT_ID=PfvgagkfWzZqleCKlomDNFd5f9ezjvBr
+      - OAUTH2_PROXY_CLIENT_SECRET=RRcjHlUDqg37PBdHi13cNcWc-0oEWmLZ33vaA3oQrqNGP8fub-e1hFd5cNWcyseA
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=https://dev-a6swuzna7alhou0r.us.auth0.com/
+      - OAUTH2_PROXY_PROVIDER=oidc
+      - OAUTH2_PROXY_REDIRECT_URL=https://admin.calpolynglab.com/oauth2/callback
+      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
+      - OAUTH2_PROXY_COOKIE_CSRF_PER_REQUEST=true
+ #     - OAUTH2_PROXY_REVERSE_PROXY=true
+      - OAUTH2_PROXY_COOKIE_SECRET=openssl_rand_base64_32
+      - OAUTH2_PROXY_EMAIL_DOMAINS=* # Restrict to specific emails if preferred
+      - OAUTH2_PROXY_INSECURE_OIDC_ALLOW_UNVERIFIED_EMAIL=true
+      - OAUTH2_PROXY_WHITELIST_DOMAINS="calpolynglab.com"
+      - OAUTH2_PROXY_COOKIE_SECURE=true
+      - OAUTH2_PROXY_COOKIE_DOMAINS="calpolynglab.com"
+      - OAUTH2_PROXY_UPSTREAM=http://homer_admin:8083
+    ports:
+      - "4180:4180"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  kuma:
+    name: kuma
+    driver: linbit/linstor-docker-volume
+    driver_opts:
+      size: 1GB
+      storagePool: "swarm-pool"
+
+  homer_student:
+    name: homer_student
+    driver: linbit/linstor-docker-volume
+    driver_opts:
+      size: 1GB
+      storagePool: "swarm-pool"
+
+  homer_admin:
+    name: homer_admin
+    driver: linbit/linstor-docker-volume
+    driver_opts:
+      size: 1GB
+      storagePool: "swarm-pool"
+networks:
+  dashboard:

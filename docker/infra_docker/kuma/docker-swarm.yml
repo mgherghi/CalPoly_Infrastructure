@@ -1,0 +1,21 @@
+services:
+  uptime-kuma:
+    image: elestio/uptime-kuma
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - kuma_vol:/app/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  kuma_vol:
+    name: kuma_vol
+    driver: linbit/linstor-docker-volume
+    driver_opts:
+      size: 2GB
+      storagePool: "swarm-pool"

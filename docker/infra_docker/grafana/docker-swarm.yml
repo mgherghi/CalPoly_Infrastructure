@@ -1,0 +1,111 @@
+services:
+
+  grafana-image-renderer:
+    image:  grafana/grafana-image-renderer:latest
+    ports:
+      - "8181:8081"
+#    deploy:
+#      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - AUTH_TOKEN=M23d03b89
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+#    deploy:
+#      replicas: 1
+      restart_policy:
+        condition: on-failure
+#    volumes:
+#      - loki_vol:/loki
+    configs:
+      - source: loki
+        target: /etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+#  prometheus:
+#    image: prom/prometheus:latest
+#    container_name: prometheus
+#    restart: unless-stopped
+#    ports:
+#      - "9090:9090"
+#    deploy:
+#      replicas: 1
+#      restart_policy:
+#        condition: on-failure
+#    command:
+#      - '--web.enable-remote-write-receiver'
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#    volumes:
+#      - prom_vol:/prometheus
+#    configs:
+#      - source: prometheus
+#        target: /etc/prometheus/prometheus.yml#
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3333:3000"
+#    deploy:
+#      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=M23d03b89
+      # --- Server Settings ---
+      - GF_SERVER_ROOT_URL=https://grafana.calpolynglab.com
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Owner
+      - GF_RENDERING_SERVER_URL=http://grafana-image-renderer:8081/render
+      - GF_RENDERING_CALLBACK_URL=http://grafana:3000
+      - GF_RENDERING_RENDERER_TOKEN=M23d03b89
+      # --- Auth0 / Generic OAuth Settings ---
+      - GF_AUTH_GENERIC_OAUTH_ENABLED=true
+      - GF_AUTH_GENERIC_OAUTH_NAME=Auth0
+      - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=iOSpLcbZcw09ZLfKF39kBc8JvucfTBK5
+      - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=I1ccAU_9G5WomzvZo-bq221JkFoM8ki6S1pueJproEqlDMNvhxD-Dn95ib2IKy7x
+      - GF_AUTH_GENERIC_OAUTH_SCOPES=openid profile email 
+      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=https://dev-a6swuzna7alhou0r.us.auth0.com/authorize
+      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=https://dev-a6swuzna7alhou0r.us.auth0.com/oauth/token
+      - GF_AUTH_GENERIC_OAUTH_API_URL=https://dev-a6swuzna7alhou0r.us.auth0.com/userinfo
+ #   volumes:
+ #     - grafana_vol:/var/lib/grafana
+
+configs:
+  loki:
+    file: ./loki-config.yaml
+#  prometheus:
+#    file: ./prometheus.yml
+
+#volumes:
+#  prom_vol:
+#    name: prom_vol
+#    driver: linbit/linstor-docker-volume
+#    driver_opts:
+#      size: 5GB
+#      storagePool: "swarm-pool"
+
+#  grafana_vol:
+#    driver: linbit/linstor-docker-volume
+#    name: grafana_vol
+#    driver_opts:
+#      size: 5GB
+#      storagePool: swarm-pool
+
+#  loki_vol:
+#    name: loki_vol
+#    driver: linbit/linstor-docker-volume
+#    driver_opts:
+#      size: 5GB
+#      storagePool: "swarm-pool"
+
+
+
+

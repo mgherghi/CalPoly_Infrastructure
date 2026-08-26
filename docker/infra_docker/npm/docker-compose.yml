@@ -1,0 +1,46 @@
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+      # Add any other Stream port you want to expose
+      # - '21:21' # FTP
+    environment:
+      # Postgres parameters:
+      DB_POSTGRES_HOST: '2.0.0.100'
+      DB_POSTGRES_PORT: '5432'
+      DB_POSTGRES_USER: 'admin'
+      DB_POSTGRES_PASSWORD: 'M23d03b89'
+      DB_POSTGRES_NAME: 'npm'
+      INITIAL_ADMIN_EMAIL: mihairomanian@gmail.com
+      INITIAL_ADMIN_PASSWORD: M23d03b89
+      # Uncomment this if IPv6 is not enabled on your host
+      # DISABLE_IPV6: 'true'
+    volumes:
+#      -npm-data:/data
+#      -npm-certs:/etc/letsencrypt
+      - ./npm-data:/data
+      - ./npm-certs:/etc/letsencrypt
+    restart: unless-stopped
+#    deploy:
+#      replicas: 1
+#      restart_policy:
+#        condition: on-failure
+
+
+#volumes:
+#  npm-data:
+#    name: npm-data
+#    driver: linbit/linstor-docker-volume
+#    driver_opts:
+#      size: 2GB
+#      storagePool: "swarm-pool"
+#  npm-certs:
+#    name: npm-certs
+#    driver: linbit/linstor-docker-volume
+#    driver_opts:
+#      size: 2GB
+#      storagePool: "swarm-pool"

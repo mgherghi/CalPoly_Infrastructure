@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  unbound:
+    image: mvance/unbound:latest
+    container_name: unbound_dns
+    restart: unless-stopped
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      # 1. Mount your local configuration file (read-only for security)
+      - ./config/unbound.conf:/opt/unbound/etc/unbound/unbound.conf

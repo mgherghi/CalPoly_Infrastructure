@@ -1,0 +1,32 @@
+services:
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    container_name: oauth2-proxy
+    restart: unless-stopped
+
+    ports:
+      - "4180:4180"
+
+
+    command:
+      - --provider=oidc
+      - --oidc-issuer-url=https://dev-a6swuzna7alhou0r.us.auth0.com/
+      - --client-id=8wi1gt3To8fHf8TvYYbFKVrCiuokU4xn
+      - --client-secret=mHPG-Z6Ytkp0fbp5gydWqHt7ozZMvtGvMEgmBZZmqNYs-Hs1Ql3VaodN1w3dibfv
+      - --redirect-url=https://admin.calpolynglab.com/oauth2/callback
+      - --scope=openid profile email
+      - --email-domain=*
+      - --cookie-secret=HScKCb32DiNwM0F3LdTyHC3ac6EdLJEbNUTiMtDD4C8=
+      - --cookie-secure=true
+      - --cookie-samesite=lax
+      - --http-address=0.0.0.0:4180
+      - --reverse-proxy=true
+      - --trusted-proxy-ip="2.0.0.2/32"
+      - --upstream=static://202
+      - --skip-provider-button=true
+      - --whitelist-domain=admin.calpolynglab.com
+      - --skip-claims-from-profile-url=true
+      - --insecure-oidc-allow-unverified-email=true
+      - --cookie-csrf-per-request=true
+      - --cookie-csrf-expire=5m
+

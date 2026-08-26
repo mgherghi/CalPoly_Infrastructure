@@ -1,0 +1,52 @@
+---
+subtitle: "California Polytechnic State University"
+title: "Northrop Grumman Cyber Lab"
+documentTitle: "California Polytechnic State University"
+
+logo: "https://me.calpoly.edu/wp-content/uploads/2021/04/cropped-cropped-cal-poly-shield-mark-rev.png"
+
+header: true
+footer: false
+
+columns: "3"
+
+connectivityCheck: true
+
+defaults:
+#  layout: list
+  colorTheme: auto
+
+services:
+
+  - name: "Students"
+    icon: "fas fa-user-graduate"
+    items:
+      - name: "Guacamole"
+        logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Apache_Guacamole_logo.png/500px-Apache_Guacamole_logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail"
+        subtitle: "Remote Desktop Access"
+#        url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn-9xTQL5W8X8t4ypX0YxFqAZcXlGq8soexJHjcq5MeAUb2tG5IX2-BTiN&s=10"
+        url: "http://guacamole.calpolynglab.com"
+        target: "_blank"
+
+  - name: "How-To"
+    icon: "fas fa-book"
+    items:
+      - name: "How to use Guacamole"
+        icon: "fas fa-circle-question"
+        subtitle: "Tips & Tricks"
+        url: "https://photos.google.com/u/3/photo/AF1QipN1SQL--dcFoOUXdaJ6v9EQPzOeeaoDVTh4evNt"
+        target: "_blank"
+
+      - name: "How to use Alternative (Remote.it)"
+        icon: "fas fa-circle-question"
+        subtitle: "Tips & Tricks"
+        url: "https://photos.google.com/share/AF1QipNqGw-JQlwS_--z4bw3chmdDftFKsz72UftWIC-mTsSrhHHB4-gvV52nj25c3yYHQ/photo/AF1QipM14DsavveifzYy5mj_mDg8Ir2jG9AzYGQUQvfS?key=QWxjTXhwSDlQWTFYUEN2ZjczNnJZNHdJNmhVdVJB"
+        target: "_blank"
+  - name: "Admin"
+    icon: "fas fa-user-shield"
+    items:
+      - name: "Admin"
+        icon: "fas fa-lock"
+        subtitle: "Administrator Login"
+        url: "http://admin.calpolynglab.com"
+        target: "_self"

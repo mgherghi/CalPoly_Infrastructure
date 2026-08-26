@@ -1,0 +1,55 @@
+---
+subtitle: "California Polytechnic State University"
+title: "Northrop Grumman Cyber Lab Admin"
+documentTitle: "California Polytechnic State University"
+
+logo: "https://me.calpoly.edu/wp-content/uploads/2021/04/cropped-cropped-cal-poly-shield-mark-rev.png"
+
+header: true
+footer: false
+
+columns: "2"
+
+connectivityCheck: true
+
+defaults:
+#  layout: list
+  colorTheme: auto
+
+services:
+
+  - name: "Metrics"
+    icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prometheus.svg"
+    items:
+      - name: "Grafana"
+        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grafana.svg"
+        subtitle: "Infrastructure Metrics"
+        url: "http://grafana.calpolynglab.com"
+        target: "_blank"
+
+  - name: "Infrastructure"
+    icon: "https://cdn.jsdelivr.net/gh/selfhst/icons/svg/cloudpanel.svg"
+    items:
+      - name: "Incus"
+        subtitle: "Incus Infrastructure UI"
+        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/incus.svg"
+        url: "http://incus.calpolynglab.com"
+        target: "_blank"
+
+      - name: "Linstor/DRBD"
+        logo: "https://linbit.com/wp-content/uploads/2019/07/Linbit_Site_Icon.png"
+        subtitle: "Network Storage UI"
+        url: "http://linstor.calpolynglab.com"
+        target: "_blank"
+
+      - name: "NGINX Proxy Manager"
+        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/nginx-proxy-manager.svg"
+        subtitle: "Reverse Proxy UI"
+        url: "http://npm.calpolynglab.com"
+        target: "_blank"
+
+      - name: "Databasus"
+        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/databasus.svg"
+        subtitle: "PostgreSQL Database Backup UI"
+        url: "http://databasus.calpolynglab.com"
+        target: "_blank"
