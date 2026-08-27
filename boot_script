@@ -151,7 +151,7 @@ network_r730xd3() {
     sysctl -w vm.max_map_count=1048576
 
     # Set PFC through dcb
-    #dcb pfc set dev enp131s0 prio-pfc all:off 3:on
+    dcb pfc set dev enp131s0 prio-pfc all:off 3:on
 
     # Unload bonding module 
     # modprobe -r bonding || true
