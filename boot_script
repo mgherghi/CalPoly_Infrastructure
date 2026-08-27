@@ -545,7 +545,7 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -C enp65s0f1np1 adaptive-rx on adaptive-tx on
 
     network_gigabyte
-    io_policy
+    /usr/sbin/toggle_gpu vm
 
 elif [ "$hostname" == "supermicro" ]; then
     cpu_performance
@@ -574,7 +574,8 @@ elif [ "$hostname" == "supermicro" ]; then
     ethtool -G enp175s0d1   rx 8192 tx 8192
 
     network_supermicro
-    io_policy
+    /usr/sbin/toggle_gpu vm
+    
 
 elif [ "$hostname" == "r620" ]; then
     cpu_performance
@@ -602,7 +603,7 @@ elif [ "$hostname" == "r620" ]; then
     ethtool -G enp66s0   rx 8192 tx 8192
 
     network_r620
-    io_policy
+    
     
 elif [ "$hostname" == "r730xd-1" ]; then
     cpu_performance
@@ -631,7 +632,6 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -G enp132s0d1   rx 8192 tx 8192
 
     network_r730xd1
-    io_policy
 
 elif [ "$hostname" == "r730xd-2" ]; then
     cpu_performance
@@ -660,7 +660,7 @@ elif [ "$hostname" == "r730xd-2" ]; then
     ethtool -G enp131s0d1   rx 8192 tx 8192
 
     network_r730xd2
-    io_policy
+    
 
 elif [ "$hostname" == "r730xd-3" ]; then
     cpu_performance
@@ -689,7 +689,7 @@ elif [ "$hostname" == "r730xd-3" ]; then
     ethtool -G enp131s0    rx 8192 tx 8192
 
     network_r730xd3
-    io_policy
+    
 else
     echo "Hostname does not match."
 fi
