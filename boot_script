@@ -14,7 +14,7 @@ io_policy() {
 
 network_r730xd1() {
     sysctl -w net.core.rmem_max=536870912
-    sysctl -w net.core.bpf_jit_limit=1000000000
+
     sysctl -w net.core.wmem_max=536870912
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
@@ -77,7 +77,7 @@ network_r730xd1() {
 network_r730xd2() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
-    sysctl -w net.core.bpf_jit_limit=1000000000
+
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
@@ -138,74 +138,77 @@ network_r730xd2() {
 network_r730xd3() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
-    sysctl -w net.core.bpf_jit_limit=1000000000
+
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
     sysctl -w net.ipv4.tcp_congestion_control=bbr
-    sysctl -w net.core.netdev_max_backlog=1347726
+    sysctl -w net.core.netdev_max_backlog=65536
     sysctl -w fs.aio-max-nr=524288
     sysctl -w net.ipv4.neigh.default.gc_thresh3=8192
     sysctl -w net.ipv6.neigh.default.gc_thresh3=8192
     sysctl -w vm.max_map_count=1048576
 
+    # Set PFC through dcb
+    #dcb pfc set dev enp131s0 prio-pfc all:off 3:on
+
     # Unload bonding module 
-    modprobe -r bonding || true
+    # modprobe -r bonding || true
 
     # SETUP MTU
-    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-    ip link  add mlnx-bond type bond
-    ip link  set enp131s0 down
-    ip link  set enp131s0d1 down
-    ip link  set enp131s0 master mlnx-bond
-    ip link  set enp131s0d1 master mlnx-bond
-    ip link  set mlnx-bond up
+    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    #ip link  add mlnx-bond type bond
+    #ip link  set enp131s0 down
+    #ip link  set enp131s0d1 down
+    #ip link  set enp131s0 master mlnx-bond
+    #ip link  set enp131s0d1 master mlnx-bond
+    #ip link  set mlnx-bond up
     ip link set enp131s0 mtu 9000
     ip link set enp131s0d1 mtu 9000
-    ip link set mlnx-bond mtu 9000
+    #ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD REPLICATION
-    ip link add link mlnx-bond name keepalived type vlan id 5
+    ip link add link enp131s0d1 name keepalived type vlan id 5
     ip link set keepalived up
     ip addr add 4.0.0.9/24 dev keepalived
 
     # SETUP DRBD REPLICATION
-    ip link add link mlnx-bond name drbd type vlan id 10 
+    ip link add link enp131s0 name drbd type vlan id 10 
     ip link set drbd mtu 9000
     ip link set drbd up
     ip addr add 4.1.0.9/24 dev drbd
 
     # SETUP LINSTOR MGMT 
-    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link add link enp131s0d1 name linstor-mgmt type vlan id 20
     ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.9/24 dev linstor-mgmt
 
     # SETUP OVN NETWORK
-    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link add link enp131s0d1 name ovn-mgmt type vlan id 30
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.9/24 dev ovn-mgmt
 
-    ip link set enp131s0 txqueuelen 10000
+    #ip link set enp131s0 txqueuelen 10000
     ip link set enp131s0d1 txqueuelen 10000
-    ip link set mlnx-bond txqueuelen 10000
+    #ip link set mlnx-bond txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
-    ip link set drbd txqueuelen 10000
+    #ip link set drbd txqueuelen 10000
 
 }
 
 network_supermicro() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
-    sysctl -w net.core.bpf_jit_limit=1000000000
+
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
-    sysctl -w net.core.netdev_max_backlog=1924067
+    sysctl -w net.core.netdev_max_backlog=65536
     sysctl -w net.ipv4.tcp_congestion_control=bbr
     sysctl -w vm.max_map_count=1048576
 
@@ -296,13 +299,13 @@ network_supermicro() {
 network_gigabyte() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
-    sysctl -w net.core.bpf_jit_limit=1000000000
+
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
     sysctl -w net.ipv4.tcp_congestion_control=bbr
-    sysctl -w net.core.netdev_max_backlog=24570696
+    sysctl -w net.core.netdev_max_backlog=65536
     sysctl -w vm.max_map_count=1048576
 
     # Unload bonding module 
@@ -393,13 +396,13 @@ network_gigabyte() {
 network_r620() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
-    sysctl -w net.core.bpf_jit_limit=1000000000
+
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
     sysctl -w net.core.default_qdisc=fq
     sysctl -w net.ipv4.tcp_congestion_control=bbr
-    sysctl -w net.core.netdev_max_backlog=2313813
+    sysctl -w net.core.netdev_max_backlog=65536
     sysctl -w vm.max_map_count=1048576
 
     # Unload bonding module 
