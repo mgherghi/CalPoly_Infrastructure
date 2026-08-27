@@ -26,45 +26,45 @@ network_r730xd1() {
     #modprobe -r bonding || true
 
     # SETUP MTU
-    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-    #ip link  add mlnx-bond type bond
-    #ip link  set enp132s0 down
-    #ip link set enp132s0d1 down
-    #ip link  set enp132s0 master mlnx-bond
-    #ip link  set enp132s0d1 master mlnx-bond
-    #ip link  set mlnx-bond up
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link  add mlnx-bond type bond
+    ip link  set enp132s0 down
+    ip link set enp132s0d1 down
+    ip link  set enp132s0 master mlnx-bond
+    ip link  set enp132s0d1 master mlnx-bond
+    ip link  set mlnx-bond up
     ip link set enp132s0 mtu 9000
     ip link set enp132s0d1 mtu 9000
     ip link set enp132s0 up 
     ip link set enp132s0d1 up
-    #ip link set mlnx-bond mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     # SETUP Keepalived REPLICATION
-    ip link add link enp132s0 name keepalived type vlan id 5
+    ip link add link mlnx-bond name keepalived type vlan id 5
     ip link set keepalived up
     ip addr add 4.0.0.7/24 dev keepalived
 
     # SETUP DRBD REPLICATION
-    ip link add link enp132s0 name drbd type vlan id 10 
+    ip link add link mlnx-bond name drbd type vlan id 10 
     ip link set drbd mtu 9000
     ip link set drbd up
     ip addr add 4.1.0.7/24 dev drbd
 
     # SETUP LINSTOR MGMT 
-    ip link add link enp132s0d1 name linstor-mgmt type vlan id 20
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
     ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.7/24 dev linstor-mgmt
 
     # SETUP OVN NETWORK
-    ip link add link enp132s0d1 name ovn-mgmt type vlan id 30
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.7/24 dev ovn-mgmt
 
     ip link set enp132s0 txqueuelen 10000
     ip link set enp132s0d1 txqueuelen 10000
-    #ip link set mlnx-bond txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
     ip link set drbd txqueuelen 10000
@@ -88,48 +88,48 @@ network_r730xd2() {
 
     #dcb pfc set dev enp131s0 prio-pfc all:off 3:on
     # Unload bonding module 
-    # modprobe -r bonding || true
+    #modprobe -r bonding || true
 
     # SETUP MTU
-    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-    #ip link  add mlnx-bond type bond
-    #ip link  set enp131s0 down
-    #ip link  set enp131s0 master mlnx-bond
-    #ip link  set enp131s0d1 master mlnx-bond
-    #ip link  set mlnx-bond up
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link  add mlnx-bond type bond
+    ip link  set enp131s0 down
+    ip link  set enp131s0 master mlnx-bond
+    ip link  set enp131s0d1 master mlnx-bond
+    ip link  set mlnx-bond up
     ip link set enp131s0 mtu 9000
     ip link set enp131s0d1 mtu 9000
     ip link set enp131s0 up
     ip link set enp131s0d1 up
-    #ip link set mlnx-bond mtu 9000
+    ip link set mlnx-bond mtu 9000
 
 
     # SETUP keepalived REPLICATION
-    ip link add link enp131s0 name keepalived type vlan id 5
+    ip link add link mlnx-bond name keepalived type vlan id 5
     ip link set keepalived up
     ip addr add 4.0.0.8/24 dev keepalived
 
     # SETUP DRBD REPLICATION
-    ip link add link enp131s0 name drbd type vlan id 10 
+    ip link add link mlnx-bond name drbd type vlan id 10 
     ip link set drbd mtu 9000
     ip link set drbd up
     ip addr add 4.1.0.8/24 dev drbd
 
     # SETUP LINSTOR MGMT 
-    ip link add link enp131s0d1 name linstor-mgmt type vlan id 20
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
     ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.8/24 dev linstor-mgmt
 
     # SETUP OVN NETWORK
-    ip link add link enp131s0d1 name ovn-mgmt type vlan id 30
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.8/24 dev ovn-mgmt
 
     ip link set enp131s0 txqueuelen 10000
     ip link set enp131s0d1 txqueuelen 10000
-    #ip link set mlnx-bond txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
     ip link set drbd txqueuelen 10000
@@ -154,48 +154,48 @@ network_r730xd3() {
     #dcb pfc set dev enp131s0 prio-pfc all:off 3:on
 
     # Unload bonding module 
-    # modprobe -r bonding || true
+    #modprobe -r bonding || true
 
     # SETUP MTU
-    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-    #ip link  add mlnx-bond type bond
-    #ip link  set enp131s0 down
-    #ip link  set enp131s0d1 down
-    #ip link  set enp131s0 master mlnx-bond
-    #ip link  set enp131s0d1 master mlnx-bond
-    #ip link  set mlnx-bond up
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link  add mlnx-bond type bond
+    ip link  set enp131s0 down
+    ip link  set enp131s0d1 down
+    ip link  set enp131s0 master mlnx-bond
+    ip link  set enp131s0d1 master mlnx-bond
+    ip link  set mlnx-bond up
     ip link set enp131s0 mtu 9000
     ip link set enp131s0d1 mtu 9000
     ip link set enp131s0 up
     ip link set enp131s0d1 up
-    #ip link set mlnx-bond mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     # SETUP Keepalived REPLICATION
-    ip link add link enp131s0 name keepalived type vlan id 5
+    ip link add link mlnx-bond name keepalived type vlan id 5
     ip link set keepalived up
     ip addr add 4.0.0.9/24 dev keepalived
 
     # SETUP DRBD REPLICATION
-    ip link add link enp131s0 name drbd type vlan id 10 
+    ip link add link mlnx-bond name drbd type vlan id 10 
     ip link set drbd mtu 9000
     ip link set drbd up
     ip addr add 4.1.0.9/24 dev drbd
 
     # SETUP LINSTOR MGMT 
-    ip link add link enp131s0d1 name linstor-mgmt type vlan id 20
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
     ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.9/24 dev linstor-mgmt
 
     # SETUP OVN NETWORK
-    ip link add link enp131s0d1 name ovn-mgmt type vlan id 30
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.9/24 dev ovn-mgmt
 
     ip link set enp131s0 txqueuelen 10000
     ip link set enp131s0d1 txqueuelen 10000
-    #ip link set mlnx-bond txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
     ip link set drbd txqueuelen 10000
@@ -220,76 +220,76 @@ network_supermicro() {
     #dcb pfc set dev enp175s0 prio-pfc all:off 3:on
 
     # SETUP MTU
-    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-    #ip link  add mlnx-bond type bond
-    #ip link  set enp175s0 down
-    #ip link  set enp175s0d1 down
-    #ip link  set enp175s0 master mlnx-bond
-    #ip link  set enp175s0d1 master mlnx-bond
-    #ip link  set mlnx-bond up
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link  add mlnx-bond type bond
+    ip link  set enp175s0 down
+    ip link  set enp175s0d1 down
+    ip link  set enp175s0 master mlnx-bond
+    ip link  set enp175s0d1 master mlnx-bond
+    ip link  set mlnx-bond up
     ip link set enp175s0 mtu 9000
     ip link set enp175s0d1 mtu 9000
     ip link set enp175s0 up
     ip link set enp175s0d1 up 
-    #ip link set mlnx-bond mtu 9000
+    ip link set mlnx-bond mtu 9000
 
     # KEEPALIVED MGMT
-    ip link add link enp175s0 name keepalived type vlan id 5
+    ip link add link mlnx-bond name keepalived type vlan id 5
     ip link set keepalived up
     ip addr add 4.0.0.10/24 dev keepalived 
 
     # SETUP DRBD REPLICATION
-    ip link add link enp175s0 name drbd type vlan id 10
+    ip link add link mlnx-bond name drbd type vlan id 10
     ip link set drbd mtu 9000
     ip link set drbd up
     ip addr add 4.1.0.10/24 dev drbd
 
     # SETUP LINSTOR MGMT 
-    ip link add link enp175s0 name linstor-mgmt type vlan id 20
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
     ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.10/24 dev linstor-mgmt
 
     # SETUP OVN NETWORK
-    ip link add link enp175s0 name ovn-mgmt type vlan id 30
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.10/24 dev ovn-mgmt
 
     # SETUP INCUS NETWORK
-    ip link add link enp175s0 name incus-mgmt type vlan id 40
+    ip link add link mlnx-bond name incus-mgmt type vlan id 40
     ip link set incus-mgmt mtu 9000
     ip link set incus-mgmt up
     ip addr add 4.4.0.10/24 dev incus-mgmt
 
     # SETUP INCUS NETWORKS
-    ip link add link enp175s0d1 name infra type vlan id 50
+    ip link add link mlnx-bond name infra type vlan id 50
     ip link set infra mtu 9000
     ip link set infra up 
 
-    ip link add link enp175s0d1 name admin-labs type vlan id 60
+    ip link add link mlnx-bond name admin-labs type vlan id 60
     ip link set admin-labs mtu 9000
     ip link set admin-labs up 
 
-    ip link add link enp175s0d1 name bdebruhl type vlan id 70
+    ip link add link mlnx-bond name bdebruhl type vlan id 70
     ip link set bdebruhl mtu 9000
     ip link set bdebruhl up 
 
-    ip link add link enp175s0d1 name bhartma type vlan id 80
+    ip link add link mlnx-bond name bhartma type vlan id 80
     ip link set bhartma mtu 9000
     ip link set bhartma up 
 
-    ip link add link enp175s0d1 name sbeard type vlan id 90
+    ip link add link mlnx-bond name sbeard type vlan id 90
     ip link set sbeard mtu 9000
     ip link set sbeard up 
 
-    ip link add link enp175s0d1 name dofang type vlan id 100
+    ip link add link mlnx-bond name dofang type vlan id 100
     ip link set dofang mtu 9000
     ip link set dofang up      
 
     ip link set enp175s0 txqueuelen 10000
     ip link set enp175s0d1 txqueuelen 10000
-    #ip link set mlnx-bond txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
     ip link set incus-mgmt txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
@@ -319,75 +319,75 @@ network_gigabyte() {
     # Unload bonding module 
     # modprobe -r bonding || true
 
-    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-    #ip link add mlnx-bond type bond 
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link add mlnx-bond type bond 
 
-    #ip link set enp65s0f0np0 down
-    #ip link set enp65s0f1np1 down
+    ip link set enp65s0f0np0 down
+    ip link set enp65s0f1np1 down
 
-    #ip link set enp65s0f0np0 master mlnx-bond
-    #ip link set enp65s0f1np1 master mlnx-bond
+    ip link set enp65s0f0np0 master mlnx-bond
+    ip link set enp65s0f1np1 master mlnx-bond
 
     ip link set enp65s0f0np0 mtu 9000
     ip link set enp65s0f1np1 mtu 9000
     ip link set enp65s0f0np0 up
     ip link set enp65s0f1np1 up
-    #ip link set mlnx-bond up
-    #ip link set mlnx-bond mtu 9000
+    ip link set mlnx-bond mtu 9000
+    ip link set mlnx-bond up
 
     # KEEPALIVED MGMT
-    ip link add link enp65s0f0np0 name keepalived type vlan id 5
+    ip link add link mlnx-bond name keepalived type vlan id 5
     ip link set keepalived up
     ip addr add 4.0.0.11/24 dev keepalived 
 
-    ip link add link enp65s0f0np0 name drbd type vlan id 10 
+    ip link add link mlnx-bond name drbd type vlan id 10 
     ip link set drbd mtu 9000
     ip link set drbd up 
     ip addr add 4.1.0.11/24 dev drbd 
 
-    ip link add link enp65s0f0np0 name linstor-mgmt type vlan id 20 
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20 
     ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.11/24 dev linstor-mgmt 
 
-    ip link add link enp65s0f0np0 name ovn-mgmt type vlan id 30 
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30 
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up 
     ip addr add 4.3.0.11/24 dev ovn-mgmt 
 
-    ip link add link enp65s0f0np0 name incus-mgmt type vlan id 40
+    ip link add link mlnx-bond name incus-mgmt type vlan id 40
     ip link set incus-mgmt mtu 9000
     ip link set incus-mgmt up 
     ip addr add 4.4.0.11/24 dev incus-mgmt 
 
-    ip link add link enp65s0f1np1 name infra type vlan id 50 
+    ip link add link mlnx-bond name infra type vlan id 50 
     ip link set infra mtu 9000
     ip link set infra up  
 
-    ip link add link enp65s0f1np1 name admin-labs type vlan id 60 
+    ip link add link mlnx-bond name admin-labs type vlan id 60 
     ip link set admin-labs mtu 9000
     ip link set admin-labs up 
 
-    ip link add link enp65s0f1np1 name bdebruhl type vlan id 70  
+    ip link add link mlnx-bond name bdebruhl type vlan id 70  
     ip link set bdebruhl mtu 9000
     ip link set bdebruhl up 
 
-    ip link add link enp65s0f1np1 name bhartma type vlan id 80 
+    ip link add link mlnx-bond name bhartma type vlan id 80 
     ip link set bhartma mtu 9000
     ip link set bhartma up 
 
-    ip link add link enp65s0f1np1 name sbeard type vlan id 90 
+    ip link add link mlnx-bond name sbeard type vlan id 90 
     ip link set sbeard mtu 9000
     ip link set sbeard up 
 
-    ip link add link enp65s0f1np1 name dofang type vlan id 100 
+    ip link add link mlnx-bond name dofang type vlan id 100 
     ip link set dofang mtu 9000
     ip link set dofang up      
 
 
     ip link set enp65s0f0np0 txqueuelen 10000
     ip link set enp65s0f1np1 txqueuelen 10000
-    #ip link set mlnx-bond txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
     ip link set incus-mgmt txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
@@ -420,76 +420,76 @@ network_r620() {
     #modprobe -r bonding || true
 
     # SETUP MTU
-    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-    #ip link add mlnx-bond type bond
-    #ip link set enp65s0 down
-    #ip link set enp66s0 down
-    #ip link set enp65s0 master mlnx-bond
-    #ip link set enp66s0 master mlnx-bond
-    #ip link set mlnx-bond up
+    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link add mlnx-bond type bond
+    ip link set enp65s0 down
+    ip link set enp66s0 down
+    ip link set enp65s0 master mlnx-bond
+    ip link set enp66s0 master mlnx-bond
     ip link set enp65s0 mtu 9000
     ip link set enp66s0 mtu 9000
     ip link set enp65s0 up
     ip link set enp66s0 up 
-    #ip link set mlnx-bond mtu 9000
+    ip link set mlnx-bond mtu 9000
+    ip link set mlnx-bond up
 
     # KEEPALIVED MGMT
-    ip link add link enp65s0 name keepalived type vlan id 5
+    ip link add link mlnx-bond  name keepalived type vlan id 5
     ip link set keepalived up
     ip addr add 4.0.0.12/24 dev keepalived 
 
     # SETUP DRBD REPLICATION
-    ip link add link enp65s0 name drbd type vlan id 10
+    ip link add link mlnx-bond  name drbd type vlan id 10
     ip link set drbd mtu 9000
     ip link set drbd up
     ip addr add 4.1.0.12/24 dev drbd
 
     # SETUP LINSTOR MGMT 
-    ip link add link enp65s0 name linstor-mgmt type vlan id 20
+    ip link add link mlnx-bond  name linstor-mgmt type vlan id 20
     ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.12/24 dev linstor-mgmt
 
     # SETUP OVN NETWORK
-    ip link add link enp65s0 name ovn-mgmt type vlan id 30
+    ip link add link mlnx-bond  name ovn-mgmt type vlan id 30
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.12/24 dev ovn-mgmt
 
     # SETUP INCUS NETWORK
-    ip link add link enp65s0 name incus-mgmt type vlan id 40
+    ip link add link mlnx-bond  name incus-mgmt type vlan id 40
     ip link set incus-mgmt mtu 9000
     ip link set incus-mgmt up
     ip addr add 4.4.0.12/24 dev incus-mgmt
 
     # SETUP INCUS NETWORKS
-    ip link add link enp66s0 name infra type vlan id 50
+    ip link add link mlnx-bond  name infra type vlan id 50
     ip link set infra mtu 9000
     ip link set infra up 
 
-    ip link add link enp66s0 name admin-labs type vlan id 60
+    ip link add link mlnx-bond  name admin-labs type vlan id 60
     ip link set admin-labs mtu 9000
     ip link set admin-labs up 
 
-    ip link add link enp66s0 name bdebruhl type vlan id 70
+    ip link add link mlnx-bond  name bdebruhl type vlan id 70
     ip link set bdebruhl mtu 9000
     ip link set bdebruhl up 
 
-    ip link add link enp66s0 name bhartma type vlan id 80
+    ip link add link mlnx-bond  name bhartma type vlan id 80
     ip link set bhartma mtu 9000
     ip link set bhartma up 
 
-    ip link add link enp66s0 name sbeard type vlan id 90
+    ip link add link mlnx-bond  name sbeard type vlan id 90
     ip link set sbeard mtu 9000
     ip link set sbeard up 
 
-    ip link add link enp66s0 name dofang type vlan id 100
+    ip link add link mlnx-bond  name dofang type vlan id 100
     ip link set dofang mtu 9000
     ip link set dofang up      
 
     ip link set enp66s0 txqueuelen 10000
     ip link set enp65s0 txqueuelen 10000
-    #ip link set mlnx-bond txqueuelen 10000
+    ip link set mlnx-bond txqueuelen 10000
     ip link set incus-mgmt txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
