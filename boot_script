@@ -167,7 +167,7 @@ network_r730xd3() {
     ip link set enp131s0 mtu 9000
     ip link set enp131s0d1 mtu 9000
     ip link set enp131s0 up
-    ip link set enp131s0d1 up    
+    ip link set enp131s0d1 up
     #ip link set mlnx-bond mtu 9000
 
     # SETUP DRBD REPLICATION
