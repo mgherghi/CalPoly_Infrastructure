@@ -27,6 +27,7 @@ network_r730xd1() {
     sysctl -w net.ipv6.neigh.default.gc_thresh3=8192
     sysctl -w vm.max_map_count=1048576
 
+    dcb pfc set dev enp132s0 prio-pfc all:off 3:on
     # Unload bonding module 
     #modprobe -r bonding || true
 
