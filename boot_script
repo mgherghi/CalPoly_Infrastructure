@@ -8,7 +8,8 @@ modprobe tcp_bbr
 
 network_r730xd1() {
     sysctl -w net.core.rmem_max=536870912
-
+    sysctl -w net.ipv4.tcp_moderate_rcvbuf=1
+    sysctl -w net.ipv4.tcp_window_scaling=1
     sysctl -w net.core.wmem_max=536870912
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
@@ -75,6 +76,9 @@ network_r730xd2() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
 
+    sysctl -w net.ipv4.tcp_moderate_rcvbuf=1
+    sysctl -w net.ipv4.tcp_window_scaling=1
+
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
@@ -139,6 +143,8 @@ network_r730xd3() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
 
+    sysctl -w net.ipv4.tcp_moderate_rcvbuf=1
+    sysctl -w net.ipv4.tcp_window_scaling=1
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
@@ -206,6 +212,8 @@ network_supermicro() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
 
+    sysctl -w net.ipv4.tcp_moderate_rcvbuf=1
+    sysctl -w net.ipv4.tcp_window_scaling=1
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
@@ -306,6 +314,8 @@ network_gigabyte() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
 
+    sysctl -w net.ipv4.tcp_moderate_rcvbuf=1
+    sysctl -w net.ipv4.tcp_window_scaling=1
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
@@ -405,6 +415,8 @@ network_r620() {
     sysctl -w net.core.rmem_max=536870912
     sysctl -w net.core.wmem_max=536870912
 
+    sysctl -w net.ipv4.tcp_moderate_rcvbuf=1
+    sysctl -w net.ipv4.tcp_window_scaling=1
     sysctl -w net.ipv4.tcp_rmem="4096 87380 268435456"
     sysctl -w net.ipv4.tcp_wmem="4096 65536 268435456"
     sysctl -w net.ipv4.tcp_mtu_probing=1
