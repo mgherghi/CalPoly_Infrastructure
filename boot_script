@@ -163,45 +163,44 @@ network_r730xd3() {
     #modprobe -r bonding || true
 
     # SETUP MTU
-    modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
-    ip link  add mlnx-bond type bond
+    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    #ip link  add mlnx-bond type bond
     ip link  set enp131s0 down
     ip link  set enp131s0d1 down
-    ip link  set enp131s0 master mlnx-bond
-    ip link  set enp131s0d1 master mlnx-bond
-    ip link  set mlnx-bond up
+    #ip link  set enp131s0 master mlnx-bond
+    #ip link  set enp131s0d1 master mlnx-bond
+    #ip link  set mlnx-bond up
     ip link set enp131s0 mtu 9000
     ip link set enp131s0d1 mtu 9000
     ip link set enp131s0 up
     ip link set enp131s0d1 up
-    ip link set mlnx-bond mtu 9000
+    #ip link set mlnx-bond mtu 9000
 
     # SETUP Keepalived REPLICATION
-    ip link add link mlnx-bond name keepalived type vlan id 5
+    ip link add link enp131s0 name keepalived type vlan id 5
     ip link set keepalived up
     ip addr add 4.0.0.9/24 dev keepalived
 
     # SETUP DRBD REPLICATION
-    ip link add link mlnx-bond name drbd type vlan id 10 
+    ip link add link enp131s0 name drbd type vlan id 10 
     ip link set drbd mtu 9000
     ip link set drbd up
     ip addr add 4.1.0.9/24 dev drbd
 
     # SETUP LINSTOR MGMT 
-    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link add link enp131s0 name linstor-mgmt type vlan id 20
     ip link set linstor-mgmt mtu 9000
     ip link set linstor-mgmt up
     ip addr add 4.2.0.9/24 dev linstor-mgmt
 
     # SETUP OVN NETWORK
-    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link add link enp131s0 name ovn-mgmt type vlan id 30
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.9/24 dev ovn-mgmt
 
     ip link set enp131s0 txqueuelen 10000
     ip link set enp131s0d1 txqueuelen 10000
-    ip link set mlnx-bond txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
     ip link set drbd txqueuelen 10000
@@ -534,7 +533,7 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -K enp65s0f0np0 rx-udp-gro-forwarding on
     ethtool -K enp65s0f0np0 rx-gro-list on
     ethtool -K enp65s0f0np0 rx-all off
-    ethtool -G enp65s0f1np1 rx 8192 tx 8192
+    #ethtool -G enp65s0f1np1 rx 8192 tx 8192
     
     ethtool -K enp65s0f1np1 rx on 
     ethtool -K enp65s0f1np1 tx on 
@@ -550,14 +549,14 @@ if [[ "$hostname" == "gigabyte" ]]; then
     ethtool -K enp65s0f0np0 rx-gro-list on
     ethtool -K enp65s0f0np0 rx-all off
 
-    ethtool -G enp65s0f0np0   rx 8192 tx 8192
+    #ethtool -G enp65s0f0np0   rx 8192 tx 8192
 
 
     ethtool -C enp65s0f0np0 adaptive-rx on adaptive-tx on
     ethtool -C enp65s0f1np1 adaptive-rx on adaptive-tx on
 
     network_gigabyte
-    /usr/sbin/toggle_gpu vm
+    #/usr/sbin/toggle_gpu vm
 
 elif [ "$hostname" == "supermicro" ]; then
     cpu_performance
@@ -571,7 +570,7 @@ elif [ "$hostname" == "supermicro" ]; then
     ethtool -K enp175s0    txvlan on 
     ethtool -K enp175s0    rxhash on
 
-    ethtool -G enp175s0   rx 8192 tx 8192
+    #ethtool -G enp175s0   rx 8192 tx 8192
 
     ethtool -K enp175s0d1    rx on 
     ethtool -K enp175s0d1    tx on 
@@ -583,10 +582,10 @@ elif [ "$hostname" == "supermicro" ]; then
     ethtool -K enp175s0d1    txvlan on 
     ethtool -K enp175s0d1    rxhash on
 
-    ethtool -G enp175s0d1   rx 8192 tx 8192
+    #ethtool -G enp175s0d1   rx 8192 tx 8192
 
     network_supermicro
-    /usr/sbin/toggle_gpu vm
+    #/usr/sbin/toggle_gpu vm
     
 
 elif [ "$hostname" == "r620" ]; then
@@ -600,7 +599,8 @@ elif [ "$hostname" == "r620" ]; then
     ethtool -K enp65s0    rxvlan on 
     ethtool -K enp65s0    txvlan on 
     ethtool -K enp65s0    rxhash on
-    ethtool -G enp65s0   rx 8192 tx 8192
+    
+    #ethtool -G enp65s0   rx 8192 tx 8192
 
     ethtool -K enp66s0    rx on 
     ethtool -K enp66s0    tx on 
@@ -612,7 +612,7 @@ elif [ "$hostname" == "r620" ]; then
     ethtool -K enp66s0    txvlan on 
     ethtool -K enp66s0    rxhash on
 
-    ethtool -G enp66s0   rx 8192 tx 8192
+    #ethtool -G enp66s0   rx 8192 tx 8192
 
     network_r620
     
@@ -629,7 +629,7 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -K enp132s0    txvlan on 
     ethtool -K enp132s0    rxhash on
 
-    ethtool -G enp132s0   rx 8192 tx 8192
+    #ethtool -G enp132s0   rx 8192 tx 8192
 
     ethtool -K enp132s0d1 rx on 
     ethtool -K enp132s0d1    tx on 
@@ -641,7 +641,7 @@ elif [ "$hostname" == "r730xd-1" ]; then
     ethtool -K enp132s0d1    txvlan on 
     ethtool -K enp132s0d1    rxhash on
 
-    ethtool -G enp132s0d1   rx 8192 tx 8192
+    #ethtool -G enp132s0d1   rx 8192 tx 8192
 
     network_r730xd1
 
@@ -657,7 +657,7 @@ elif [ "$hostname" == "r730xd-2" ]; then
     ethtool -K enp131s0    txvlan on 
     ethtool -K enp131s0    rxhash on
 
-    ethtool -G enp131s0   rx 8192 tx 8192
+    #ethtool -G enp131s0   rx 8192 tx 8192
 
     ethtool -K enp131s0d1    rx on 
     ethtool -K enp131s0d1    tx on 
@@ -669,7 +669,7 @@ elif [ "$hostname" == "r730xd-2" ]; then
     ethtool -K enp131s0d1   txvlan on 
     ethtool -K enp131s0d1   rxhash on
 
-    ethtool -G enp131s0d1   rx 8192 tx 8192
+    #ethtool -G enp131s0d1   rx 8192 tx 8192
 
     network_r730xd2
     
@@ -686,7 +686,7 @@ elif [ "$hostname" == "r730xd-3" ]; then
     ethtool -K enp131s0    txvlan on 
     ethtool -K enp131s0    rxhash on
 
-    ethtool -G enp131s0   rx 8192 tx 8192
+    #ethtool -G enp131s0   rx 8192 tx 8192
 
     ethtool -K enp131s0d1    rx on 
     ethtool -K enp131s0d1    tx on 
@@ -698,7 +698,7 @@ elif [ "$hostname" == "r730xd-3" ]; then
     ethtool -K enp131s0d1    txvlan on 
     ethtool -K enp131s0d1    rxhash on
 
-    ethtool -G enp131s0    rx 8192 tx 8192
+    #ethtool -G enp131s0    rx 8192 tx 8192
 
     network_r730xd3
     
