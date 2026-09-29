@@ -279,7 +279,7 @@ network_supermicro() {
     ip link set admin-labs mtu 9000
     ip link set admin-labs up 
 
-    ip link add link enp175s0d1d name bdebruhl type vlan id 70
+    ip link add link enp175s0d1 name bdebruhl type vlan id 70
     ip link set bdebruhl mtu 9000
     ip link set bdebruhl up 
 
