@@ -1,0 +1,196 @@
+cat /etc/haproxy/haproxy.cfg
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+
+    user haproxy
+    group haproxy
+    daemon
+
+    maxconn 10000
+
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+
+
+defaults
+    log global
+
+    timeout connect 5s
+    timeout client  1h
+    timeout server  1h
+    timeout tunnel  1h
+
+    retries 3
+
+
+# ============================================================
+# Metrics / Statistics
+# ============================================================
+
+frontend stats
+    bind *:8404
+    mode http
+
+    http-request use-service prometheus-exporter if { path /metrics }
+
+    stats enable
+    stats uri /stats
+    stats refresh 10s
+
+
+# ============================================================
+# Apache Guacamole Web Interface
+#
+# Traffic flow:
+#
+# Client
+#   |
+#   v
+# Nginx 4.5.0.202
+#   |
+#   | X-Forwarded-For: REAL_CLIENT_IP
+#   v
+# HAProxy
+#   |
+#   v
+# Guacamole Web Servers
+# ============================================================
+
+frontend guacamole_http_front
+    bind *:8080
+    mode http
+
+    option httplog
+
+    # --------------------------------------------------------
+    # Security
+    #
+    # Only the Nginx reverse proxy should be able to access
+    # the Guacamole HTTP load balancer.
+    # --------------------------------------------------------
+
+    acl trusted_nginx src 4.5.0.200
+    http-request deny deny_status 403 unless trusted_nginx
+
+    # Nginx is expected to supply this header.
+    # Reject requests without it.
+    http-request deny deny_status 403 unless { req.hdr(X-Forwarded-For) -m found }
+
+
+    # --------------------------------------------------------
+    # Per-client rate limiting
+    #
+    # IMPORTANT:
+    # Do NOT use "src" here.
+    #
+    # HAProxy sees Nginx (2.0.0.2) as the TCP source.
+    # X-Forwarded-For contains the actual browser/client IP.
+    # --------------------------------------------------------
+
+    stick-table type ip size 200k expire 10s store http_req_rate(10s)
+
+    http-request track-sc0 req.hdr_ip(X-Forwarded-For)
+
+    # Allow up to 200 requests per 10 seconds per public IP.
+    #
+    # If many students are behind one campus NAT, consider
+    # increasing this value.
+    http-request deny deny_status 429 if { sc_http_req_rate(0) gt 200 }
+
+
+    default_backend guacamole_web_backends
+
+
+# ============================================================
+# Guacamole Web Backend
+# ============================================================
+
+backend guacamole_web_backends
+    mode http
+
+    # --------------------------------------------------------
+    # Load balancing
+    #
+    # New browsers/connections are distributed across the
+    # Guacamole web servers.
+    #
+    # DO NOT use "balance source" here because many students
+    # may share the same public NAT address.
+    # --------------------------------------------------------
+
+    balance roundrobin
+
+
+    # --------------------------------------------------------
+    # Health checks
+    # --------------------------------------------------------
+
+    option httpchk GET /
+
+
+    # --------------------------------------------------------
+    # Session persistence
+    #
+    # HAProxy inserts SERVERID into the browser.
+    #
+    # This keeps an individual browser attached to the same
+    # Guacamole web server without depending on its IP address.
+    # --------------------------------------------------------
+
+    cookie SERVERID insert indirect nocache
+
+
+    # --------------------------------------------------------
+    # Guacamole Web Servers
+    # --------------------------------------------------------
+
+    server guac-web1 10.253.159.2:8080 check cookie web1
+    server guac-web2 10.253.159.3:8080 check cookie web2
+    server guac-web3 10.253.159.4:8080 check cookie web3
+    server guac-web4 10.253.159.5:8080 check cookie web4
+    server guac-web5 10.253.159.6:8080 check cookie web5
+
+
+# ============================================================
+# Guacamole guacd Load Balancer
+# ============================================================
+
+frontend guacd_frontend
+    bind *:4822
+    mode tcp
+
+    option tcplog
+
+    default_backend guacd_backends
+
+
+# ============================================================
+# guacd Backend
+# ============================================================
+
+backend guacd_backends
+    mode tcp
+
+    # --------------------------------------------------------
+    # leastconn is a good fit for guacd because Guacamole
+    # connections can remain open for long periods.
+    #
+    # New connections are sent to the guacd instance with the
+    # fewest currently-active connections.
+    # --------------------------------------------------------
+
+    balance leastconn
+
+    option tcp-check
+
+
+    # --------------------------------------------------------
+    # guacd Servers
+    # --------------------------------------------------------
+
+    server guacd1 10.184.187.2:4822 check
+    server guacd2 10.184.187.3:4822 check
+    server guacd3 10.184.187.4:4822 check
+    server guacd4 10.184.187.5:4822 check
+    server guacd5 10.184.187.6:4822 check
