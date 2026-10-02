@@ -29,15 +29,15 @@ network_r730xd1() {
     # SETUP MTU
     #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
     ip link add mlnx-bond type bond
-    ip link  set enp132s0 down
-    ip link set enp132s0d1 down
-    ip link set enp132s0 master mlnx-bond
-    ip link set enp132s0d1 master mlnx-bond
+    ip link  set enp140s0 down
+    ip link set enp140s0d1 down
+    ip link set enp140s0 master mlnx-bond
+    ip link set enp140s0d1 master mlnx-bond
     ip link set mlnx-bond up
-    ip link set enp132s0 mtu 9000
-    ip link set enp132s0d1 mtu 9000
-    ip link set enp132s0 up 
-    ip link set enp132s0d1 up
+    ip link set enp140s0 mtu 9000
+    ip link set enp140s0d1 mtu 9000
+    ip link set enp140s0 up 
+    ip link set enp140s0d1 up
     ip link set mlnx-bond mtu 9000
 
     # SETUP Keepalived REPLICATION
@@ -63,8 +63,8 @@ network_r730xd1() {
     ip link set ovn-mgmt up
     ip addr add 4.3.0.7/24 dev ovn-mgmt
 
-    ip link set enp132s0 txqueuelen 10000
-    ip link set enp132s0d1 txqueuelen 10000
+    ip link set enp140s0 txqueuelen 10000
+    ip link set enp140s0d1 txqueuelen 10000
     ip link set mlnx-bond txqueuelen 10000
     ip link set ovn-mgmt txqueuelen 10000
     ip link set linstor-mgmt txqueuelen 10000
@@ -621,29 +621,29 @@ elif [ "$hostname" == "r620" ]; then
     
 elif [ "$hostname" == "r730xd-1" ]; then
     cpu_performance
-    ethtool -K enp132s0 rx on 
-    ethtool -K enp132s0    tx on 
-    ethtool -K enp132s0    sg on 
-    ethtool -K enp132s0    tso on 
-    ethtool -K enp132s0    gso on 
-    ethtool -K enp132s0    gro on 
-    ethtool -K enp132s0    rxvlan on 
-    ethtool -K enp132s0    txvlan on 
-    ethtool -K enp132s0    rxhash on
+    ethtool -K enp140s0    rx on 
+    ethtool -K enp140s0    tx on 
+    ethtool -K enp140s0    sg on 
+    ethtool -K enp140s0    tso on 
+    ethtool -K enp140s0    gso on 
+    ethtool -K enp140s0    gro on 
+    ethtool -K enp140s0    rxvlan on 
+    ethtool -K enp140s0    txvlan on 
+    ethtool -K enp140s0    rxhash on
 
-    #ethtool -G enp132s0   rx 8192 tx 8192
+    #ethtool -G enp140s0   rx 8192 tx 8192
 
-    ethtool -K enp132s0d1 rx on 
-    ethtool -K enp132s0d1    tx on 
-    ethtool -K enp132s0d1    sg on 
-    ethtool -K enp132s0d1    tso on 
-    ethtool -K enp132s0d1    gso on 
-    ethtool -K enp132s0d1    gro on 
-    ethtool -K enp132s0d1    rxvlan on 
-    ethtool -K enp132s0d1    txvlan on 
-    ethtool -K enp132s0d1    rxhash on
+    ethtool -K enp140s0d1    rx on 
+    ethtool -K enp140s0d1    tx on 
+    ethtool -K enp140s0d1    sg on 
+    ethtool -K enp140s0d1    tso on 
+    ethtool -K enp140s0d1    gso on 
+    ethtool -K enp140s0d1    gro on 
+    ethtool -K enp140s0d1    rxvlan on 
+    ethtool -K enp140s0d1    txvlan on 
+    ethtool -K enp140s0d1    rxhash on
 
-    #ethtool -G enp132s0d1   rx 8192 tx 8192
+    #ethtool -G enp140s0d1   rx 8192 tx 8192
 
     network_r730xd1
 
