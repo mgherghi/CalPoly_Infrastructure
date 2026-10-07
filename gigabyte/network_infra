@@ -1,0 +1,166 @@
+#!/bin/bash
+
+ovs-vsctl del-br ovs-mlnx
+
+wait
+wait
+wait
+
+
+systemctl stop openvswitch-switch
+devlink dev eswitch set pci/0000:41:00.0 mode switchdev
+devlink dev eswitch set pci/0000:41:00.1 mode switchdev
+systemctl start openvswitch-switch
+
+ovs-vsctl set Open_vSwitch . other_config:offload-rebalance=true
+ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
+systemctl restart openvswitch-switch
+
+wait
+
+ovs-vsctl --may-exist add-br ovs-mlnx -- set Interface ovs-mlnx  mtu_request=9000
+ip link set ovs-mlnx up 
+
+wait
+systemctl restart linstor-satellite
+wait
+wait
+wait
+
+ip link add mlnx-bond type bond mode 802.3ad miimon 100 lacp_rate fast xmit_hash_policy layer3+4
+
+ip link set enp65s0f0np0 down
+ip link set enp65s0f1np1 down
+
+ip link set enp65s0f0np0 master mlnx-bond
+ip link set enp65s0f1np1 master mlnx-bond
+
+wait
+
+ip link set enp65s0f0np0 up
+ip link set enp65s0f1np1 up
+ip link set mlnx-bond up
+ip link set enp65s0f0np0 mtu 9000
+ip link set enp65s0f1np1 mtu 9000
+ip link set mlnx-bond mtu 9000
+ip link set enp65s0f0np0 down
+ip link set enp65s0f1np1 down
+ip link set mlnx-bond down
+ip link set enp65s0f0np0 up
+ip link set enp65s0f1np1 up
+ip link set mlnx-bond up
+
+wait
+
+
+ovs-vsctl --may-exist add-port ovs-mlnx mlnx-bond -- set Interface mlnx-bond mtu_request=9000
+ovs-vsctl set port mlnx-bond vlan_mode=trunk trunks=5,10,20,30,40,50,60,70,80,90,100 
+wait
+
+
+ovs-vsctl --may-exist add-port ovs-mlnx drbd-rdma-rep tag=5 -- set Interface drbd-rdma-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx drbd-rep tag=10 -- set Interface drbd-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx linstor-rep tag=20 -- set Interface linstor-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx ovn-rep  tag=30 -- set Interface ovn-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx incus-rep  tag=40 -- set Interface incus-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx infra-rep  tag=50 -- set Interface infra-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx admin-rep  tag=60 -- set Interface admin-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx bdebruhl-rep  tag=70 -- set Interface bdebruhl-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx bhartma-rep  tag=80 -- set Interface bhartma-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx sbeard-rep  tag=90 -- set Interface sbeard-rep mtu_request=9000
+ovs-vsctl --may-exist add-port ovs-mlnx dofang-rep  tag=100 -- set Interface dofang-rep mtu_request=9000
+
+wait
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 1
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 2
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 3
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 4
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.0 flavour pcisf pfnum 0 sfnum 5
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.1 flavour pcisf pfnum 1 sfnum 1
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.1 flavour pcisf pfnum 1 sfnum 2
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.1 flavour pcisf pfnum 1 sfnum 3
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.1 flavour pcisf pfnum 1 sfnum 4
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.1 flavour pcisf pfnum 1 sfnum 5
+/opt/mellanox/iproute2/sbin/mlxdevm  port add pci/0000:41:00.1 flavour pcisf pfnum 1 sfnum 6
+wait
+wait
+
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.0/32768 hw_addr 00:00:00:00:00:01 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.0/32769 hw_addr 00:00:00:00:00:02 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.0/32770 hw_addr 00:00:00:00:00:03 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.0/32771 hw_addr 00:00:00:00:00:04 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.0/32772 hw_addr 00:00:00:00:00:05 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98304 hw_addr 00:00:00:00:01:00 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98305 hw_addr 00:00:00:00:02:00 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98306 hw_addr 00:00:00:00:03:00 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98307 hw_addr 00:00:00:00:04:00 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98308 hw_addr 00:00:00:00:05:00 state active
+/opt/mellanox/iproute2/sbin/mlxdevm port function set pci/0000:41:00.1/98309 hw_addr 00:00:00:00:06:00 state active
+
+
+wait
+wait
+wait
+wait
+wait
+wait
+
+ip link set en41f0pf0sf5 name drbd-rdma mtu 9000
+ip link set drbd-rdma up 
+ip link set enp41s0f0s5 name drbd-rdma-rep mtu 9000
+ip link set drbd-rdma-rep up 
+ip addr add 4.0.0.11/24 dev drbd-rdma
+
+ip link set en41f0pf0sf1 name drbd mtu 9000
+ip link set drbd up 
+ip link set enp41s0f0s1  name drbd-rep 
+ip link set drbd-rep up 
+ip addr add 4.1.0.11/24 dev drbd 
+
+ip link set en41f0pf0sf2 name linstor-mgmt  mtu 9000
+ip link set linstor-mgmt up
+ip link set enp41s0f0s2  name linstor-rep  mtu 9000
+ip link set linstor-rep up 
+ip addr add 4.2.0.11/24 dev linstor-mgmt 
+
+ip link set  en41f0pf0sf3 name ovn-mgmt  mtu 9000
+ip link set ovn-mgmt up 
+ip link set  enp41s0f0s3 name ovn-rep  mtu 9000
+ip link set ovn-rep up 
+ip addr add 4.3.0.11/24 dev ovn-mgmt 
+
+ip link set  en41f0pf0sf4 name incus-mgmt mtu 9000
+ip link set incus-mgmt up 
+ip link set  enp41s0f0s4 name incus-rep mtu 9000
+ip link set incus-rep up 
+ip addr add 4.4.0.11/24 dev incus-mgmt 
+
+ip link set en41f1pf1sf1 name infra mtu 9000
+ip link set infra up 
+ip link set enp41s0f1s1 name infra-rep mtu 9000
+ip link set infra-rep up
+
+ip link set en41f1pf1sf2 name admin-labs  mtu 9000
+ip link set admin-labs up
+ip link set enp41s0f1s2 name admin-rep mtu 9000
+ip link set admin-rep up 
+
+ip link set en41f1pf1sf3 name bdebruhl  mtu 9000
+ip link set bdebruhl up
+ip link set enp41s0f1s3 name bdebruhl-rep mtu 9000
+ip link set bdebruhl-rep up
+
+ip link set en41f1pf1sf4 name bhartma  mtu 9000
+ip link set bhartma up
+ip link set enp41s0f1s4 name bhartma-rep mtu 9000
+ip link set bhartma-rep up
+
+ip link set en41f1pf1sf5 name sbeard mtu 9000
+ip link set sbeard up
+ip link set enp41s0f1s5 name sbeard-rep mtu 9000
+ip link set sbeard-rep up
+
+ip link set en41f1pf1sf6 name dofang mtu 9000
+ip link set dofang up
+ip link set enp41s0f1s6 name dofang-rep mtu 9000
+ip link set dofang-rep up
