@@ -12,11 +12,11 @@ devlink dev eswitch set pci/0000:41:00.1 mode switchdev &
 wait
 systemctl start openvswitch-switch &
 wait
-#ovs-vsctl set Open_vSwitch . other_config:offload-rebalance=true &
-ovs-vsctl set Open_vSwitch . other_config:hw-offload=true &
-wait
-systemctl restart openvswitch-switch &
-wait
+#######ovs-vsctl set Open_vSwitch . other_config:offload-rebalance=true &
+#ovs-vsctl set Open_vSwitch . other_config:hw-offload=true &
+#wait
+#systemctl restart openvswitch-switch &
+#wait
 
 ovs-vsctl --may-exist add-br ovs-mlnx -- set Interface ovs-mlnx  mtu_request=9000 &
 wait
