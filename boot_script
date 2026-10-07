@@ -81,7 +81,7 @@ network_supermicro() {
     sysctl -w net.ipv4.tcp_congestion_control=bbr
     sysctl -w vm.max_map_count=1048576
 
-    curl -sSL https://github.com/mgherghi/CalPoly_Infrastructure/blob/main/supermicro/network_infra | sudo bash
+    curl -sSL https://raw.githubusercontent.com/mgherghi/CalPoly_Infrastructure/refs/heads/main/supermicro/network_infra | sudo bash
 
 
 }
