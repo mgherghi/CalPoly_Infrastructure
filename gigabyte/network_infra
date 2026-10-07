@@ -137,6 +137,118 @@ wait
 wait
 
 
+sleep 5
+
+ip link set en41f0pf0sf5 name drbd-rdma mtu 9000  &
+wait
+ip link set enx000000000005 name drbd-rdma-rep mtu 9000  &
+wait
+ip link set drbd-rdma-rep up   &
+wait
+ip link set drbd-rdma up   &
+wait
+ip addr add 4.0.0.11/24 dev drbd-rdma  &
+wait
+
+ip link set en41f0pf0sf1 name drbd mtu 9000  &
+wait
+ip link set enx000000000001  name drbd-rep   &
+wait
+ip link set drbd-rep up   &
+wait
+ip link set drbd up   &
+wait
+ip addr add 4.1.0.11/24 dev drbd   &
+wait
+
+ip link set en41f0pf0sf2 name linstor-mgmt  mtu 9000  &
+wait
+ip link set enx000000000002  name linstor-rep  mtu 9000  &
+wait
+ip link set linstor-rep up   &
+wait
+ip link set linstor-mgmt up  &
+wait
+ip addr add 4.2.0.11/24 dev linstor-mgmt   &
+wait
+
+ip link set  en41f0pf0sf3 name ovn-mgmt  mtu 9000  &
+wait
+ip link set  enx000000000003 name ovn-rep  mtu 9000  &
+wait
+ip link set ovn-rep up   &
+wait
+ip link set ovn-mgmt up   &
+wait
+ip addr add 4.3.0.11/24 dev ovn-mgmt   &
+wait
+
+ip link set  en41f0pf0sf4 name incus-mgmt mtu 9000  &
+wait
+ip link set  enx000000000004 name incus-rep mtu 9000  &
+wait
+ip link set incus-rep up   &
+wait
+ip link set incus-mgmt up   &
+wait
+ip addr add 4.4.0.11/24 dev incus-mgmt   &
+wait
+
+ip link set en41f1pf1sf1 name infra mtu 9000  &
+wait
+ip link set enx000000000100 name infra-rep mtu 9000  &
+wait
+ip link set infra-rep up  &
+wait
+ip link set infra up   &
+wait
+
+ip link set en41f1pf1sf2 name admin-labs  mtu 9000  &
+wait
+ip link set enx000000000200 name admin-rep mtu 9000  &
+wait
+ip link set admin-rep up   &
+wait
+ip link set admin-labs up  &
+wait
+
+ip link set en41f1pf1sf3 name bdebruhl  mtu 9000  &
+wait
+ip link set enx000000000300 name bdebruhl-rep mtu 9000  &
+wait
+ip link set bdebruhl-rep up  &
+wait
+ip link set bdebruhl up  &
+wait
+
+ip link set en41f1pf1sf4 name bhartma  mtu 9000  &
+wait
+ip link set enx000000000400 name bhartma-rep mtu 9000  &
+wait
+ip link set bhartma-rep up  &
+wait
+ip link set bhartma up  &
+wait
+
+ip link set en41f1pf1sf5 name sbeard mtu 9000  &
+wait
+ip link set enx000000000500 name sbeard-rep mtu 9000  &
+wait
+ip link set sbeard-rep up  &
+wait
+ip link set sbeard up  &
+wait
+
+ip link set en41f1pf1sf6 name dofang mtu 9000  &
+wait
+ip link set enx000000000600 name dofang-rep mtu 9000  &
+wait
+ip link set dofang-rep up  &
+wait
+ip link set dofang up  &
+wait
+
+sleep 5 
 
 ip link set en41f0pf0sf5 name drbd-rdma mtu 9000  &
 wait
