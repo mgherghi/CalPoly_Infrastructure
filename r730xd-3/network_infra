@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+    # Set PFC through dcb
+    #dcb pfc set dev enp131s0 prio-pfc all:off 3:on
+
+    # Unload bonding module 
+    #modprobe -r bonding || true
+
+    # SETUP MTU
+    #modprobe bonding mode=802.3ad miimon=100 lacp_rate=1 xmit_hash_policy=layer3+4
+    ip link add mlnx-bond type bond mode 802.3ad miimon 100 lacp_rate fast xmit_hash_policy layer3+4
+    ip link set enp139s0 down
+    ip link set enp139s0d1 down
+    ip link set enp139s0 master mlnx-bond
+    ip link set enp139s0d1 master mlnx-bond
+    ip link set mlnx-bond up
+    ip link set enp139s0 mtu 9000
+    ip link set enp139s0d1 mtu 9000
+    ip link set enp139s0 up
+    ip link set enp139s0d1 up
+    ip link set mlnx-bond mtu 9000
+
+    # SETUP Keepalived REPLICATION
+    ip link add link mlnx-bond name keepalived type vlan id 5
+    ip link set keepalived up
+    ip addr add 4.0.0.9/24 dev keepalived
+
+    # SETUP DRBD REPLICATION
+    ip link add link mlnx-bond name drbd type vlan id 10 
+    ip link set drbd mtu 9000
+    ip link set drbd up
+    ip addr add 4.1.0.9/24 dev drbd
+
+    # SETUP LINSTOR MGMT 
+    ip link add link mlnx-bond name linstor-mgmt type vlan id 20
+    ip link set linstor-mgmt mtu 9000
+    ip link set linstor-mgmt up
+    ip addr add 4.2.0.9/24 dev linstor-mgmt
+
+    # SETUP OVN NETWORK
+    ip link add link mlnx-bond name ovn-mgmt type vlan id 30
+    ip link set ovn-mgmt mtu 9000
+    ip link set ovn-mgmt up
+    ip addr add 4.3.0.9/24 dev ovn-mgmt
