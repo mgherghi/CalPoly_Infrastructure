@@ -62,13 +62,6 @@ network_r730xd1() {
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.7/24 dev ovn-mgmt
-
-    ip link set enp140s0 txqueuelen 10000
-    ip link set enp140s0d1 txqueuelen 10000
-    ip link set mlnx-bond txqueuelen 10000
-    ip link set ovn-mgmt txqueuelen 10000
-    ip link set linstor-mgmt txqueuelen 10000
-    ip link set drbd txqueuelen 10000
 }
 
 
@@ -131,13 +124,6 @@ network_r730xd2() {
     ip link set ovn-mgmt mtu 9000
     ip link set ovn-mgmt up
     ip addr add 4.3.0.8/24 dev ovn-mgmt
-
-    ip link set enp139s0 txqueuelen 10000
-    ip link set enp139s0d1 txqueuelen 10000
-    ip link set mlnx-bond txqueuelen 10000
-    ip link set ovn-mgmt txqueuelen 10000
-    ip link set linstor-mgmt txqueuelen 10000
-    ip link set drbd txqueuelen 10000
 }
 
 network_r730xd3() {
@@ -200,12 +186,6 @@ network_r730xd3() {
     ip link set ovn-mgmt up
     ip addr add 4.3.0.9/24 dev ovn-mgmt
 
-    ip link set enp139s0 txqueuelen 10000
-    ip link set enp139s0d1 txqueuelen 10000
-    ip link set mlnx-bond txqueuelen 10000
-    ip link set ovn-mgmt txqueuelen 10000
-    ip link set linstor-mgmt txqueuelen 10000
-    ip link set drbd txqueuelen 10000
 
 }
 
@@ -296,19 +276,6 @@ network_supermicro() {
     ip link set dofang mtu 9000
     ip link set dofang up      
 
-    ip link set enp175s0 txqueuelen 10000
-    ip link set enp175s0d1 txqueuelen 10000
-    ip link set mlnx-bond txqueuelen 10000
-    ip link set incus-mgmt txqueuelen 10000
-    ip link set ovn-mgmt txqueuelen 10000
-    ip link set linstor-mgmt txqueuelen 10000
-    ip link set drbd txqueuelen 10000
-    ip link set infra txqueuelen 10000 
-    ip link set admin-labs txqueuelen 10000
-    ip link set bdebruhl txqueuelen 10000
-    ip link set bhartma txqueuelen 10000
-    ip link set sbeard txqueuelen 10000
-    ip link set dofang txqueuelen 10000
 }
 
 network_gigabyte() {
@@ -395,20 +362,6 @@ network_gigabyte() {
     ip link set dofang mtu 9000
     ip link set dofang up      
 
-
-    ip link set enp65s0f0np0 txqueuelen 10000
-    ip link set enp65s0f1np1 txqueuelen 10000
-    ip link set mlnx-bond txqueuelen 10000
-    ip link set incus-mgmt txqueuelen 10000
-    ip link set ovn-mgmt txqueuelen 10000
-    ip link set linstor-mgmt txqueuelen 10000
-    ip link set drbd txqueuelen 10000
-    ip link set infra txqueuelen 10000 
-    ip link set admin-labs txqueuelen 10000
-    ip link set bdebruhl txqueuelen 10000
-    ip link set bhartma txqueuelen 10000
-    ip link set sbeard txqueuelen 10000
-    ip link set dofang txqueuelen 10000
     
 }
 
@@ -500,19 +453,7 @@ network_r620() {
     ip link set dofang mtu 9000
     ip link set dofang up      
 
-    ip link set enp66s0 txqueuelen 10000
-    ip link set enp65s0 txqueuelen 10000
-    ip link set mlnx-bond txqueuelen 10000
-    ip link set incus-mgmt txqueuelen 10000
-    ip link set ovn-mgmt txqueuelen 10000
-    ip link set linstor-mgmt txqueuelen 10000
-    ip link set drbd txqueuelen 10000
-    ip link set infra txqueuelen 10000 
-    ip link set admin-labs txqueuelen 10000
-    ip link set bdebruhl txqueuelen 10000
-    ip link set bhartma txqueuelen 10000
-    ip link set sbeard txqueuelen 10000
-    ip link set dofang txqueuelen 10000
+
 }
 
 cpu_performance() {
