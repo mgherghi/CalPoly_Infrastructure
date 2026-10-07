@@ -140,7 +140,7 @@ wait
 
 ip link set en41f0pf0sf5 name drbd-rdma mtu 9000  &
 wait
-ip link set enp41s0f0s5 name drbd-rdma-rep mtu 9000  &
+ip link set enx000000000005 name drbd-rdma-rep mtu 9000  &
 wait
 ip link set drbd-rdma-rep up   &
 wait
@@ -151,7 +151,7 @@ wait
 
 ip link set en41f0pf0sf1 name drbd mtu 9000  &
 wait
-ip link set enp41s0f0s1  name drbd-rep   &
+ip link set enx000000000001  name drbd-rep   &
 wait
 ip link set drbd-rep up   &
 wait
@@ -162,7 +162,7 @@ wait
 
 ip link set en41f0pf0sf2 name linstor-mgmt  mtu 9000  &
 wait
-ip link set enp41s0f0s2  name linstor-rep  mtu 9000  &
+ip link set enx000000000002  name linstor-rep  mtu 9000  &
 wait
 ip link set linstor-rep up   &
 wait
@@ -173,7 +173,7 @@ wait
 
 ip link set  en41f0pf0sf3 name ovn-mgmt  mtu 9000  &
 wait
-ip link set  enp41s0f0s3 name ovn-rep  mtu 9000  &
+ip link set  enx000000000003 name ovn-rep  mtu 9000  &
 wait
 ip link set ovn-rep up   &
 wait
@@ -184,7 +184,7 @@ wait
 
 ip link set  en41f0pf0sf4 name incus-mgmt mtu 9000  &
 wait
-ip link set  enp41s0f0s4 name incus-rep mtu 9000  &
+ip link set  enx000000000004 name incus-rep mtu 9000  &
 wait
 ip link set incus-rep up   &
 wait
@@ -195,7 +195,7 @@ wait
 
 ip link set en41f1pf1sf1 name infra mtu 9000  &
 wait
-ip link set enp41s0f1s1 name infra-rep mtu 9000  &
+ip link set enx000000000100 name infra-rep mtu 9000  &
 wait
 ip link set infra-rep up  &
 wait
@@ -204,7 +204,7 @@ wait
 
 ip link set en41f1pf1sf2 name admin-labs  mtu 9000  &
 wait
-ip link set enp41s0f1s2 name admin-rep mtu 9000  &
+ip link set enx000000000200 name admin-rep mtu 9000  &
 wait
 ip link set admin-rep up   &
 wait
@@ -213,7 +213,7 @@ wait
 
 ip link set en41f1pf1sf3 name bdebruhl  mtu 9000  &
 wait
-ip link set enp41s0f1s3 name bdebruhl-rep mtu 9000  &
+ip link set enx000000000300 name bdebruhl-rep mtu 9000  &
 wait
 ip link set bdebruhl-rep up  &
 wait
@@ -222,7 +222,7 @@ wait
 
 ip link set en41f1pf1sf4 name bhartma  mtu 9000  &
 wait
-ip link set enp41s0f1s4 name bhartma-rep mtu 9000  &
+ip link set enx000000000400 name bhartma-rep mtu 9000  &
 wait
 ip link set bhartma-rep up  &
 wait
@@ -231,7 +231,7 @@ wait
 
 ip link set en41f1pf1sf5 name sbeard mtu 9000  &
 wait
-ip link set enp41s0f1s5 name sbeard-rep mtu 9000  &
+ip link set enx000000000500 name sbeard-rep mtu 9000  &
 wait
 ip link set sbeard-rep up  &
 wait
@@ -240,7 +240,7 @@ wait
 
 ip link set en41f1pf1sf6 name dofang mtu 9000  &
 wait
-ip link set enp41s0f1s6 name dofang-rep mtu 9000  &
+ip link set enx000000000600 name dofang-rep mtu 9000  &
 wait
 ip link set dofang-rep up  &
 wait
