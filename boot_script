@@ -233,7 +233,7 @@ elif [ "$hostname" == "r730xd-1" ]; then
     #ethtool -K enp140s0    sg on 
     #ethtool -K enp140s0    tso on 
     #ethtool -K enp140s0    gso on 
-    vethtool -K enp140s0    gro on 
+    #ethtool -K enp140s0    gro on 
     #ethtool -K enp140s0    rxvlan on 
     #ethtool -K enp140s0    txvlan on 
     #ethtool -K enp140s0    rxhash on
