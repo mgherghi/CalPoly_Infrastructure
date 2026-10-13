@@ -142,8 +142,9 @@ if [[ "$hostname" == "gigabyte" ]]; then
     #ethtool -K enp65s0f0np0 rx-udp-gro-forwarding on
     #ethtool -K enp65s0f0np0 rx-gro-list on
     #ethtool -K enp65s0f0np0 rx-all off
-    ethtool -G enp65s0f1np1 rx 8192 tx 8192
-    
+    ethtool -G enp65s0f0np0 rx 8192 tx 8192
+
+
     ethtool -K enp65s0f1np1 rx on 
     ethtool -K enp65s0f1np1 tx on 
     ethtool -K enp65s0f1np1 sg on 
@@ -158,7 +159,7 @@ if [[ "$hostname" == "gigabyte" ]]; then
     #ethtool -K enp65s0f0np0 rx-gro-list on
     #ethtool -K enp65s0f0np0 rx-all off
 
-    ethtool -G enp65s0f0np0   rx 8192 tx 8192
+    ethtool -G enp65s0f1np1   rx 8192 tx 8192
 
 
     #ethtool -C enp65s0f0np0 adaptive-rx on adaptive-tx on
@@ -266,7 +267,7 @@ elif [ "$hostname" == "r730xd-2" ]; then
     ethtool -K enp139s0    txvlan on 
     ethtool -K enp139s0    rxhash on
 
-    ethtool -G enp131s0   rx 8192 tx 8192
+    ethtool -G enp139s0   rx 8192 tx 8192
 
     ethtool -K enp139s0d1    rx on 
     ethtool -K enp139s0d1    tx on 
